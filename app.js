@@ -35,7 +35,8 @@
     $("langBtn").textContent = t(U.langToggle);
 
     $("nav").innerHTML = Object.keys(U.nav).map(k => `<a href="#${k}">${tx(U.nav[k])}</a>`).join("") +
-      (C.devicesPage ? `<a href="devices.html" style="color:var(--accent)">${tx(C.devicesPage.navLink)} ↗</a>` : "");
+      (C.devicesPage ? `<a href="devices.html" style="color:var(--accent)">${tx(C.devicesPage.navLink)} ↗</a>` : "") +
+      (C.appMode ? `<a href="app.html" style="color:var(--built)">${tx(C.appMode.navLink)} ↗</a>` : "");
     $("heroKicker").innerHTML = tx(C.meta.teamName) + " · " + tx(C.hero.kicker) + " · " + C.meta.targetPrizes.map(esc).join(" / ");
     $("heroVision").innerHTML = tx(C.hero.vision);
     $("heroScope").innerHTML = tx(C.hero.scope);
@@ -43,6 +44,8 @@
     $("ctaLayers").innerHTML = tx(C.hero.ctaLayers);
     if (C.devicesPage && !$("ctaDevices")) $("ctaLayers").insertAdjacentHTML("afterend", `<a class="btn" href="devices.html" id="ctaDevices"></a>`);
     if ($("ctaDevices")) $("ctaDevices").innerHTML = tx(C.devicesPage.navLink) + " ↗";
+    if (C.appMode && !$("ctaApp")) { $("ctaDemo").insertAdjacentHTML("beforebegin", `<a class="btn primary" href="app.html" id="ctaApp"></a>`); $("ctaDemo").classList.remove("primary"); }
+    if ($("ctaApp")) $("ctaApp").innerHTML = "▶ " + tx(C.appMode.cta);
     $("heroDisclaimer").innerHTML = tx(C.meta.disclaimer);
     $("statusLegend").innerHTML = Object.keys(C.statusLabels).map(chip).join("");
 
@@ -213,10 +216,23 @@
     (o.hlines || []).forEach(h => { g.strokeStyle = h.color; g.setLineDash(h.dash || [5, 4]); g.lineWidth = 1.4; g.beginPath(); g.moveTo(pad.l, Y(h.y)); g.lineTo(W - pad.r, Y(h.y)); g.stroke(); g.setLineDash([]); });
     (o.vlines || []).forEach(v => { g.strokeStyle = v.color; g.setLineDash(v.dash || [3, 3]); g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(v.x), pad.t); g.lineTo(X(v.x), H - pad.b); g.stroke(); g.setLineDash([]); });
     o.series.forEach(s => {
+      // تعبئة متدرجة تحت الخط (للسلسلة الرئيسية) لوضوح أكبر
+      if (s.fill) {
+        const pts = []; s.data.forEach((v, i) => v != null && pts.push([s.xs ? X(s.xs[i]) : X(i), Y(v)]));
+        if (pts.length > 1) {
+          const grd = g.createLinearGradient(0, pad.t, 0, H - pad.b);
+          grd.addColorStop(0, "rgba(231,236,247,.16)"); grd.addColorStop(1, "rgba(231,236,247,0)");
+          g.fillStyle = grd; g.beginPath(); g.moveTo(pts[0][0], H - pad.b); pts.forEach(p => g.lineTo(p[0], p[1]));
+          g.lineTo(pts[pts.length - 1][0], H - pad.b); g.closePath(); g.fill();
+        }
+      }
+      g.save();
+      if (s.glow) { g.shadowColor = s.color; g.shadowBlur = 6; }
       g.strokeStyle = s.color; g.lineWidth = s.width || 1.6; g.setLineDash(s.dash || []); g.globalAlpha = s.alpha || 1;
+      g.lineJoin = "round"; g.lineCap = "round";
       g.beginPath(); let pen = false;
       s.data.forEach((v, i) => { if (v == null) { pen = false; return; } const x = s.xs ? X(s.xs[i]) : X(i); pen ? g.lineTo(x, Y(v)) : (g.moveTo(x, Y(v)), pen = true); });
-      g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+      g.stroke(); g.restore();
     });
     // شرائط التنبيه في الأعلى
     (o.strips || []).forEach((st, r) => {
@@ -274,7 +290,7 @@
       if (th) hl.push({ y: th.value, color: css("--fixed") });
       const series = [
         { data: ast.truth[id], color: css("--muted"), width: 1, dash: [2, 3], alpha: .7 },
-        { data: ast.obs[id], color: id === "chem" ? css("--future") : css("--text"), width: 1.4 }
+        { data: ast.obs[id], color: id === "chem" ? css("--future") : css("--text"), width: 1.6, fill: true, glow: true }
       ];
       if (id === "hr") {
         hl.push({ y: proj.thr, color: css("--accent-2"), dash: [2, 2] });
@@ -293,11 +309,11 @@
 
     $("pt-comp").innerHTML = tx(L.composite);
     $("pu-comp").textContent = "S+ · h=" + sim.personal.h;
-    drawChart($("cv-comp"), { n, series: [{ data: pers.compS, color: css("--personal"), width: 1.8 }], hlines: [{ y: sim.personal.h, color: css("--danger") }], vlines, shade, strips: [strips[0]], yMin: 0 });
+    drawChart($("cv-comp"), { n, series: [{ data: pers.compS, color: css("--personal"), width: 2, glow: true }], hlines: [{ y: sim.personal.h, color: css("--danger") }], vlines, shade, strips: [strips[0]], yMin: 0 });
 
     $("pt-rad").innerHTML = tx(L.radiation) + " " + chip("built");
     $("pu-rad").textContent = "mSv · " + tx(L.radLimit) + " " + sim.radiation.limit;
-    drawChart($("cv-rad"), { n, series: [{ data: ast.rad, color: css("--built"), width: 2 }], hlines: [{ y: sim.radiation.limit, color: css("--danger") }], yMin: 0 });
+    drawChart($("cv-rad"), { n, series: [{ data: ast.rad, color: css("--built"), width: 2.2, glow: true }], hlines: [{ y: sim.radiation.limit, color: css("--danger") }], yMin: 0 });
 
     renderExplain();
   }
