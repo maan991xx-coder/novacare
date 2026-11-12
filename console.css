@@ -235,8 +235,10 @@ body.has-ship .room::after { content: ""; position: absolute; inset: 0;
   background: radial-gradient(120% 90% at 50% 45%, rgba(3,10,18,.15), rgba(3,10,18,.7)); }
 
 /* ---------- صورة الرائد (media/astronaut.png إن وُجدت) ---------- */
-.astro-img { position: relative; height: 100%; max-height: 440px; display: flex; align-items: flex-end; justify-content: center; }
-.astro-img img { position: relative; z-index: 1; max-height: 100%; max-width: 100%; object-fit: contain; filter: drop-shadow(0 10px 18px rgba(0,0,0,.5)) drop-shadow(0 0 22px rgba(95,212,255,.25)); }
+.astro-img { position: relative; height: min(50vh, 440px); padding-bottom: 14px; display: flex; align-items: flex-end; justify-content: center; }
+.astro-img img { position: relative; z-index: 1; height: 100%; width: auto; max-width: 100%; object-fit: contain; filter: drop-shadow(0 10px 18px rgba(0,0,0,.5)) drop-shadow(0 0 22px rgba(95,212,255,.25)); }
 .astro-img .pad { position: absolute; bottom: -6px; left: 50%; width: 70%; height: 34px; transform: translateX(-50%); border-radius: 50%;
   border: 2px solid rgba(111,227,255,.7); background: radial-gradient(closest-side, rgba(95,212,255,.5), rgba(95,212,255,.08) 70%, transparent);
   box-shadow: 0 0 24px rgba(95,212,255,.5); }
+@media (max-width: 860px) { .astro-img { height: min(46vh, 360px); } }
+body.has-ship { --holo: rgba(8, 28, 40, .66); }
