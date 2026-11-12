@@ -35,6 +35,8 @@
     document.title = "VITALX — " + t(D.navLink);
     $("langBtn").textContent = t(C.ui.langToggle);
     $("backLink").innerHTML = (lang === "ar" ? "→ " : "← ") + tx(D.back);
+    if (C.appMode && !$("appLink")) $("backLink").insertAdjacentHTML("afterend", `<a href="app.html" id="appLink" style="color:var(--built)"></a>`);
+    if ($("appLink")) $("appLink").innerHTML = tx(C.appMode.navLink) + " ↗";
     $("dvKicker").innerHTML = tx(C.meta.teamName) + " · " + tx(D.kicker) + " " + chip("designed");
     $("dvTitle").innerHTML = tx(D.title);
     $("dvIntro").innerHTML = tx(D.intro);

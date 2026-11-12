@@ -404,6 +404,133 @@ window.VITALX_CONTENT = {
      إعدادات المحاكاة — كل الأرقام هنا افتراضية للعرض، وليست قيماً سريرية.
      Simulation settings — demo values only, not clinical values.
      ===================================================================== */
+  /* =====================================================================
+     وضع التطبيق (app.html) · App mode
+     واجهة تعمل كتطبيق حقيقي على بيانات مولّدة. النصوص هنا، والطاقم أدناه.
+     ===================================================================== */
+  appMode: {
+    navLink: { ar: "وضع التطبيق", en: "App mode" },
+    cta: { ar: "افتح وضع التطبيق", en: "Open app mode" },
+    title: { ar: "VITALX · وحدة طبيب الطاقم", en: "VITALX · Crew medical console" },
+    back: { ar: "الموقع", en: "Website" },
+    synthetic: { ar: "بيانات مولّدة · ليست بيانات رواد حقيقيين", en: "Synthetic data · not real crew data" },
+    disclaimer: { ar: "أداة دعم قرار وليست تشخيصاً. لا يُنفَّذ أي إجراء تلقائياً، وكل اقتراح يحتاج موافقة طبيب الطاقم.",
+                  en: "Decision support, not diagnosis. Nothing is actuated automatically; every suggestion needs the crew medical officer's approval." },
+    screens: {
+      crew:     { ar: "الطاقم", en: "Crew" },
+      member:   { ar: "الرائد", en: "Crew member" },
+      trends:   { ar: "الاتجاهات", en: "Trends" },
+      alerts:   { ar: "التنبيهات", en: "Alerts" },
+      review:   { ar: "قرار الطبيب", en: "CMO review" },
+      habitat:  { ar: "المقصورة", en: "Habitat" },
+      settings: { ar: "الإعدادات", en: "Settings" },
+      devices:  { ar: "الأجهزة", en: "Devices" }
+    },
+    player: {
+      play: { ar: "تشغيل", en: "Play" }, pause: { ar: "إيقاف", en: "Pause" },
+      restart: { ar: "من البداية", en: "Restart" }, step: { ar: "يوم واحد", en: "One day" },
+      speed: { ar: "السرعة", en: "Speed" }, day: { ar: "اليوم", en: "Day" }, of: { ar: "من", en: "of" },
+      perSec: { ar: "يوم/ث", en: "days/s" }
+    },
+    phase: {
+      adapt: { ar: "مرحلة التكيف", en: "Adaptation phase" },
+      calib: { ar: "معايرة خط الأساس", en: "Calibrating baseline" },
+      watch: { ar: "مراقبة شخصية فعّالة", en: "Personal monitoring active" }
+    },
+    status: {
+      0: { ar: "ضمن خط الأساس", en: "Within baseline" },
+      1: { ar: "معلومة", en: "Info" },
+      2: { ar: "مراقبة", en: "Monitor" },
+      3: { ar: "عاجل", en: "Urgent" },
+      calib: { ar: "معايرة", en: "Calibrating" }
+    },
+    labels: {
+      composite: { ar: "الدرجة المركبة", en: "Composite score" },
+      cusum: { ar: "تراكم CUSUM", en: "CUSUM build-up" },
+      zone: { ar: "النطاق الشخصي", en: "Personal zone" },
+      lastAlert: { ar: "آخر تنبيه", en: "Last alert" },
+      none: { ar: "لا يوجد", en: "None" },
+      open: { ar: "افتح", en: "Open" },
+      dose: { ar: "الجرعة التراكمية", en: "Cumulative dose" },
+      limitDemo: { ar: "حد العرض", en: "Demo limit" },
+      cabinCo2: { ar: "CO2 المقصورة (متوسط القراءات)", en: "Cabin CO2 (mean of readings)" },
+      waveform: { ar: "موجة توضيحية · المعدل من البيانات المولّدة", en: "Illustrative waveform · rate from synthetic data" },
+      sensors: { ar: "الحساسات على الرائد", en: "Sensors on the crew member" },
+      why: { ar: "لماذا هذه الحالة؟", en: "Why this status?" },
+      contrib: { ar: "مساهمة كل قناة في الدرجة المركبة (z بالاتجاه السيئ)", en: "Each channel's share of the composite score (z in the bad direction)" },
+      noContrib: { ar: "لا يوجد تنبيه اليوم. المساهمات تظهر عند التنبيه.", en: "No alert today. Contributions appear when an alert fires." },
+      today: { ar: "اليوم", en: "Today" },
+      channel: { ar: "القناة", en: "Channel" },
+      member: { ar: "الرائد", en: "Crew member" },
+      projection: { ar: "إسقاط الاتجاه", en: "Trend projection" },
+      projText: { ar: "بالاتجاه الحالي، قد يعبر النبض عتبة المراقبة قرب اليوم", en: "At the current trend, heart rate may cross the monitoring threshold near day" },
+      projNone: { ar: "لا اتجاه صاعد واضح الآن.", en: "No clear rising trend now." },
+      projNote: { ar: "اتجاه خطي على نافذة الأيام الأخيرة، وليس توقعاً لمرض.", en: "A linear trend over the last days' window, not a prediction of illness." },
+      truth: { ar: "إظهار بدء الانحراف الحقيقي (للعرض فقط)", en: "Show true drift onset (demo only)" },
+      onset: { ar: "بدء الانحراف", en: "Drift onset" },
+      hover: { ar: "مرّر أو المس الرسم لقراءة القيم", en: "Hover or touch the chart to read values" },
+      baselineBand: { ar: "خط الأساس ±3", en: "Baseline ±3" },
+      observed: { ar: "القراءة اليومية", en: "Daily reading" },
+      fixedThr: { ar: "العتبة الثابتة", en: "Fixed threshold" },
+      future: { ar: "لم يحدث بعد", en: "Not yet" }
+    },
+    alertsUi: {
+      filterAll: { ar: "الكل", en: "All" },
+      filterOpen: { ar: "بانتظار إجراء", en: "Needs action" },
+      filterInfo: { ar: "إظهار المعلومات", en: "Show info" },
+      ack: { ar: "استلام", en: "Acknowledge" },
+      acked: { ar: "تم الاستلام", en: "Acknowledged" },
+      review: { ar: "مراجعة", en: "Review" },
+      empty: { ar: "لا توجد تنبيهات حتى هذا اليوم.", en: "No alerts up to this day." },
+      newAlert: { ar: "تنبيه جديد", en: "New alert" },
+      top: { ar: "أكبر المساهمين", en: "Top contributors" }
+    },
+    review: {
+      pick: { ar: "اختر تنبيهاً من قائمة التنبيهات لمراجعته.", en: "Pick an alert from the alerts list to review it." },
+      evidence: { ar: "الدليل", en: "Evidence" },
+      suggestions: { ar: "اقتراحات للطبيب", en: "Suggestions for the CMO" },
+      suggestNote: { ar: "اقتراحات فقط. لا يُنفَّذ شيء إلا بموافقتك، ولا يتحكم النظام بأي جهاز.", en: "Suggestions only. Nothing happens without your approval, and the system controls no equipment." },
+      approve: { ar: "اعتماد المحدد", en: "Approve selected" },
+      dismiss: { ar: "رفض مع سبب", en: "Dismiss with reason" },
+      escalate: { ar: "تحويل لجراح الطيران على الأرض", en: "Escalate to ground flight surgeon" },
+      reason: { ar: "سبب الرفض (مثال: قراءة خاطئة بسبب الحساس)", en: "Reason (e.g. faulty sensor reading)" },
+      decided: { ar: "القرار", en: "Decision" },
+      approved: { ar: "اعتمد الطبيب", en: "CMO approved" },
+      dismissed: { ar: "رفض الطبيب", en: "CMO dismissed" },
+      escalated: { ar: "حُوّل للأرض", en: "Escalated to ground" },
+      log: { ar: "سجل القرارات", en: "Decision log" },
+      logEmpty: { ar: "لا قرارات بعد.", en: "No decisions yet." },
+      clear: { ar: "مسح السجل", en: "Clear log" },
+      undo: { ar: "تراجع", en: "Undo" },
+      who: { ar: "طبيب الطاقم", en: "Crew medical officer" },
+      pendingWording: { ar: "صياغة الاقتراحات بانتظار فريق الممرضين", en: "Suggestion wording awaits the nursing team" }
+    },
+    suggestions: {
+      hr:    { ar: "جدولة فحص قصير مع الرائد وإعادة قياس نبض الراحة غداً", en: "Schedule a short check-in and re-measure resting heart rate tomorrow" },
+      sleep: { ar: "مراجعة جدول النوم والإضاءة وعبء العمل", en: "Review sleep schedule, lighting and workload" },
+      co2:   { ar: "طلب فحص CO2 المقصورة وحالة جهاز الامتصاص من فريق البيئة", en: "Ask the environment team to check cabin CO2 and scrubber status" },
+      chem:  { ar: "قناة محاكاة فقط: لا إجراء", en: "Simulated channel only: no action" },
+      monitor: { ar: "متابعة المراقبة ومراجعة الحالة بعد 24 ساعة", en: "Keep monitoring and review again in 24 hours" },
+      ground: { ar: "مشاركة الملخص مع جراح الطيران عند توفر الاتصال", en: "Share the summary with the flight surgeon when the link is available" }
+    },
+    settingsUi: {
+      intro: { ar: "غيّر إعدادات الخوارزمية وشاهد أثرها فوراً على كل الشاشات.", en: "Change the algorithm settings and see the effect on every screen at once." },
+      reset: { ar: "إعادة الإعدادات والقرارات", en: "Reset settings and decisions" },
+      data: { ar: "البيانات", en: "Data" }
+    },
+    /* الطاقم: رموز وليس أسماء أشخاص حقيقيين. driftMult: 0 = لا انحراف (رائد مستقر) */
+    crew: [
+      { id: "A", seed: 11, driftMult: 1.2, noiseMult: 1.0, onset: 50,
+        name: { ar: "الرائد أ", en: "Crew A" }, role: { ar: "قائد المهمة", en: "Commander" } },
+      { id: "B", seed: 23, driftMult: 0,   noiseMult: 1.0, onset: 60,
+        name: { ar: "الرائد ب", en: "Crew B" }, role: { ar: "مهندس الطيران", en: "Flight engineer" } },
+      { id: "C", seed: 37, driftMult: 0.8, noiseMult: 1.1, onset: 68,
+        name: { ar: "الرائد ج", en: "Crew C" }, role: { ar: "أخصائي المهمة", en: "Mission specialist" } },
+      { id: "D", seed: 53, driftMult: 1.0, noiseMult: 1.3, onset: 58,
+        name: { ar: "الرائد د", en: "Crew D" }, role: { ar: "عالم المهمة", en: "Science officer" } }
+    ]
+  },
+
   sim: {
     seed: 42,
     missionDays: 120,

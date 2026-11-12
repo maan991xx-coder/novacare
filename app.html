@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050914">
+<title>VITALX App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="appmode.css">
+</head>
+<body class="appmode">
+<!-- وضع التطبيق: الهيكل فقط. النصوص من content.js (appMode)، والحساب من engine.js -->
+<div class="shell">
+  <aside class="side" id="side">
+    <a class="brand side-brand" href="index.html">VITAL<span>X</span></a>
+    <nav class="tabs" id="tabs" aria-label="App"></nav>
+    <div class="side-foot">
+      <a class="side-link" href="index.html" id="backLink"></a>
+      <button id="langBtn" class="lang-btn" type="button"></button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div class="top-title">
+        <a class="brand top-brand" href="index.html">VITAL<span>X</span></a>
+        <h1 id="screenTitle"></h1>
+        <span class="phase" id="phase"></span>
+      </div>
+      <div class="player">
+        <button class="pbtn" id="restartBtn" type="button"></button>
+        <button class="pbtn primary" id="playBtn" type="button"></button>
+        <button class="pbtn" id="stepBtn" type="button"></button>
+        <label class="speed"><span id="speedLab"></span>
+          <select id="speedSel"></select></label>
+        <div class="daybadge"><span id="dayLab"></span> <b id="dayNum" dir="ltr">0</b><small dir="ltr" id="dayOf"></small></div>
+        <button id="langBtnTop" class="lang-btn top-lang" type="button"></button>
+      </div>
+    </header>
+
+    <div class="timeline" id="timeline">
+      <div class="tl-track" id="tlTrack">
+        <div class="tl-adapt" id="tlAdapt"></div>
+        <div class="tl-calib" id="tlCalib"></div>
+        <div class="tl-done" id="tlDone"></div>
+        <div class="tl-ticks" id="tlTicks"></div>
+      </div>
+      <input type="range" id="scrub" min="0" max="119" value="0" aria-label="Mission day">
+    </div>
+
+    <main class="view" id="view" tabindex="-1"></main>
+
+    <footer class="app-foot">
+      <span class="tag-synth" id="synthTag"></span>
+      <span id="disclaimer"></span>
+    </footer>
+  </div>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="content.js"></script>
+<script src="engine.js"></script>
+<script src="appmode.js"></script>
+</body>
+</html>
