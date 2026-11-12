@@ -205,11 +205,8 @@ h3 { font-size: 1.2rem; margin-top: 2.2em; }
 .foot { padding: 36px 0; border-top: 1px solid var(--line); text-align: center; }
 .foot p { margin: 4px 0; }
 
-.vision { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-.vision-card .note { margin: 12px 0 0; font-size: .92rem; color: var(--text, inherit); }
-
 @media (max-width: 900px) {
-  .layers, .alerts, .diff, .roadmap, .kpis, .vision { grid-template-columns: 1fr; }
+  .layers, .alerts, .diff, .roadmap, .kpis { grid-template-columns: 1fr; }
   .device { grid-template-columns: 1fr; }
   .demo { grid-template-columns: 1fr; }
   .controls { position: static; }

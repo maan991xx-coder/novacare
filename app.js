@@ -89,15 +89,6 @@
 
     $("hDiff").innerHTML = tx(S.diff);
     $("diffGrid").innerHTML = C.differentiation.map(d => `<div class="diff-card"><h3>${tx(d.vs)}</h3><p>${tx(d.point)}</p></div>`).join("");
-    if (C.vision && $("visionGrid")) {
-      $("hVision").innerHTML = tx(S.vision);
-      $("visionIntro").innerHTML = tx(C.vision.intro);
-      $("visionGrid").innerHTML = C.vision.items.map(v => `
-        <article class="layer vision-card" style="--c:var(--${v.status})">
-          ${chip(v.status)}<h3>${tx(v.title)}</h3><p>${tx(v.idea)}</p>
-          <p class="note"><b>${tx(C.vision.honestLabel)}</b> ${tx(v.honest)}</p>
-        </article>`).join("");
-    }
     $("hNurses").innerHTML = tx(S.nurses);
     $("nursesTbl").innerHTML = `<thead><tr><th>${tx(T.item)}</th><th>${tx(T.current)}</th><th>${tx(T.status)}</th></tr></thead><tbody>` +
       C.nurseDecisions.map(n => `<tr><td><b>${tx(n.item)}</b></td><td>${tx(n.current)}</td><td>${chip(n.status)}</td></tr>`).join("") + "</tbody>";
