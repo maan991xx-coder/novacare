@@ -37,7 +37,6 @@ window.VITALX_CONTENT = {
       data:    { ar: "البيانات", en: "Data" },
       demo:    { ar: "العرض التفاعلي", en: "Live demo" },
       proof:   { ar: "الإثبات", en: "Evidence" },
-      vision:  { ar: "الرؤية", en: "Vision" },
       roadmap: { ar: "خارطة الطريق", en: "Roadmap" }
     },
     langToggle: { ar: "English", en: "العربية" },
@@ -53,7 +52,6 @@ window.VITALX_CONTENT = {
       forecast: { ar: "إسقاط الاتجاه", en: "Trend projection" },
       method:   { ar: "الخوارزمية", en: "The algorithm" },
       diff:     { ar: "ما يميزنا", en: "What sets us apart" },
-      vision:   { ar: "الجيل القادم من VITALX", en: "The next generation of VITALX" },
       nurses:   { ar: "قرارات فريق الممرضين", en: "Decisions for the nursing team" },
       roadmap:  { ar: "خارطة الطريق", en: "Roadmap" },
       refs:     { ar: "المراجع العلمية", en: "Scientific references" },
@@ -290,47 +288,6 @@ window.VITALX_CONTENT = {
                                                        en: "Explained alerts, offline operation, a proven comparison, and honest disclosure of limits." } }
   ],
 
-  /* أفكار الجيل القادم (من دفتر الفريق، 2026-11-10). لكل فكرة: الحالة، الفكرة، وما نقوله بصدق */
-  vision: {
-    intro: {
-      ar: "أفكار نطوّر بها VITALX بعد الهاكاثون. لكل فكرة حالتها الصريحة، وتحتها ما نقوله عنها بصدق: ما المبني منها اليوم، وما الذي لا ندّعيه.",
-      en: "Ideas for taking VITALX beyond the hackathon. Each has an explicit status, and under it what we honestly say about it: what is built today and what we do not claim."
-    },
-    honestLabel: { ar: "بصدق:", en: "Honestly:" },
-    items: [
-      { status: "future",
-        title: { ar: "التوأم الرقمي الحيوي التنبؤي", en: "Predictive bio-digital twin" },
-        idea: { ar: "نسخة رقمية لكل رائد تُبنى من ثلاثة مصادر: المؤشرات الجينية والحيوية الخاصة به، وتاريخه الطبي والبدني، واستجابته الفسيولوجية الفعلية أثناء المهمة. تمر بأربع مراحل: مطابقة جينية قبل الرحلة (محلياً وبخصوصية)، ثم خط أساس فسيولوجي شخصي، ثم تكيّف ديناميكي أثناء المهمة، ثم محاكاة استباقية للـ48 ساعة القادمة.",
-                en: "A digital copy of each astronaut built from three sources: their own genomic and biomarker profile, their medical and physical history, and their actual physiological response during the mission. It goes through four stages: pre-flight genomic pairing (local and private), a personal physiological baseline, dynamic adaptation during the mission, and a 48-hour forward simulation." },
-        honest: { ar: "المبني اليوم هو المرحلة الثانية (خط الأساس الشخصي) وجزء من الثالثة. الربط الجيني والمحاكاة لـ48 ساعة بحث مستقبلي، ولا نعرض نسب احتمال مثل \"تدهور إدراكي 91%\" لأننا لم نتحقق منها. الإسقاط الحالي اتجاه بهامش خطأ معلن.",
-                  en: "What is built today is stage two (the personal baseline) and part of stage three. Genomic pairing and the 48-hour simulation are future research, and we show no probabilities such as \"cognitive decline 91%\" because we have not validated them. Today's projection is a trend with a stated error margin." } },
-      { status: "built",
-        title: { ar: "محرك التكيّف الفضائي الديناميكي", en: "Dynamic space-adaptation engine" },
-        idea: { ar: "المراقبة التقليدية تقارن الرائد بخط ثابت مأخوذ من متوسط سكان الأرض، فتُطلق إنذارات كاذبة لأن جسمه يتغير طبيعياً في انعدام الجاذبية. VITALX يرسم خط أساس تكيّفياً يتبع الرائد نفسه، ولا ينبّه إلا إذا خرجت بياناته عن نطاق التكيّف المقبول، مثل هبوط مفاجئ في تقلّب النبض (HRV). هكذا يفرّق بين التكيّف الطبيعي والتغير المرضي.",
-                en: "Traditional monitoring compares the astronaut with a fixed line taken from the Earth population average, so it raises false alarms because the body changes normally in microgravity. VITALX draws an adaptive baseline that follows the astronaut, and alerts only when the data leaves the accepted adaptation zone, such as a sudden drop in heart rate variability (HRV). This separates normal adaptation from pathological change." },
-        honest: { ar: "هذه الفكرة مبنية فعلاً في العرض التفاعلي: خط أساس مستقر بعد التكيّف، وخط متحرك مقيّد بمرساة. تجربتنا أظهرت أن الخط الذي يتبع البيانات يومياً بلا قيد يخفي الانحراف البطيء (كشف 79% مقابل 95%)، لذلك نقيّده. وفقدان كثافة العظام ليس تكيّفاً نقبله، بل خطر تقاومه ناسا بالتمارين، ولا يقيسه جهاز يُلبس يومياً.",
-                  en: "This idea is already built in the live demo: a stable post-adaptation baseline and an anchored rolling baseline. Our tests showed that a baseline that follows the data daily without a limit hides slow drift (79% detection vs 95%), so we bound it. Bone density loss is not an adaptation we accept; it is a risk NASA counters with exercise, and no daily wearable measures it." } },
-      { status: "designed",
-        title: { ar: "إجراءات مضادة توجيهية", en: "Prescriptive countermeasures" },
-        idea: { ar: "البرمجيات الحالية تشخيصية: تطلق إنذاراً مثل \"الأكسجين منخفض\" وتترك المسؤول الطبي يقرر وحده تحت الضغط. VITALX لا يكتفي بالتشخيص، بل يقترح خطوات عملية جاهزة، مثل تعديل جدول إضاءة كبسولة النوم، أو تخفيف حمل التمارين غداً، أو إعادة توزيع المهام. هذا يخفف العبء الذهني على المسؤول الطبي.",
-                en: "Current software is diagnostic: it raises an alarm such as \"oxygen low\" and leaves the medical officer to decide alone under pressure. VITALX goes beyond diagnosis and suggests ready, concrete steps, such as adjusting the sleep-pod lighting schedule, lightening tomorrow's exercise load, or redistributing tasks. This reduces the medical officer's cognitive load." },
-        honest: { ar: "الاقتراحات تُعرض على طبيب الطاقم ولا تُنفَّذ تلقائياً، والقرار له دائماً. الإجراءات التي تمس هواء المقصورة (مثل ضغط الأكسجين) من اختصاص نظام دعم الحياة وفريق المهمة، لأن رفع الأكسجين يزيد خطر الحريق.",
-                  en: "Suggestions go to the crew medical officer and are never applied automatically; the decision is always theirs. Actions that touch cabin air (such as oxygen pressure) belong to the life-support system and the mission team, because more oxygen raises fire risk." } },
-      { status: "designed",
-        title: { ar: "خصوصية البيانات بالمعالجة المحلية", en: "Privacy through on-device processing" },
-        idea: { ar: "قد يتردد الرواد في مشاركة بياناتهم الدقيقة خوفاً على مستقبلهم المهني. في VITALX تُعالج البيانات الحساسة محلياً على جهاز الرائد ولا تخرج منه، ولا يُشارك مع الشاشة الرئيسية أو الأرض إلا تحديثات مجمّعة دون البيانات الخام (التعلّم الموحّد · Federated Learning).",
-                en: "Astronauts may hesitate to share detailed data for fear of the effect on their careers. In VITALX sensitive data is processed on the astronaut's own device and does not leave it; only aggregated updates, without raw data, are shared with the main console or Earth (federated learning)." },
-        honest: { ar: "المعالجة المحلية جزء من التصميم الحالي أصلاً، لأن النظام يعمل بلا اتصال. التعلّم الموحّد يفيد أكثر عبر مهام وطواقم كثيرة، لا داخل طاقم من أربعة. ولا نستخدم وصف \"المعرفة الصفرية\" لأنه مصطلح تشفيري محدد لم ننفّذه.",
-                  en: "On-device processing is already part of the current design, since the system runs offline. Federated learning pays off across many missions and crews, not within a crew of four. We do not use the term \"zero-knowledge\", which is a specific cryptographic technique we have not implemented." } },
-      { status: "designed",
-        title: { ar: "واجهة القيادة المقترحة", en: "Proposed command dashboard" },
-        idea: { ar: "لوحة رئيسية فيها توأم رقمي لكل رائد مع مؤشر لوني فوري (أخضر مستقر، أصفر تنبيه مبكر، أحمر خطر). شريط مؤشرات حيوية (النبض، تقلّب النبض، الإشعاع التراكمي، معدل التنفس) مع منحنى للحالة المتوقعة. لوحة جانبية لهواء الكبسولة والحرارة وCO2 مع تنبيه عند بداية أي انحراف. وقسم للقرار التوجيهي يعرض اقتراحات جاهزة للطبيب.",
-                en: "A main screen with a digital twin per astronaut and an instant colour status (green stable, yellow early warning, red danger). A vitals bar (heart rate, HRV, cumulative radiation, respiration rate) with an expected-trajectory curve. A side panel for pod air, temperature and CO2 that warns when any drift starts. And a prescriptive section with ready suggestions for the medical officer." },
-        honest: { ar: "التصاميم المرسومة توضّح الفكرة فقط، والأرقام فيها توضيحية وليست مخرجات النظام. تقلّب النبض ومعدل التنفس قناتان مقترحتان لم تدخلا النموذج بعد.",
-                  en: "The drawn mockups illustrate the idea only; their numbers are illustrative, not system output. HRV and respiration rate are proposed channels not yet in the model." } }
-    ]
-  },
-
   forecast: {
     text: {
       ar: "إذا استمر الميل الحالي لنبض الراحة (انحدار خطي على آخر أيام النافذة)، متى سيتجاوز عتبة المراقبة؟ نقيس الخطأ في توقيت العبور مقارنة بالحقيقة المُدخلة في البيانات الصناعية.",
@@ -356,7 +313,7 @@ window.VITALX_CONTENT = {
     { status: "designed", phase: { ar: "بعد الهاكاثون", en: "After the hackathon" },
       text: { ar: "معايرة المدى بالبيانات الحقيقية إن وُجدت، ضبط الأوزان والعتبات مع فريق التمريض، نموذج الجهاز.", en: "Calibrate ranges with real data if found, tune weights and thresholds with the nursing team, device prototype." } },
     { status: "future", phase: { ar: "بحث", en: "Research" },
-      text: { ar: "قناة كيميائية حقيقية بالإبر الدقيقة، وتنبؤ لمدة شهر بشرط توفر بيانات طولية حقيقية، والتوأم الرقمي الحيوي، والتعلّم الموحّد عبر المهام.", en: "A real chemical channel with microneedles, month-long forecasting once real longitudinal data exists, the bio-digital twin, and federated learning across missions." } }
+      text: { ar: "قناة كيميائية حقيقية بالإبر الدقيقة، وتنبؤ لمدة شهر بشرط توفر بيانات طولية حقيقية.", en: "A real chemical channel with microneedles, and month-long forecasting once real longitudinal data exists." } }
   ],
 
   references: [
@@ -372,10 +329,6 @@ window.VITALX_CONTENT = {
       use: { ar: "سياق صحة الطاقم", en: "Crew health context" } },
     { name: "NASA Technical Reports Server (NTRS)", url: "https://ntrs.nasa.gov/",
       use: { ar: "أوراق علمية داعمة ⟨أضيفوا الأوراق المحددة⟩", en: "Supporting papers ⟨add the specific papers⟩" } },
-    { name: "NASA Open Data Portal", url: "https://data.nasa.gov/",
-      use: { ar: "بيانات عامة مفتوحة قد تفيد في المعايرة (لم يُستخدم شيء منها بعد)", en: "Open public data that may help calibration (nothing used yet)" } },
-    { name: "National Academies of Sciences, Engineering, and Medicine", url: "https://nap.nationalacademies.org/",
-      use: { ar: "دراسات عن صحة رواد الفضاء واحتياجاتهم الطبية ⟨أضيفوا الدراسة المحددة⟩", en: "Studies on astronaut health and medical needs ⟨add the specific study⟩" } },
     { name: "NASA Open Science Data Repository (OSDR)", url: "https://osdr.nasa.gov/",
       use: { ar: "مكان البحث عن بيانات للمعايرة (لم يُستخدم بعد)", en: "Where we search for calibration data (not used yet)" } }
   ],
