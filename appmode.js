@@ -809,6 +809,7 @@
       + row("rad", t(L.radShort), fmt(dose, 1), "mSv", radCol, "habitat")
       + row("comp", t(L.composite), calib ? "—" : fmt(comp, 1), "z", statusColor(s === "calib" ? 0 : s), "member/" + c.m.id);
   }
+  let hasAstroImg = false;
   function screenHome() {
     const d = state.day, c = crewById(state.member), s = statusOf(c, d);
     const open = episodesUpTo(d).filter(e => e.open && e.level >= 2).length;
@@ -816,7 +817,7 @@
     return `<div class="home">
       <div class="vitals">${vitalsFor(c, d)}</div>
       <div class="figure">
-        ${astronautSVG(c, d)}
+        ${hasAstroImg ? `<div class="astro-img"><img src="media/astronaut.png" alt="${esc(t(c.m.name))}"><i class="pad"></i></div>` : astronautSVG(c, d)}
         <div class="namepill" style="--c:${statusCss(s)}">
           <button type="button" class="pill-nav" data-step="-1" aria-label="prev">‹</button>
           <span><b>${tx(c.m.name)}</b> · ${tx(A.status[s])}</span>
@@ -921,7 +922,7 @@
       slideDir = 0;
     }
     if (after) after();
-    renderDots();
+    renderDots(); renderGhosts();
     renderTabs(); renderTimeline(); renderPlayer();
     if ($("telemetry")) renderTelemetry();
   }
@@ -1065,6 +1066,25 @@
       tb._label = label;
     }
   }
+  // الصفحتان السابقة والتالية على جانبي اللوحة (عرض منحنٍ بمنظور الشخص الأول)
+  let ghostKey = "";
+  function renderGhosts() {
+    if (!$("ghostL")) return;
+    const i = Math.max(0, TABS.indexOf(state.screen)), n = TABS.length;
+    const prev = TABS[(i - 1 + n) % n], next = TABS[(i + 1) % n];
+    const left = isRtl() ? next : prev, right = isRtl() ? prev : next;
+    const key = [left, right, lang, state.member, Math.floor(state.day / 5)].join("|");
+    if (key === ghostKey) return; ghostKey = key;
+    const fill = (el, scr, k) => {
+      let body = "";
+      try { body = SCREENS[scr][0]().replace(/\s(id|for)="[^"]*"/g, "").replace(/<video[\s\S]*?<\/video>/g, `<img src="media/vitalx-poster.jpg" alt="" style="width:100%;border-radius:14px">`); } catch (e) { body = ""; }
+      el.innerHTML = `<div class="g-head">${icon(scr)}<b>${tx(A.screens[scr])}</b></div><div class="g-body">${body}</div>`;
+      el.onclick = () => navStep(k);
+      el.title = t(A.screens[scr]);
+    };
+    fill($("ghostL"), left, isRtl() ? 1 : -1);
+    fill($("ghostR"), right, isRtl() ? -1 : 1);
+  }
   function renderDots() {
     if (!$("dots")) return;
     $("dots").innerHTML = TABS.map(k => `<i class="${k === state.screen ? "on" : ""}"></i>`).join("");
@@ -1147,6 +1167,10 @@
   let start = 40;
   try { const q = new URLSearchParams(location.search).get("day"); if (q != null) start = clamp(parseInt(q, 10) || 0, 0, D - 1); } catch (e) { /* */ }
   state.day = start; seenUpTo(start);
+  // صور اختيارية: خلفية المركبة وصورة الرائد. إذا لم تكن موجودة يبقى الرسم المدمج
+  const probe = (src, cls, cb) => { const im = new Image(); im.onload = () => { document.body.classList.add(cls); if (cb) cb(); }; im.src = src; };
+  probe("media/ship-bg.jpg", "has-ship");
+  probe("media/astronaut.png", "has-astro", () => { hasAstroImg = true; render(); });
   renderFrame(); bind(); route();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
 })();
