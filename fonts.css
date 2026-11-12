@@ -1,0 +1,13 @@
+/* خط ثمانية: الترخيص يمنع رفع ملفات الخط أو استضافتها، لذلك مجلد fonts/ غير مرفوع على GitHub.
+ يعمل الخط إذا كان مثبّتاً على الجهاز، أو إذا وُضعت ملفاته في fonts/ بجانب الموقع على جهازك. وإلا يُستخدم IBM Plex. */
+@font-face { font-family: "VX Thmanyah"; font-weight: 300; font-display: swap;
+  src: local("thmanyah sans Light"), local("thmanyahsans-Light"), url("fonts/thmanyahsans-Light.woff2") format("woff2"); }
+@font-face { font-family: "VX Thmanyah"; font-weight: 400; font-display: swap;
+  src: local("thmanyah sans Regular"), local("thmanyahsans-Regular"), url("fonts/thmanyahsans-Regular.woff2") format("woff2"); }
+@font-face { font-family: "VX Thmanyah"; font-weight: 500; font-display: swap;
+  src: local("thmanyah sans Medium"), local("thmanyahsans-Medium"), url("fonts/thmanyahsans-Medium.woff2") format("woff2"); }
+@font-face { font-family: "VX Thmanyah"; font-weight: 700; font-display: swap;
+  src: local("thmanyah sans Bold"), local("thmanyahsans-Bold"), url("fonts/thmanyahsans-Bold.woff2") format("woff2"); }
+@font-face { font-family: "VX Thmanyah"; font-weight: 900; font-display: swap;
+  src: local("thmanyah sans Black"), local("thmanyahsans-Black"), url("fonts/thmanyahsans-Black.woff2") format("woff2"); }
+:root { --font: "VX Thmanyah", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif; }

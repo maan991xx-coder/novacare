@@ -409,14 +409,18 @@ window.VITALX_CONTENT = {
      واجهة تعمل كتطبيق حقيقي على بيانات مولّدة. النصوص هنا، والطاقم أدناه.
      ===================================================================== */
   appMode: {
-    navLink: { ar: "وضع التطبيق", en: "App mode" },
-    cta: { ar: "افتح وضع التطبيق", en: "Open app mode" },
-    title: { ar: "VITALX · وحدة طبيب الطاقم", en: "VITALX · Crew medical console" },
+    navLink: { ar: "لوحة التحكم", en: "Console" },
+    cta: { ar: "افتح لوحة التحكم", en: "Open the console" },
+    subtitle: { ar: "لوحة التحكم المركزية لطبيب الطاقم", en: "Central console for the crew medical officer" },
+    title: { ar: "نظام VITALX | دعم قرار طبيب الطاقم", en: "VITALX | Crew medical decision support" },
     back: { ar: "الموقع", en: "Website" },
     synthetic: { ar: "بيانات مولّدة · ليست بيانات رواد حقيقيين", en: "Synthetic data · not real crew data" },
     disclaimer: { ar: "أداة دعم قرار وليست تشخيصاً. لا يُنفَّذ أي إجراء تلقائياً، وكل اقتراح يحتاج موافقة طبيب الطاقم.",
                   en: "Decision support, not diagnosis. Nothing is actuated automatically; every suggestion needs the crew medical officer's approval." },
     screens: {
+      home:     { ar: "الرئيسية", en: "Home" },
+      video:    { ar: "العرض المرئي", en: "Trailer" },
+      details:  { ar: "التفاصيل", en: "Details" },
       crew:     { ar: "الطاقم", en: "Crew" },
       member:   { ar: "الرائد", en: "Crew member" },
       trends:   { ar: "الاتجاهات", en: "Trends" },
@@ -429,6 +433,9 @@ window.VITALX_CONTENT = {
     player: {
       play: { ar: "تشغيل", en: "Play" }, pause: { ar: "إيقاف", en: "Pause" },
       restart: { ar: "من البداية", en: "Restart" }, step: { ar: "يوم واحد", en: "One day" },
+      next: { ar: "الرائد التالي", en: "Next crew" },
+      tilt: { ar: "التنقل بالإمالة", en: "Tilt to navigate" },
+      tiltOn: { ar: "الإمالة تعمل", en: "Tilt on" },
       speed: { ar: "السرعة", en: "Speed" }, day: { ar: "اليوم", en: "Day" }, of: { ar: "من", en: "of" },
       perSec: { ar: "يوم/ث", en: "days/s" }
     },
@@ -452,6 +459,7 @@ window.VITALX_CONTENT = {
       none: { ar: "لا يوجد", en: "None" },
       open: { ar: "افتح", en: "Open" },
       dose: { ar: "الجرعة التراكمية", en: "Cumulative dose" },
+      radShort: { ar: "الإشعاع", en: "Radiation" },
       limitDemo: { ar: "حد العرض", en: "Demo limit" },
       cabinCo2: { ar: "CO2 المقصورة (متوسط القراءات)", en: "Cabin CO2 (mean of readings)" },
       waveform: { ar: "موجة توضيحية · المعدل من البيانات المولّدة", en: "Illustrative waveform · rate from synthetic data" },

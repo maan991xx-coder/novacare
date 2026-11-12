@@ -36,7 +36,7 @@
 
     $("nav").innerHTML = Object.keys(U.nav).map(k => `<a href="#${k}">${tx(U.nav[k])}</a>`).join("") +
       (C.devicesPage ? `<a href="devices.html" style="color:var(--accent)">${tx(C.devicesPage.navLink)} ↗</a>` : "") +
-      (C.appMode ? `<a href="app.html" style="color:var(--built)">${tx(C.appMode.navLink)} ↗</a>` : "");
+      (C.appMode ? `<a href="index.html" style="color:var(--built)">${tx(C.appMode.navLink)} ↗</a>` : "");
     $("heroKicker").innerHTML = tx(C.meta.teamName) + " · " + tx(C.hero.kicker) + " · " + C.meta.targetPrizes.map(esc).join(" / ");
     $("heroVision").innerHTML = tx(C.hero.vision);
     $("heroScope").innerHTML = tx(C.hero.scope);
@@ -44,7 +44,7 @@
     $("ctaLayers").innerHTML = tx(C.hero.ctaLayers);
     if (C.devicesPage && !$("ctaDevices")) $("ctaLayers").insertAdjacentHTML("afterend", `<a class="btn" href="devices.html" id="ctaDevices"></a>`);
     if ($("ctaDevices")) $("ctaDevices").innerHTML = tx(C.devicesPage.navLink) + " ↗";
-    if (C.appMode && !$("ctaApp")) { $("ctaDemo").insertAdjacentHTML("beforebegin", `<a class="btn primary" href="app.html" id="ctaApp"></a>`); $("ctaDemo").classList.remove("primary"); }
+    if (C.appMode && !$("ctaApp")) { $("ctaDemo").insertAdjacentHTML("beforebegin", `<a class="btn primary" href="index.html" id="ctaApp"></a>`); $("ctaDemo").classList.remove("primary"); }
     if ($("ctaApp")) $("ctaApp").innerHTML = "▶ " + tx(C.appMode.cta);
     $("heroDisclaimer").innerHTML = tx(C.meta.disclaimer);
     $("statusLegend").innerHTML = Object.keys(C.statusLabels).map(chip).join("");

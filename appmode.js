@@ -33,7 +33,7 @@
   const persist = () => { try { localStorage.setItem(STORE, JSON.stringify(saved)); } catch (e) { /* */ } };
 
   const state = {
-    day: 0, playing: false, speed: 2, screen: "crew", member: "A", channel: "hr",
+    day: 0, playing: false, speed: 2, screen: "home", member: "A", channel: "hr",
     showTruth: false, showInfo: false, filter: "open", episode: null
   };
   const SPEEDS = [0.5, 1, 2, 4, 8];
@@ -110,10 +110,13 @@
     review: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
     habitat: '<path d="M3 10.5 12 3l9 7.5V21H3z"/><path d="M8 21v-6h8v6"/><circle cx="12" cy="10" r="1.5"/>',
     settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>',
+    home: '<path d="M12 3 3 8v8l9 5 9-5V8z"/><circle cx="12" cy="12" r="3"/>',
+    video: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/>',
+    details: '<path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
     devices: '<rect x="6" y="5" width="12" height="14" rx="3"/><path d="M9 5V2h6v3M9 19v3h6v-3M10 12h4"/>'
   };
   const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
-  const TABS = ["crew", "member", "trends", "alerts", "review", "habitat", "settings"];
+  const TABS = ["home", "crew", "member", "trends", "alerts", "review", "habitat", "video", "settings"];
 
   // =====================================================================
   //  الرسم البياني (Canvas بدقة الشاشة، تدرّج، توهج، مؤشر قراءة)
@@ -385,6 +388,67 @@
     </svg>`;
   }
 
+  // رائد ببدلة فضائية (SVG مفصّل) مع نقاط الحساسات ومنصة هولوغرام
+  function chanCol(c, id, day) {
+    const z = c.pers.z[id] ? c.pers.z[id][day] : null;
+    return z == null ? css("--simulated") : Math.abs(z) < 2 ? "#3ddc97" : z * sim.channels[id].direction > 0 ? (Math.abs(z) < 3 ? "#ffb547" : "#ff5d6c") : "#6aa8ff";
+  }
+  function astronautSVG(c, day) {
+    const u = "a" + Math.random().toString(36).slice(2, 7);
+    const dot = (x, y, col) => `<g class="sens"><circle cx="${x}" cy="${y}" r="13" fill="${col}" opacity=".16" class="sdot"/><circle cx="${x}" cy="${y}" r="7" fill="none" stroke="${col}" stroke-width="1.6"/><circle cx="${x}" cy="${y}" r="3.6" fill="${col}"/></g>`;
+    const S = `url(#${u}s)`, Sd = `url(#${u}sd)`;
+    return `<svg class="astro" viewBox="0 0 220 380" role="img" aria-label="${esc(t(A.labels.sensors))}">
+      <defs>
+        <linearGradient id="${u}s" x1="0" x2="1"><stop offset="0" stop-color="#b9c4d4"/><stop offset=".35" stop-color="#f4f7fb"/><stop offset=".7" stop-color="#e3e9f2"/><stop offset="1" stop-color="#9eabbf"/></linearGradient>
+        <linearGradient id="${u}sd" x1="0" x2="1"><stop offset="0" stop-color="#8f9bb0"/><stop offset=".5" stop-color="#cfd7e3"/><stop offset="1" stop-color="#7f8ba0"/></linearGradient>
+        <radialGradient id="${u}v" cx=".38" cy=".32" r=".85"><stop offset="0" stop-color="#ffe9a8"/><stop offset=".18" stop-color="#c49a3a"/><stop offset=".55" stop-color="#3a2a12"/><stop offset="1" stop-color="#0b0905"/></radialGradient>
+        <radialGradient id="${u}p" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(95,212,255,.55)"/><stop offset=".6" stop-color="rgba(95,212,255,.12)"/><stop offset="1" stop-color="rgba(95,212,255,0)"/></radialGradient>
+        <linearGradient id="${u}beam" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="rgba(95,212,255,.22)"/><stop offset="1" stop-color="rgba(95,212,255,0)"/></linearGradient>
+        <filter id="${u}f" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity=".45"/></filter>
+      </defs>
+      <!-- منصة الهولوغرام -->
+      <path d="M40 352 L70 40 L150 40 L180 352 Z" fill="url(#${u}beam)" opacity=".6"/>
+      <ellipse cx="110" cy="352" rx="92" ry="20" fill="url(#${u}p)"/>
+      <ellipse cx="110" cy="352" rx="70" ry="13" fill="none" stroke="rgba(95,212,255,.7)" stroke-width="1.5"/>
+      <ellipse cx="110" cy="352" rx="48" ry="8" fill="none" stroke="rgba(95,212,255,.45)" stroke-width="1" stroke-dasharray="4 4"/>
+      <g filter="url(#${u}f)">
+        <!-- حقيبة الظهر -->
+        <rect x="66" y="92" width="88" height="104" rx="14" fill="${Sd}"/>
+        <!-- الساقان -->
+        <path d="M78 214 Q74 262 80 318 L104 318 Q106 266 108 222 Z" fill="${S}"/>
+        <path d="M142 214 Q146 262 140 318 L116 318 Q114 266 112 222 Z" fill="${S}"/>
+        <rect x="77" y="262" width="30" height="9" rx="3" fill="#c8384a"/><rect x="113" y="262" width="30" height="9" rx="3" fill="#c8384a"/>
+        <path d="M74 316 h34 v18 q0 6 -6 6 h-30 q-6 0 -6 -6 z" fill="#6f7b90"/><path d="M112 316 h34 v18 q0 6 -6 6 h-30 q-6 0 -6 -6 z" fill="#6f7b90"/>
+        <!-- الجذع -->
+        <path d="M70 104 Q110 88 150 104 L156 214 Q110 232 64 214 Z" fill="${S}"/>
+        <path d="M66 196 Q110 212 154 196 L156 214 Q110 232 64 214 Z" fill="#c4ccd8"/>
+        <!-- الذراعان -->
+        <path d="M70 106 Q52 112 48 140 L40 204 L58 208 L68 150 Z" fill="${S}"/>
+        <path d="M150 106 Q168 112 172 140 L180 204 L162 208 L152 150 Z" fill="${S}"/>
+        <rect x="43" y="150" width="24" height="8" rx="3" transform="rotate(8 55 154)" fill="#c8384a"/><rect x="153" y="150" width="24" height="8" rx="3" transform="rotate(-8 165 154)" fill="#c8384a"/>
+        <ellipse cx="48" cy="214" rx="12" ry="14" fill="#7d889c"/><ellipse cx="172" cy="214" rx="12" ry="14" fill="#7d889c"/>
+        <rect x="38" y="194" width="22" height="8" rx="2" fill="#a7b2c4"/><rect x="160" y="194" width="22" height="8" rx="2" fill="#a7b2c4"/>
+        <!-- وحدة التحكم على الصدر -->
+        <rect x="88" y="140" width="44" height="30" rx="5" fill="#5e6a80" stroke="#9aa6ba" stroke-width="1"/>
+        <circle cx="98" cy="150" r="3" fill="#ff5d6c"/><circle cx="108" cy="150" r="3" fill="#3ddc97"/><circle cx="118" cy="150" r="3" fill="#5fd4ff"/>
+        <rect x="95" y="158" width="30" height="5" rx="2" fill="#2a3446"/>
+        <path d="M92 172 Q88 186 96 196 M128 172 Q132 186 124 196" stroke="#8a96aa" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- الخوذة -->
+        <rect x="86" y="92" width="48" height="14" rx="6" fill="#aeb8c8"/>
+        <circle cx="110" cy="64" r="36" fill="${S}"/>
+        <ellipse cx="110" cy="66" rx="26" ry="23" fill="url(#${u}v)"/>
+        <path d="M92 56 Q100 46 114 46" stroke="rgba(255,255,255,.75)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M120 80 Q126 76 128 70" stroke="rgba(255,255,255,.35)" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <rect x="74" y="54" width="7" height="18" rx="3" fill="#9aa6ba"/><rect x="139" y="54" width="7" height="18" rx="3" fill="#9aa6ba"/>
+        <rect x="132" y="112" width="14" height="9" rx="1.5" fill="#24427a"/><rect x="132" y="112" width="6" height="5" fill="#fff" opacity=".8"/>
+      </g>
+      ${dot(110, 128, chanCol(c, "hr", day))}
+      ${dot(46, 186, chanCol(c, "sleep", day))}
+      ${dot(136, 184, "#3ddc97")}
+      ${chIds().includes("chem") ? dot(166, 176, chanCol(c, "chem", day)) : ""}
+    </svg>`;
+  }
+
   // موجة قلب توضيحية بمعدل النبض اليومي
   let ecgRaf = 0;
   function startEcg(cv, getHr) {
@@ -494,11 +558,11 @@
       <div class="gauges">${g("hr")}${g("sleep")}${g("co2")}${compG}</div>
       <div class="grid g3" style="margin-top:14px">
         <div class="card"><h3>${tx(L.why)} <span class="unit">${tx(A.player.day)} <span dir="ltr">${d}</span></span></h3>
-          <p class="card-sub">${tx(L.contrib)}</p>${bars}${lvText}</div>
+          ${bars}</div>
         <div class="card"><h3>${esc(chName("hr"))} <span class="unit">ECG · bpm</span></h3>
           <canvas class="ecg" id="ecg"></canvas>
           <div class="ecg-row"><span>${tx(L.waveform)}</span><b dir="ltr">${fmt(c.ast.obs.hr[d], 0)}</b></div></div>
-        <div class="card"><h3>${tx(L.sensors)}</h3><div class="body-wrap">${bodySVG(c, d)}
+        <div class="card"><h3>${tx(L.sensors)}</h3><div class="body-wrap">${astronautSVG(c, d)}
           <ul class="sensor-list">${(C.deviceDiagram || []).slice(0, 4).map(x => `<li><span class="dot" style="--c:var(--${x.status})"></span>${tx(x.label)}</li>`).join("")}</ul></div></div>
       </div>
       <h3 class="sec-h">${tx(A.screens.trends)}</h3>
@@ -515,7 +579,7 @@
       <span><i style="background:rgba(95,212,255,.45)"></i>${tx(L.baselineBand)}</span>
       <span><i style="background:${css("--fixed")}"></i>${tx(L.fixedThr)}</span>
       <span><i style="background:${css("--accent-2")}"></i>${tx(L.projection)}</span>
-      <span>▼ ${tx(C.ui.chart.personalAlert)}</span><span class="muted">${tx(L.hover)}</span></div>`;
+      <span>▼ ${tx(C.ui.chart.personalAlert)}</span></div>`;
   }
   function projectionNow(c, d) {
     const ch = sim.channels.hr, pr = sim.projection, at = c.pers.active;
@@ -600,7 +664,7 @@
       return `<div class="card aitem ${ep.open ? "" : "done"}" style="--c:${LV(ep.level)}"><span class="stripe"></span>
         <div><div class="a-top"><b style="color:${LV(ep.level)}">${tx(C.alerts[ep.level].name)}</b><b>${tx(ep.crew.m.name)}</b>
           <span class="muted">${tx(A.player.day)} <span dir="ltr">${ep.start}${ep.last !== ep.start ? "–" + ep.last : ""}</span></span>${epState(ep)}</div>
-          ${compact ? "" : `<div class="a-text">${tx(C.alerts[ep.level].text)}</div>`}
+
           ${tc ? `<div class="a-text">${tx(A.alertsUi.top)}: ${tc}</div>` : ""}</div>
         <div class="a-act">${acts.join("")}</div></div>`;
     }).join("")}</div>`;
@@ -640,7 +704,7 @@
           <h3><span><b style="color:${LV(ep.level)}">${tx(C.alerts[ep.level].name)}</b> · ${tx(c.m.name)} · ${tx(A.player.day)} <span dir="ltr">${ep.peakDay}</span></span>${epState(ep)}</h3>
           <p style="margin-top:0">${tx(C.alerts[ep.level].text)}</p>
           <h4 class="sec-h" style="margin-top:6px">${tx(A.review.evidence)}</h4>
-          <p class="card-sub">${tx(L.contrib)}</p><div class="bars">${evid}</div>
+          <div class="bars">${evid}</div>
           <div style="margin-top:14px">${chartBox("cvReview", "short")}</div>
         </div>
         <div class="card" style="margin-top:14px">
@@ -720,10 +784,88 @@
           <label class="chk" style="margin-top:10px"><input type="checkbox" id="sAnchor" ${p.useAnchor ? "checked" : ""}> ${tx(U.anchor)}</label></div>
       </div>
       <div class="toolbar" style="margin-top:16px"><button class="abtn bad" type="button" id="sReset">${tx(A.settingsUi.reset)}</button>
-        <a class="abtn" href="index.html#demo">${tx(C.ui.nav.demo)} ↗</a> <a class="abtn" href="devices.html">${tx(A.screens.devices)} ↗</a></div>`;
+        <a class="abtn" href="details.html#demo">${tx(C.ui.nav.demo)} ↗</a> <a class="abtn" href="devices.html">${tx(A.screens.devices)} ↗</a></div>`;
+  }
+
+  // ---------- الرئيسية (مثل لوحة التحكم في التصميم) ----------
+  const VICON = {
+    hr: '<path d="M12 21s-7-4.4-9.3-9A5.3 5.3 0 0 1 12 6.2 5.3 5.3 0 0 1 21.3 12C19 16.6 12 21 12 21Z"/><path d="M4 12h4l2-3 3 6 2-3h5"/>',
+    sleep: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/><path d="M15 4h4l-4 4h4"/>',
+    co2: '<text x="12" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" stroke="none" font-family="sans-serif">CO2</text><rect x="2.5" y="5" width="19" height="14" rx="3"/>',
+    rad: '<circle cx="12" cy="12" r="2"/><path d="M12 10 9 4.8A8 8 0 0 0 4.2 13H10M14 12h6a8 8 0 0 0-4.8-7.4L12 10M13 13.7l3 5.2a8 8 0 0 1-8 0l3-5.2"/>',
+    comp: '<path d="M3 12h4l2-6 4 12 2-6h6"/>'
+  };
+  const vicon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${VICON[k]}</svg>`;
+  function vitalsFor(c, d) {
+    const calib = d < c.pers.active;
+    const row = (k, name, val, unit, col, go) => `<button type="button" class="vital" data-go="${go}" style="--c:${col}"><span class="vi">${vicon(k)}</span><span class="vn">${esc(name)}</span><b class="vv" dir="ltr">${val}<em>${esc(unit)}</em></b></button>`;
+    const lim = sim.radiation.limit, dose = c.ast.rad[d];
+    const radCol = dose / lim < .7 ? "#3ddc97" : dose / lim < .9 ? "#ffb547" : "#ff5d6c";
+    const comp = c.pers.composite[d];
+    const s = statusOf(c, d);
+    return row("hr", chName("hr"), fmt(c.ast.obs.hr[d], 0), "bpm", chanCol(c, "hr", d), "trends/hr")
+      + row("sleep", chName("sleep"), fmt(c.ast.obs.sleep[d], 1), "h", chanCol(c, "sleep", d), "trends/sleep")
+      + row("co2", chName("co2"), fmt(c.ast.obs.co2[d], 2), "mmHg", chanCol(c, "co2", d), "trends/co2")
+      + row("rad", t(L.radShort), fmt(dose, 1), "mSv", radCol, "habitat")
+      + row("comp", t(L.composite), calib ? "—" : fmt(comp, 1), "z", statusColor(s === "calib" ? 0 : s), "member/" + c.m.id);
+  }
+  let hasAstroImg = false;
+  function screenHome() {
+    const d = state.day, c = crewById(state.member), s = statusOf(c, d);
+    const open = episodesUpTo(d).filter(e => e.open && e.level >= 2).length;
+    const crewCol = crew.map(x => { const sx = statusOf(x, d); return `<button type="button" class="mini-crew ${x.m.id === c.m.id ? "on" : ""}" data-member="${x.m.id}" style="--c:${statusCss(sx)}" title="${esc(t(x.m.name))}"><span class="avatar">${esc(x.m.id)}</span><small>${tx(A.status[sx])}</small></button>`; }).join("");
+    return `<div class="home">
+      <div class="vitals">${vitalsFor(c, d)}</div>
+      <div class="figure">
+        ${hasAstroImg ? `<div class="astro-img"><img src="media/astronaut.png" alt="${esc(t(c.m.name))}"><i class="pad"></i></div>` : astronautSVG(c, d)}
+        <div class="namepill" style="--c:${statusCss(s)}">
+          <button type="button" class="pill-nav" data-step="-1" aria-label="prev">‹</button>
+          <span><b>${tx(c.m.name)}</b> · ${tx(A.status[s])}</span>
+          <button type="button" class="pill-nav" data-step="1" aria-label="next">›</button>
+        </div>
+      </div>
+      <div class="side-col">
+        ${crewCol}
+        <button type="button" class="alert-btn ${open ? "hot" : ""}" data-go="alerts">${icon("alerts")}<b dir="ltr">${open}</b><small>${tx(A.screens.alerts)}</small></button>
+      </div>
+    </div>`;
+  }
+
+  function screenVideo() {
+    return `<div class="video-wrap"><video controls playsinline preload="metadata" poster="media/vitalx-poster.jpg">
+      <source src="media/vitalx-trailer.webm" type="video/webm"><source src="media/vitalx-trailer.mp4" type="video/mp4"></video></div>`;
+  }
+
+  // ---------- شريط القياسات العلوي ----------
+  function tinySpark(cv, data, day, color) {
+    const s = setupCanvas(cv); if (!s) return;
+    const { g, W, H } = s;
+    const from = Math.max(0, day - 40), vals = [];
+    for (let i = from; i <= day; i++) if (data[i] != null) vals.push([i, data[i]]);
+    if (vals.length < 2) return;
+    let lo = Math.min(...vals.map(v => v[1])), hi = Math.max(...vals.map(v => v[1])); if (hi === lo) hi = lo + 1;
+    const X = i => (i - from) / Math.max(1, day - from) * (W - 2) + 1, Y = v => 3 + (1 - (v - lo) / (hi - lo)) * (H - 6);
+    const grd = g.createLinearGradient(0, 0, 0, H); grd.addColorStop(0, hexA(color, .35)); grd.addColorStop(1, hexA(color, 0));
+    g.fillStyle = grd; g.beginPath(); g.moveTo(X(vals[0][0]), H); vals.forEach(v => g.lineTo(X(v[0]), Y(v[1]))); g.lineTo(X(vals[vals.length - 1][0]), H); g.fill();
+    g.save(); g.shadowColor = color; g.shadowBlur = 5; g.strokeStyle = color; g.lineWidth = 1.4; g.lineJoin = "round";
+    g.beginPath(); vals.forEach((v, i) => i ? g.lineTo(X(v[0]), Y(v[1])) : g.moveTo(X(v[0]), Y(v[1]))); g.stroke(); g.restore();
+  }
+  function renderTelemetry() {
+    const c = crewById(state.member), d = state.day;
+    const items = [
+      { k: "hr", name: chName("hr"), v: fmt(c.ast.obs.hr[d], 0), u: "bpm", data: c.ast.obs.hr, col: "#ff6b81" },
+      { k: "sleep", name: chName("sleep"), v: fmt(c.ast.obs.sleep[d], 1), u: "h", data: c.ast.obs.sleep, col: "#8b7bff" },
+      { k: "co2", name: chName("co2"), v: fmt(c.ast.obs.co2[d], 2), u: "mmHg", data: c.ast.obs.co2, col: "#5fd4ff" },
+      { k: "rad", name: t(L.dose), v: fmt(c.ast.rad[d], 1), u: "mSv", data: c.ast.rad, col: "#ffd166" },
+      { k: "comp", name: t(L.composite), v: d < c.pers.active ? "—" : fmt(c.pers.composite[d], 1), u: "z", data: c.pers.composite, col: "#3ddc97" }
+    ];
+    $("telemetry").innerHTML = `<div class="tm-who"><span class="avatar" style="--c:${statusCss(statusOf(c, d))}">${esc(c.m.id)}</span><b>${tx(c.m.name)}</b></div>` +
+      items.map(it => `<div class="tm"><div class="tm-top"><span class="tm-i" style="color:${it.col}">${vicon(it.k)}</span><small>${esc(it.name)}</small><b dir="ltr">${it.v}<em>${it.u}</em></b></div><canvas data-tm="${it.k}"></canvas></div>`).join("");
+    items.forEach(it => tinySpark($("telemetry").querySelector(`[data-tm="${it.k}"]`), it.data, d, it.col));
   }
 
   const SCREENS = {
+    home: [screenHome], video: [screenVideo],
     crew: [screenCrew, afterCrew], member: [screenMember, afterMember], trends: [screenTrends, afterTrends],
     alerts: [screenAlerts], review: [screenReview, afterReview], habitat: [screenHabitat, afterHabitat], settings: [screenSettings]
   };
@@ -740,8 +882,10 @@
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
     document.title = t(A.title);
-    $("langBtn").textContent = $("langBtnTop").textContent = t(C.ui.langToggle);
-    $("backLink").textContent = (lang === "ar" ? "→ " : "← ") + t(A.back);
+    $("langBtn").textContent = "🌐 " + t(C.ui.langToggle);
+    $("backLink").textContent = t(A.screens.details);
+    if ($("subtitle")) $("subtitle").textContent = t(A.subtitle);
+    if ($("nextBtn")) $("nextBtn").textContent = t(A.player.next) + " ›";
     $("restartBtn").textContent = "⏮ " + t(A.player.restart);
     $("stepBtn").textContent = t(A.player.step) + " +1";
     $("speedLab").textContent = t(A.player.speed);
@@ -769,11 +913,23 @@
 
   function render() {
     cancelAnimationFrame(ecgRaf);
-    const [html, after] = SCREENS[state.screen] || SCREENS.crew;
-    $("screenTitle").textContent = t(A.screens[state.screen]);
+    const [html, after] = SCREENS[state.screen] || SCREENS.home;
+    $("screenTitle").textContent = state.screen === "home" ? t(A.title) : t(A.screens[state.screen]);
     $("view").innerHTML = html();
+    if (slideDir) {
+      const v = $("view"), fromLeft = (slideDir > 0) === isRtl();
+      v.classList.remove("in-l", "in-r"); void v.offsetWidth; v.classList.add(fromLeft ? "in-l" : "in-r");
+      slideDir = 0;
+    }
     if (after) after();
+    renderDots(); renderGhosts();
     renderTabs(); renderTimeline(); renderPlayer();
+    if ($("telemetry")) renderTelemetry();
+  }
+  function stepMember(k) {
+    const i = crew.findIndex(c => c.m.id === state.member);
+    state.member = crew[(i + k + crew.length) % crew.length].m.id;
+    if (state.screen === "member") go("member/" + state.member); else render();
   }
   // أثناء التشغيل: لا نعيد بناء الشاشة إذا كان المستخدم يكتب
   function tickRender() {
@@ -825,11 +981,124 @@
     setTimeout(() => el.remove(), 6000);
   }
 
+  // ---------- التنقل بين الشاشات: سحب بالماوس أو الإصبع، عجلة أفقية، أسهم، وإمالة الجوال ----------
+  let slideDir = 0;
+  function navStep(k) {
+    let i = TABS.indexOf(state.screen); if (i < 0) i = 0;
+    slideDir = k;
+    go(TABS[(i + k + TABS.length) % TABS.length]);
+  }
+  const isRtl = () => lang === "ar";
+  function bindGestures() {
+    const vp = document.querySelector(".viewport") || $("view");
+    let st = null, moved = false;
+    vp.addEventListener("pointerdown", e => {
+      if (e.button > 0 || e.target.closest("input,select,textarea,video,.edge")) { st = null; return; }
+      st = { x: e.clientX, y: e.clientY, t: Date.now() }; moved = false;
+    });
+    vp.addEventListener("pointermove", e => {
+      if (!st) return;
+      const dx = e.clientX - st.x;
+      if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(e.clientY - st.y)) { moved = true; $("view").style.transform = `translateX(${dx * .35}px)`; $("view").style.opacity = String(1 - Math.min(.5, Math.abs(dx) / 600)); }
+    });
+    const end = e => {
+      if (!st) return;
+      const dx = e.clientX - st.x, dy = e.clientY - st.y; st = null;
+      $("view").style.transform = ""; $("view").style.opacity = "";
+      if (moved && Math.abs(dx) > 70 && Math.abs(dx) > 1.4 * Math.abs(dy)) {
+        const next = isRtl() ? dx > 0 : dx < 0;
+        navStep(next ? 1 : -1);
+      }
+    };
+    vp.addEventListener("pointerup", end);
+    vp.addEventListener("pointercancel", () => { st = null; $("view").style.transform = ""; $("view").style.opacity = ""; });
+    // منع النقرة بعد السحب
+    vp.addEventListener("click", e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+    // عجلة/لوحة لمس أفقية
+    let acc = 0, lastNav = 0;
+    vp.addEventListener("wheel", e => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      acc += e.deltaX;
+      const now = Date.now();
+      if (Math.abs(acc) > 80 && now - lastNav > 700) {
+        const next = isRtl() ? acc < 0 : acc > 0;
+        acc = 0; lastNav = now; navStep(next ? 1 : -1);
+      }
+    }, { passive: false });
+    $("edgePrev").onclick = () => navStep(-1);
+    $("edgeNext").onclick = () => navStep(1);
+    // ميلان ثلاثي الأبعاد خفيف للوحة مع حركة الماوس
+    const holo = document.querySelector(".holo");
+    if (holo && window.matchMedia && !window.matchMedia("(prefers-reduced-motion: reduce)").matches && window.matchMedia("(pointer: fine)").matches) {
+      holo.addEventListener("mousemove", e => {
+        const r = holo.getBoundingClientRect();
+        const nx = (e.clientX - r.left) / r.width - .5, ny = (e.clientY - r.top) / r.height - .5;
+        holo.style.setProperty("--ry", (nx * 2.4).toFixed(2) + "deg"); holo.style.setProperty("--rx", (-ny * 1.6).toFixed(2) + "deg");
+      });
+      holo.addEventListener("mouseleave", () => { holo.style.setProperty("--ry", "0deg"); holo.style.setProperty("--rx", "0deg"); });
+    }
+    // إمالة الجوال يمين/يسار
+    const tb = $("tiltBtn");
+    const hasTilt = "DeviceOrientationEvent" in window && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    if (tb && hasTilt) {
+      tb.hidden = false;
+      let on = false, armed = true, cool = 0;
+      const onTilt = ev => {
+        const gm = ev.gamma; if (gm == null) return;
+        const now = Date.now();
+        if (Math.abs(gm) < 10) { armed = true; return; }
+        if (!armed || now < cool || Math.abs(gm) < 25) return;
+        armed = false; cool = now + 900;
+        const next = isRtl() ? gm < 0 : gm > 0;   // الإمالة نحو جهة الشاشة التالية
+        navStep(next ? 1 : -1);
+      };
+      const label = () => { tb.textContent = "📱 " + t(on ? A.player.tiltOn : A.player.tilt); tb.classList.toggle("on", on); };
+      tb.onclick = async () => {
+        if (!on && typeof DeviceOrientationEvent.requestPermission === "function") {
+          try { await DeviceOrientationEvent.requestPermission(); } catch (e) { /* نكمل؛ إن لم يُسمح فلن تصل أحداث */ }
+        }
+        on = !on;
+        if (on) window.addEventListener("deviceorientation", onTilt); else window.removeEventListener("deviceorientation", onTilt);
+        label();
+      };
+      label();
+      tb._label = label;
+    }
+  }
+  // الصفحتان السابقة والتالية على جانبي اللوحة (عرض منحنٍ بمنظور الشخص الأول)
+  let ghostKey = "";
+  function renderGhosts() {
+    if (!$("ghostL")) return;
+    const i = Math.max(0, TABS.indexOf(state.screen)), n = TABS.length;
+    const prev = TABS[(i - 1 + n) % n], next = TABS[(i + 1) % n];
+    const left = isRtl() ? next : prev, right = isRtl() ? prev : next;
+    const key = [left, right, lang, state.member, Math.floor(state.day / 5)].join("|");
+    if (key === ghostKey) return; ghostKey = key;
+    const fill = (el, scr, k) => {
+      let body = "";
+      try { body = SCREENS[scr][0]().replace(/\s(id|for)="[^"]*"/g, "").replace(/<video[\s\S]*?<\/video>/g, `<img src="media/vitalx-poster.jpg" alt="" style="width:100%;border-radius:14px">`); } catch (e) { body = ""; }
+      el.innerHTML = `<div class="g-head">${icon(scr)}<b>${tx(A.screens[scr])}</b></div><div class="g-body">${body}</div>`;
+      el.onclick = () => navStep(k);
+      el.title = t(A.screens[scr]);
+    };
+    fill($("ghostL"), left, isRtl() ? 1 : -1);
+    fill($("ghostR"), right, isRtl() ? -1 : 1);
+  }
+  function renderDots() {
+    if (!$("dots")) return;
+    $("dots").innerHTML = TABS.map(k => `<i class="${k === state.screen ? "on" : ""}"></i>`).join("");
+    const L1 = isRtl() ? "›" : "‹", R1 = isRtl() ? "‹" : "›";
+    $("edgePrev").textContent = L1; $("edgeNext").textContent = R1;
+    if ($("tiltBtn") && $("tiltBtn")._label) $("tiltBtn")._label();
+  }
+
   // ---------- التوجيه عبر الرابط ----------
   function go(path) { if (location.hash.slice(1) === path) route(); else location.hash = path; }
   function route() {
     const [scr, arg] = location.hash.slice(1).split("/");
-    state.screen = SCREENS[scr] ? scr : "crew";
+    state.screen = SCREENS[scr] ? scr : "home";
+    if (scr === "trends" && arg && sim.channels[arg]) state.channel = arg;
     if (scr === "member" && arg) state.member = arg;
     if (scr === "review" && arg) state.episode = arg;
     render();
@@ -846,20 +1115,25 @@
     $("speedSel").onchange = e => { state.speed = +e.target.value; };
     $("scrub").oninput = e => setDay(+e.target.value);
     const toggleLang = () => { lang = lang === "ar" ? "en" : "ar"; try { localStorage.setItem("vitalx-lang", lang); } catch (e) { /* */ } renderFrame(); render(); };
-    $("langBtn").onclick = toggleLang; $("langBtnTop").onclick = toggleLang;
+    $("langBtn").onclick = toggleLang;
+    if ($("nextBtn")) $("nextBtn").onclick = () => stepMember(1);
     window.addEventListener("hashchange", route);
+    if ($("edgePrev")) bindGestures();
     let rz = 0; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(render, 120); });
     document.addEventListener("keydown", e => {
       if (/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || "")) return;
       if (e.code === "Space") { e.preventDefault(); setPlaying(!state.playing); }
-      if (e.key === "ArrowRight") setDay(state.day + (lang === "ar" ? -1 : 1));
-      if (e.key === "ArrowLeft") setDay(state.day + (lang === "ar" ? 1 : -1));
+      if (e.key === "ArrowRight") navStep(isRtl() ? -1 : 1);
+      if (e.key === "ArrowLeft") navStep(isRtl() ? 1 : -1);
+      if (e.key === "PageUp" || e.key === "]" ) setDay(state.day + 1);
+      if (e.key === "PageDown" || e.key === "[") setDay(state.day - 1);
     });
     $("view").addEventListener("click", e => {
-      const el = e.target.closest("[data-go],[data-member],[data-channel],[data-filter],[data-ack],button[id]");
+      const el = e.target.closest("[data-go],[data-member],[data-step],[data-channel],[data-filter],[data-ack],button[id]");
       if (!el) return;
       if (el.dataset.go) return go(el.dataset.go);
       if (el.dataset.member) { state.member = el.dataset.member; return render(); }
+      if (el.dataset.step) return stepMember(+el.dataset.step);
       if (el.dataset.channel) { state.channel = el.dataset.channel; return render(); }
       if (el.dataset.filter) { state.filter = el.dataset.filter; return render(); }
       if (el.dataset.ack) { saved.acks[el.dataset.ack] = state.day; persist(); return render(); }
@@ -893,6 +1167,10 @@
   let start = 40;
   try { const q = new URLSearchParams(location.search).get("day"); if (q != null) start = clamp(parseInt(q, 10) || 0, 0, D - 1); } catch (e) { /* */ }
   state.day = start; seenUpTo(start);
+  // صور اختيارية: خلفية المركبة وصورة الرائد. إذا لم تكن موجودة يبقى الرسم المدمج
+  const probe = (src, cls, cb) => { const im = new Image(); im.onload = () => { document.body.classList.add(cls); if (cb) cb(); }; im.src = src; };
+  probe("media/ship-bg.jpg", "has-ship");
+  probe("media/astronaut.png", "has-astro", () => { hasAstroImg = true; render(); });
   renderFrame(); bind(); route();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
 })();
