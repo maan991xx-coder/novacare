@@ -19,7 +19,7 @@ window.VITALX_CONTENT = {
 
   site: {
     title: { ar: "VITALX", en: "VITALX" },
-    subtitle: { ar: "فريق NovaCore · يكشف الانحراف البطيء في صحة الرائد قبل الحدود الثابتة", en: "Team NovaCore · catches slow drift in astronaut health before fixed limits do" },
+    subtitle: { ar: "فريق NovaCare · يكشف الانحراف البطيء في صحة الرائد قبل الحدود الثابتة", en: "Team NovaCare · catches slow drift in astronaut health before fixed limits do" },
     synthetic: { ar: "بيانات مولّدة · ليست بيانات رواد حقيقيين", en: "Synthetic data · not real crew data" },
     disclaimer: { ar: "أداة دعم قرار لطبيب الطاقم، وليست تشخيصاً.", en: "Decision support for the crew medical officer, not diagnosis." },
 

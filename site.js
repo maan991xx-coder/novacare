@@ -647,7 +647,7 @@
       <div class="grid g2 hrp">${P.map.map(r => `<div class="card hrp-row"><span class="vi" style="--c:var(--accent)">${vicon(r.ch)}</span><div><b>${esc(nm(r.ch))}</b><small>${tx(r.risk)}</small></div></div>`).join("")}</div>
       <div class="card honest"><span class="tag-synth">${tx(A.synthetic)}</span><p>${tx(P.honest)}</p>
         <a class="key" href="https://humanresearchroadmap.nasa.gov/" target="_blank" rel="noopener">${tx(P.link)} ↗</a></div>
-      <div class="team-row"><div><small>${tx(P.team)}</small><b>NovaCore</b></div><div><small>${tx(P.challenge)}</small><b>${tx(P.challengeName)}</b></div><div><small>${tx(P.members)}</small><b>${tx(P.membersNames)}</b></div></div>`;
+      <div class="team-row"><div><small>${tx(P.team)}</small><b>NovaCare</b></div><div><small>${tx(P.challenge)}</small><b>${tx(P.challengeName)}</b></div><div><small>${tx(P.members)}</small><b>${tx(P.membersNames)}</b></div></div>`;
   }
 
   const SCREENS = {
