@@ -12,9 +12,10 @@
 <link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="appmode.css">
 <link rel="stylesheet" href="console.css">
+<link rel="stylesheet" href="six.css">
 </head>
 <body class="appmode console">
-<!-- لوحة التحكم: الهيكل فقط. النصوص من content.js (appMode)، والحساب من engine.js -->
+<!-- 6 شاشات فقط. النصوص من content.js (site)، والحساب من engine.js -->
 <div class="room" aria-hidden="true"><i class="ceil"></i><i class="ring r1"></i><i class="ring r2"></i><i class="floor"></i></div>
 
 <div class="stage">
@@ -66,7 +67,6 @@
       <div class="key daybadge"><span id="dayLab"></span> <b id="dayNum" dir="ltr">0</b><small dir="ltr" id="dayOf"></small></div>
       <button class="key tilt" id="tiltBtn" type="button" hidden></button>
       <button class="key" id="langBtn" type="button"></button>
-      <a class="key" href="details.html" id="backLink"></a>
     </div>
     <p class="fine"><span class="tag-synth" id="synthTag"></span> <span id="disclaimer"></span></p>
   </footer>
@@ -75,6 +75,6 @@
 
 <script src="content.js"></script>
 <script src="engine.js"></script>
-<script src="appmode.js"></script>
+<script src="site.js"></script>
 </body>
 </html>

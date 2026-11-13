@@ -1,16 +1,15 @@
 /* =====================================================================
-   VITALX — وضع التطبيق (app.html)
-   يشغّل المحرك نفسه (engine.js) على طاقم من 4 رواد صناعيين، ويكشف
-   البيانات يوماً بيوم كأنها تصل من الحساسات. النصوص في content.js → appMode.
+   VITALX — الموقع (6 شاشات) بنسق لوحة التحكم
+   يشغّل المحرك (engine.js) على طاقم من 4 رواد صناعيين، ويكشف البيانات
+   يوماً بيوم. النصوص في content.js → site.
    كل تنبيه في يوم ما محسوب من بيانات ذلك اليوم وما قبله فقط.
    ===================================================================== */
 (function () {
   "use strict";
-  const C = window.VITALX_CONTENT, E = window.VITALX_ENGINE, A = C.appMode;
+  const C = window.VITALX_CONTENT, E = window.VITALX_ENGINE, A = C.site;
   const $ = id => document.getElementById(id);
   const clone = o => JSON.parse(JSON.stringify(o));
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const DEFAULT_SIM = clone(C.sim);
   let sim = clone(C.sim);
   const D = sim.missionDays;
 
@@ -26,16 +25,8 @@
   const LV = l => `var(--lv${l})`;
   const lvColor = l => css("--lv" + l) || ["#3ddc97", "#6aa8ff", "#ffb547", "#ff5d6c"][l];
 
-  // ---------- الحالة المحفوظة ----------
-  const STORE = "vitalx-app-v1";
-  let saved = { acks: {}, decisions: {}, log: [] };
-  try { const s = JSON.parse(localStorage.getItem(STORE) || "null"); if (s) saved = Object.assign(saved, s); } catch (e) { /* */ }
-  const persist = () => { try { localStorage.setItem(STORE, JSON.stringify(saved)); } catch (e) { /* */ } };
-
   const state = {
-    day: 0, playing: false, speed: 2, screen: "home", member: "A", channel: "hr",
-    showTruth: false, showInfo: false, filter: "open", episode: null
-  };
+    day: 0, playing: false, speed: 2, screen: "home", member: "A" };
   const SPEEDS = [0.5, 1, 2, 4, 8];
 
   // ---------- تشغيل المحرك لكل رائد ----------
@@ -55,35 +46,10 @@
       }
       return { m, ast, pers, fx, events };
     });
+    cohortStats = E.cohort(sim, { n: sim.cohortSize });
   }
+  let cohortStats = null;
   const crewById = id => crew.find(c => c.m.id === id) || crew[0];
-
-  // نوبات التنبيه: تنبيهات الرائد المتقاربة (خلال 7 أيام) تُجمع في نوبة واحدة
-  const MERGE = 7;
-  function episodesUpTo(day) {
-    const out = [];
-    crew.forEach(c => {
-      let ep = null;
-      c.events.forEach(ev => {
-        if (ev.day > day) return;
-        if (ep && ev.day - ep.last <= MERGE) {
-          ep.last = ev.day; ep.events.push(ev);
-          if (ev.level > ep.level) { ep.level = ev.level; ep.peakDay = ev.day; }
-        } else {
-          ep = { id: c.m.id + "-" + ev.day, crew: c, start: ev.day, last: ev.day, level: ev.level, peakDay: ev.day, events: [ev] };
-          out.push(ep);
-        }
-      });
-    });
-    out.forEach(ep => {
-      const dec = saved.decisions[ep.id];
-      ep.decision = dec || null;
-      ep.acked = saved.acks[ep.id] != null;
-      ep.reopened = !!(dec && ep.last > dec.day);
-      ep.open = ep.level >= 2 ? (!dec || ep.reopened) : !ep.acked;
-    });
-    return out.sort((a, b) => b.last - a.last || b.level - a.level);
-  }
 
   function phaseOf(day) {
     const c = crew[0];
@@ -110,13 +76,18 @@
     review: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
     habitat: '<path d="M3 10.5 12 3l9 7.5V21H3z"/><path d="M8 21v-6h8v6"/><circle cx="12" cy="10" r="1.5"/>',
     settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>',
+    problem: '<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/>',
+    solution: '<rect x="2" y="6" width="13" height="12" rx="2"/><rect x="17" y="8" width="5" height="8" rx="1.5"/>',
+    edge: '<path d="m12 3 2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>',
+    demo: '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/><path d="M16 7h4v4"/>',
+    nasa: '<circle cx="12" cy="12" r="5"/><ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-20 12 12)"/>',
     home: '<path d="M12 3 3 8v8l9 5 9-5V8z"/><circle cx="12" cy="12" r="3"/>',
     video: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/>',
     details: '<path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
     devices: '<rect x="6" y="5" width="12" height="14" rx="3"/><path d="M9 5V2h6v3M9 19v3h6v-3M10 12h4"/>'
   };
   const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
-  const TABS = ["home", "crew", "member", "trends", "alerts", "review", "habitat", "video", "settings"];
+  const TABS = ["home", "problem", "solution", "edge", "demo", "nasa"];
 
   // =====================================================================
   //  الرسم البياني (Canvas بدقة الشاشة، تدرّج، توهج، مؤشر قراءة)
@@ -353,41 +324,6 @@
       </svg></div>`;
   }
 
-  // =====================================================================
-  //  رسم الرائد مع مواضع الحساسات (SVG)
-  // =====================================================================
-  function bodySVG(c, day) {
-    const cols = {};
-    chIds().forEach(id => {
-      const z = c.pers.z[id][day];
-      cols[id] = z == null ? css("--simulated") : Math.abs(z) < 2 ? "#3ddc97" : z * sim.channels[id].direction > 0 ? (Math.abs(z) < 3 ? "#ffb547" : "#ff5d6c") : "#6aa8ff";
-    });
-    const dot = (x, y, col, r) => `<circle cx="${x}" cy="${y}" r="${r + 6}" fill="${col}" opacity=".18" class="sdot"/><circle cx="${x}" cy="${y}" r="${r}" fill="${col}" stroke="#fff" stroke-width="1.2"/>`;
-    return `<svg viewBox="0 0 120 220" role="img" aria-label="${esc(t(A.labels.sensors))}">
-      <defs>
-        <linearGradient id="suit" x1="0" x2="1"><stop offset="0" stop-color="#cfd8e8"/><stop offset=".55" stop-color="#eef3fb"/><stop offset="1" stop-color="#a9b6cc"/></linearGradient>
-        <radialGradient id="visor" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#7fe3ff"/><stop offset=".45" stop-color="#1b4a7a"/><stop offset="1" stop-color="#071528"/></radialGradient>
-        <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity=".5"/></filter>
-      </defs>
-      <g filter="url(#sh)">
-        <path d="M38 64 Q60 54 82 64 L90 118 Q60 128 30 118 Z" fill="url(#suit)"/>
-        <path d="M38 66 L24 112 Q22 122 28 124 L34 122 L44 82 Z" fill="url(#suit)"/>
-        <path d="M82 66 L96 112 Q98 122 92 124 L86 122 L76 82 Z" fill="url(#suit)"/>
-        <path d="M34 116 L40 196 Q41 204 50 204 L56 202 L58 124 Z" fill="url(#suit)"/>
-        <path d="M86 116 L80 196 Q79 204 70 204 L64 202 L62 124 Z" fill="url(#suit)"/>
-        <rect x="44" y="198" width="14" height="10" rx="3" fill="#7d8aa3"/><rect x="62" y="198" width="14" height="10" rx="3" fill="#7d8aa3"/>
-        <circle cx="60" cy="38" r="22" fill="url(#suit)"/>
-        <ellipse cx="60" cy="40" rx="15" ry="13" fill="url(#visor)"/>
-        <path d="M50 33 Q55 29 62 30" stroke="rgba(255,255,255,.7)" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <rect x="48" y="78" width="24" height="16" rx="3" fill="#8794ad" opacity=".6"/>
-      </g>
-      ${dot(60, 86, cols.hr, 4.5)}
-      ${dot(27, 116, cols.sleep, 4)}
-      ${dot(76, 70, css("--built"), 3.5)}
-      ${chIds().includes("chem") ? dot(86, 90, cols.chem, 3.5) : ""}
-    </svg>`;
-  }
-
   // رائد ببدلة فضائية (SVG مفصّل) مع نقاط الحساسات ومنصة هولوغرام
   function chanCol(c, id, day) {
     const z = c.pers.z[id] ? c.pers.z[id][day] : null;
@@ -490,304 +426,9 @@
   //  الشاشات
   // =====================================================================
   const L = A.labels;
-  const pill = (s, pulse) => `<span class="lv-pill${pulse ? " pulse" : ""}" style="--c:${statusCss(s)}">${tx(A.status[s])}</span>`;
   const chName = id => t(sim.channels[id].name);
-  const lastEpisodeOf = (eps, c) => eps.find(e => e.crew === c);
 
-  function screenCrew() {
-    const d = state.day, eps = episodesUpTo(d);
-    const cards = crew.map(c => {
-      const s = statusOf(c, d), ep = lastEpisodeOf(eps.filter(e => e.level >= 2 || state.showInfo), c);
-      const v = id => c.ast.obs[id][d];
-      return `<div class="card crew-card" tabindex="0" role="button" data-go="member/${c.m.id}" style="--c:${statusCss(s)}">
-        <div class="crew-head"><div class="avatar">${esc(c.m.id)}</div>
-          <div><b>${tx(c.m.name)}</b><small>${tx(c.m.role)}</small></div>${pill(s, s === 3)}</div>
-        <div class="mini">
-          <div><small>${esc(chName("hr"))}</small><b dir="ltr">${fmt(v("hr"), 0)}<em>bpm</em></b></div>
-          <div><small>${esc(chName("sleep"))}</small><b dir="ltr">${fmt(v("sleep"), 1)}<em>h</em></b></div>
-          <div><small>${tx(L.dose)}</small><b dir="ltr">${fmt(c.ast.rad[d], 1)}<em>mSv</em></b></div>
-        </div>
-        <small class="muted">${tx(L.composite)}</small>
-        <canvas class="spark" data-spark="${c.m.id}"></canvas>
-        <div class="crew-foot"><span>${tx(L.lastAlert)}: ${ep ? `<b style="color:${LV(ep.level)}">${tx(C.alerts[ep.level].name)}</b> · ${tx(A.player.day)} <span dir="ltr">${ep.last}</span>` : tx(L.none)}</span><span>${tx(L.open)} ›</span></div>
-      </div>`;
-    }).join("");
-    const co2 = cabinCo2(), cb = crew[0].pers.band.co2[d];
-    const openEps = eps.filter(e => e.open && e.level >= 2);
-    return `<div class="grid g4">${cards}</div>
-      <div class="grid g-main" style="margin-top:14px">
-        <div class="card"><h3>${tx(A.screens.alerts)} <span class="unit">${openEps.length}</span></h3>${alertList(openEps.slice(0, 4), true)}</div>
-        <div class="card"><h3>${tx(L.cabinCo2)} <span class="unit">mmHg</span></h3>${chartBox("cvCo2Mini", "short")}
-          <div class="legend"><span><i style="background:${css("--fixed")}"></i>${tx(L.fixedThr)} <span dir="ltr">${sim.fixed.thresholds.co2.value}</span></span>
-          <span class="mono" dir="ltr">${fmt(co2[d], 2)} mmHg</span></div></div>
-      </div>`;
-  }
-  function afterCrew() {
-    const d = state.day;
-    document.querySelectorAll("[data-spark]").forEach(cv => { const c = crewById(cv.dataset.spark); sparkline(cv, c.pers.composite, d, statusColor(statusOf(c, d) === "calib" ? 0 : statusOf(c, d))); });
-    const co2 = cabinCo2();
-    drawChart($("cvCo2Mini"), { day: d, series: [{ data: co2, color: "#8b7bff", width: 2, fill: true, glow: true, head: true, label: t(L.cabinCo2), unit: "mmHg", dec: 2 }],
-      hlines: [{ y: sim.fixed.thresholds.co2.value, color: css("--fixed") }] });
-  }
-  function cabinCo2() { return Array.from({ length: D }, (_, i) => crew.reduce((s, c) => s + c.ast.obs.co2[i], 0) / crew.length); }
-
-  function memberTabs() {
-    return `<div class="seg" role="tablist">${crew.map(c => `<button type="button" data-member="${c.m.id}" class="${c.m.id === state.member ? "on" : ""}">${tx(c.m.name)}</button>`).join("")}</div>`;
-  }
-
-  function screenMember() {
-    const c = crewById(state.member), d = state.day, s = statusOf(c, d);
-    const calib = d < c.pers.active;
-    const g = id => {
-      const b = c.pers.band[id][d], ch = sim.channels[id];
-      return gauge({ id, label: ch.name, unit: ch.unit, value: c.ast.obs[id][d], med: b.med, scale: b.scale, dir: ch.direction, dec: id === "hr" ? 0 : id === "co2" ? 2 : 1, calibrating: calib });
-    };
-    const comp = c.pers.composite[d];
-    const compG = gauge({ id: "comp", label: L.composite, unit: "z", value: comp == null ? 0 : comp, med: 0, scale: 1, dir: 1, dec: 1, calibrating: calib });
-    // المساهمات اليوم
-    const ids = chIds();
-    const bars = calib ? `<p class="muted">${tx(A.phase.calib)}</p>` : `<div class="bars">${ids.map(id => {
-      const z = c.pers.z[id][d], bad = z * sim.channels[id].direction;
-      const w = clamp(Math.abs(bad) / 5, 0, 1) * 50;
-      const col = Math.abs(z) < 2 ? "#3ddc97" : bad > 0 ? (Math.abs(z) < 3 ? "#ffb547" : "#ff5d6c") : "#6aa8ff";
-      const side = bad >= 0 ? `left:50%;width:${w}%` : `left:${50 - w}%;width:${w}%`;
-      return `<div class="bar-row"><span>${esc(chName(id))}</span><div class="bar-track"><span class="mid"></span><span class="bar-fill" style="--c:${col};${side}"></span></div><span class="mono" dir="ltr">${bad >= 0 ? "+" : ""}${fmt(bad, 1)}</span></div>`;
-    }).join("")}</div>`;
-    const lvText = s !== "calib" && s > 0 ? `<p style="margin:12px 0 0">${tx(C.alerts[s].text)}</p>` : "";
-    return `<div class="toolbar">${memberTabs()} ${pill(s, s === 3)} <span class="muted">${tx(c.m.role)}</span></div>
-      <div class="gauges">${g("hr")}${g("sleep")}${g("co2")}${compG}</div>
-      <div class="grid g3" style="margin-top:14px">
-        <div class="card"><h3>${tx(L.why)} <span class="unit">${tx(A.player.day)} <span dir="ltr">${d}</span></span></h3>
-          ${bars}</div>
-        <div class="card"><h3>${esc(chName("hr"))} <span class="unit">ECG · bpm</span></h3>
-          <canvas class="ecg" id="ecg"></canvas>
-          <div class="ecg-row"><span>${tx(L.waveform)}</span><b dir="ltr">${fmt(c.ast.obs.hr[d], 0)}</b></div></div>
-        <div class="card"><h3>${tx(L.sensors)}</h3><div class="body-wrap">${astronautSVG(c, d)}
-          <ul class="sensor-list">${(C.deviceDiagram || []).slice(0, 4).map(x => `<li><span class="dot" style="--c:var(--${x.status})"></span>${tx(x.label)}</li>`).join("")}</ul></div></div>
-      </div>
-      <h3 class="sec-h">${tx(A.screens.trends)}</h3>
-      <div class="card">${chartBox("cvMember")}${trendLegend()}</div>`;
-  }
-  function afterMember() {
-    const c = crewById(state.member), d = state.day;
-    startEcg($("ecg"), () => crewById(state.member).ast.obs.hr[state.day]);
-    drawChannel($("cvMember"), c, "hr", d);
-  }
-
-  function trendLegend() {
-    return `<div class="legend"><span><i style="background:#e7ecf7"></i>${tx(L.observed)}</span>
-      <span><i style="background:rgba(95,212,255,.45)"></i>${tx(L.baselineBand)}</span>
-      <span><i style="background:${css("--fixed")}"></i>${tx(L.fixedThr)}</span>
-      <span><i style="background:${css("--accent-2")}"></i>${tx(L.projection)}</span>
-      <span>▼ ${tx(C.ui.chart.personalAlert)}</span></div>`;
-  }
-  function projectionNow(c, d) {
-    const ch = sim.channels.hr, pr = sim.projection, at = c.pers.active;
-    if (d < at + pr.window) return null;
-    const b = c.pers.band.hr[at];
-    const thr = b.med + ch.direction * pr.monitorZ * b.scale;
-    const p = E.projectCrossing(c.ast.obs.hr, d, pr.window, thr, ch.direction);
-    return { thr, p };
-  }
-  function drawChannel(cv, c, id, d) {
-    const ch = sim.channels[id], pers = c.pers;
-    const lo = pers.band[id].map((b, i) => i >= pers.active ? b.med - 3 * b.scale : null);
-    const hi = pers.band[id].map((b, i) => i >= pers.active ? b.med + 3 * b.scale : null);
-    const series = [{ data: c.ast.obs[id], color: id === "chem" ? css("--future") : "#e7ecf7", width: 1.8, fill: true, glow: true, head: true, label: t(ch.name), unit: ch.unit, dec: id === "co2" ? 2 : 1 }];
-    const hl = [], vl = [];
-    const th = sim.fixed.thresholds[id];
-    if (th) hl.push({ y: th.value, color: css("--fixed"), label: t(L.fixedThr) });
-    if (id === "hr") {
-      const pj = projectionNow(c, d);
-      if (pj) {
-        hl.push({ y: pj.thr, color: css("--accent-2"), dash: [2, 3] });
-        if (pj.p && pj.p.fit && pj.p.day > d && pj.p.day - d <= 60) {
-          const xs = [], ys = [], end = Math.min(D - 1, Math.ceil(pj.p.day) + 2);
-          for (let x = d - sim.projection.window + 1; x <= end; x++) { xs.push(x); ys.push(pj.p.fit.at(x)); }
-          series.push({ data: ys, xs, color: css("--accent-2"), width: 2.2, dash: [7, 5], glow: true });
-        }
-      }
-    }
-    if (state.showTruth) vl.push({ x: c.ast.onset, color: css("--danger"), label: t(L.onset) });
-    const markers = c.events.filter(e => e.level >= 2).map(e => ({ x: e.day, level: e.level }));
-    drawChart(cv, { day: d, series, band: { lo, hi }, hlines: hl, vlines: vl, markers });
-    attachHover(cv.parentNode);
-  }
-
-  function screenTrends() {
-    const c = crewById(state.member), d = state.day;
-    const pj = projectionNow(c, d);
-    let pText = "";
-    if (state.channel === "hr") {
-      if (pj && pj.p && pj.p.day > d && pj.p.day - d <= 60) pText = `${tx(L.projText)} <b dir="ltr">${Math.round(pj.p.day)}</b>.`;
-      else pText = tx(L.projNone);
-      pText = `<div class="card" style="margin-top:14px"><h3>${tx(L.projection)} <span class="unit" dir="ltr">w=${sim.projection.window}</span></h3><p style="margin:0">${pText}</p><p class="muted" style="margin:6px 0 0;font-size:.85rem">${tx(L.projNote)}</p></div>`;
-    }
-    return `<div class="toolbar">${memberTabs()}
-        <div class="seg">${chIds().map(id => `<button type="button" data-channel="${id}" class="${id === state.channel ? "on" : ""}">${esc(chName(id))}</button>`).join("")}</div>
-        <label class="chk"><input type="checkbox" id="truthChk" ${state.showTruth ? "checked" : ""}> ${tx(L.truth)}</label></div>
-      <div class="card"><h3>${tx(c.m.name)} · ${esc(chName(state.channel))} <span class="unit">${esc(t(sim.channels[state.channel].unit))}</span></h3>${chartBox("cvTrend", "tall")}${trendLegend()}</div>
-      ${pText}
-      <div class="card" style="margin-top:14px"><h3>${tx(C.ui.chart.composite)} <span class="unit" dir="ltr">S+ · h=${sim.personal.h}</span></h3>${chartBox("cvCus", "short")}</div>`;
-  }
-  function afterTrends() {
-    const c = crewById(state.member), d = state.day;
-    if (!chIds().includes(state.channel)) state.channel = "hr";
-    drawChannel($("cvTrend"), c, state.channel, d);
-    drawChart($("cvCus"), { day: d, yMin: 0, series: [{ data: c.pers.compS, color: css("--personal"), width: 2, fill: true, glow: true, head: true, label: "S+", dec: 2 }],
-      hlines: [{ y: sim.personal.h, color: css("--danger"), label: "h" }], markers: c.events.filter(e => e.level >= 2).map(e => ({ x: e.day, level: e.level })) });
-    attachHover($("cvCus").parentNode);
-  }
-
-  // ---------- التنبيهات ----------
-  function topContrib(ep) {
-    const ex = ep.crew.pers.explain[ep.peakDay];
-    if (!ex) return [];
-    return ex.filter(x => x.bad > 0).sort((a, b) => b.bad * b.w - a.bad * a.w).slice(0, 2);
-  }
-  function epState(ep) {
-    if (ep.decision) {
-      const k = ep.decision.type;
-      const lab = { approved: A.review.approved, dismissed: A.review.dismissed, escalated: A.review.escalated }[k];
-      return `<span class="state ${k === "approved" ? "ok" : k === "escalated" ? "esc" : "no"}">${tx(lab)}${ep.reopened ? " · " + tx(A.alertsUi.newAlert) : ""}</span>`;
-    }
-    if (ep.acked) return `<span class="state">${tx(A.alertsUi.acked)}</span>`;
-    return "";
-  }
-  function alertList(eps, compact) {
-    if (!eps.length) return `<div class="empty">${tx(A.alertsUi.empty)}</div>`;
-    return `<div class="alist">${eps.map(ep => {
-      const tc = topContrib(ep).map(x => `${esc(chName(x.id))} <span dir="ltr">z ${x.z >= 0 ? "+" : ""}${x.z.toFixed(1)}</span>`).join(" · ");
-      const acts = [];
-      if (!ep.acked && !ep.decision) acts.push(`<button class="abtn" type="button" data-ack="${ep.id}">${tx(A.alertsUi.ack)}</button>`);
-      if (ep.level >= 2) acts.push(`<button class="abtn ${ep.open ? "go" : ""}" type="button" data-go="review/${ep.id}">${tx(A.alertsUi.review)}</button>`);
-      return `<div class="card aitem ${ep.open ? "" : "done"}" style="--c:${LV(ep.level)}"><span class="stripe"></span>
-        <div><div class="a-top"><b style="color:${LV(ep.level)}">${tx(C.alerts[ep.level].name)}</b><b>${tx(ep.crew.m.name)}</b>
-          <span class="muted">${tx(A.player.day)} <span dir="ltr">${ep.start}${ep.last !== ep.start ? "–" + ep.last : ""}</span></span>${epState(ep)}</div>
-
-          ${tc ? `<div class="a-text">${tx(A.alertsUi.top)}: ${tc}</div>` : ""}</div>
-        <div class="a-act">${acts.join("")}</div></div>`;
-    }).join("")}</div>`;
-  }
-  function screenAlerts() {
-    let eps = episodesUpTo(state.day);
-    if (!state.showInfo) eps = eps.filter(e => e.level >= 2);
-    if (state.filter === "open") eps = eps.filter(e => e.open);
-    return `<div class="toolbar"><div class="seg">
-        <button type="button" data-filter="open" class="${state.filter === "open" ? "on" : ""}">${tx(A.alertsUi.filterOpen)}</button>
-        <button type="button" data-filter="all" class="${state.filter === "all" ? "on" : ""}">${tx(A.alertsUi.filterAll)}</button></div>
-        <label class="chk"><input type="checkbox" id="infoChk" ${state.showInfo ? "checked" : ""}> ${tx(A.alertsUi.filterInfo)}</label></div>
-      ${alertList(eps)}`;
-  }
-
-  // ---------- مراجعة الطبيب ----------
-  function screenReview() {
-    const eps = episodesUpTo(state.day);
-    const ep = eps.find(e => e.id === state.episode) || eps.find(e => e.open && e.level >= 2);
-    const log = saved.log.slice().reverse();
-    const logHTML = `<div class="card"><h3>${tx(A.review.log)} ${saved.log.length ? `<button class="abtn" type="button" id="clearLog">${tx(A.review.clear)}</button>` : ""}</h3>
-      ${log.length ? `<ul class="log">${log.map(l => `<li><small dir="ltr">D${l.day}</small> · <b>${esc(l.who)}</b> · ${esc(l.what)}${l.note ? ` — <span class="muted">${esc(l.note)}</span>` : ""}</li>`).join("")}</ul>` : `<p class="muted">${tx(A.review.logEmpty)}</p>`}</div>`;
-    if (!ep) return `<div class="grid g-main"><div class="card"><p class="empty">${tx(A.review.pick)}</p></div>${logHTML}</div>`;
-    state.episode = ep.id;
-    const c = ep.crew, tc = topContrib(ep);
-    const keys = tc.map(x => x.id).filter((v, i, a) => a.indexOf(v) === i);
-    const sugg = keys.concat(["monitor"]).concat(ep.level >= 3 ? ["ground"] : []);
-    const dec = ep.decision;
-    const evid = (c.pers.explain[ep.peakDay] || []).map(x => {
-      const w = clamp(Math.abs(x.bad) / 5, 0, 1) * 50, col = x.bad > 3 ? "#ff5d6c" : x.bad > 2 ? "#ffb547" : x.bad > -2 ? "#3ddc97" : "#6aa8ff";
-      const side = x.bad >= 0 ? `left:50%;width:${w}%` : `left:${50 - w}%;width:${w}%`;
-      return `<div class="bar-row"><span>${esc(chName(x.id))}</span><div class="bar-track"><span class="mid"></span><span class="bar-fill" style="--c:${col};${side}"></span></div><span class="mono" dir="ltr">${x.bad >= 0 ? "+" : ""}${x.bad.toFixed(1)}</span></div>`;
-    }).join("");
-    return `<div class="grid g-main">
-      <div>
-        <div class="card" style="border-top:3px solid ${LV(ep.level)}">
-          <h3><span><b style="color:${LV(ep.level)}">${tx(C.alerts[ep.level].name)}</b> · ${tx(c.m.name)} · ${tx(A.player.day)} <span dir="ltr">${ep.peakDay}</span></span>${epState(ep)}</h3>
-          <p style="margin-top:0">${tx(C.alerts[ep.level].text)}</p>
-          <h4 class="sec-h" style="margin-top:6px">${tx(A.review.evidence)}</h4>
-          <div class="bars">${evid}</div>
-          <div style="margin-top:14px">${chartBox("cvReview", "short")}</div>
-        </div>
-        <div class="card" style="margin-top:14px">
-          <h3>${tx(A.review.suggestions)} <span class="chip s-pending" title="${esc(t(A.review.pendingWording))}">${tx(C.statusLabels.pending)}</span></h3>
-          <div class="guard">🛡 <span>${tx(A.review.suggestNote)}</span></div>
-          <ul class="sugg">${sugg.map(k => `<li><label><input type="checkbox" name="sg" value="${k}" ${dec ? "disabled" : ""} ${dec && dec.actions && dec.actions.includes(k) ? "checked" : ""}> <span>${tx(A.suggestions[k])}</span></label></li>`).join("")}</ul>
-          ${dec && !ep.reopened ? `<p><b>${tx(A.review.decided)}:</b> ${epState(ep)} ${dec.reason ? `— <span class="muted">${esc(dec.reason)}</span>` : ""}</p><button class="abtn" type="button" id="undoDec">${tx(A.review.undo)}</button>` : `
-          <textarea class="reason" id="reason" placeholder="${esc(t(A.review.reason))}"></textarea>
-          <div class="toolbar" style="margin:0">
-            <button class="abtn go" type="button" id="approveBtn">${tx(A.review.approve)}</button>
-            <button class="abtn bad" type="button" id="dismissBtn">${tx(A.review.dismiss)}</button>
-            <button class="abtn warn" type="button" id="escBtn">${tx(A.review.escalate)}</button>
-          </div>`}
-        </div>
-      </div>
-      ${logHTML}
-    </div>`;
-  }
-  function afterReview() {
-    const eps = episodesUpTo(state.day), ep = eps.find(e => e.id === state.episode);
-    if (ep && $("cvReview")) {
-      const c = ep.crew;
-      drawChart($("cvReview"), { day: state.day, series: [{ data: c.pers.composite, color: css("--personal"), width: 2, fill: true, glow: true, head: true, label: t(L.composite), dec: 2 }],
-        hlines: [{ y: 0, color: "rgba(255,255,255,.3)", dash: [2, 3] }], markers: c.events.filter(e => e.level >= 2).map(e => ({ x: e.day, level: e.level })),
-        vlines: [{ x: ep.peakDay, color: lvColor(ep.level) }] });
-      attachHover($("cvReview").parentNode);
-    }
-  }
-  function decide(type) {
-    const eps = episodesUpTo(state.day), ep = eps.find(e => e.id === state.episode); if (!ep) return;
-    const actions = Array.from(document.querySelectorAll('input[name="sg"]:checked')).map(i => i.value);
-    const reason = ($("reason") && $("reason").value.trim()) || "";
-    if (type === "approved" && !actions.length) { $("approveBtn").animate([{ transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "none" }], 200); return; }
-    if (type === "dismissed" && !reason) { $("reason").focus(); $("reason").style.borderColor = "var(--danger)"; return; }
-    saved.decisions[ep.id] = { type, actions, reason, day: state.day };
-    saved.acks[ep.id] = state.day;
-    const lab = { approved: A.review.approved, dismissed: A.review.dismissed, escalated: A.review.escalated }[type];
-    const what = `${t(lab)} · ${t(ep.crew.m.name)} · ${t(C.alerts[ep.level].name)}` + (actions.length ? ": " + actions.map(k => t(A.suggestions[k])).join("؛ ") : "");
-    saved.log.push({ day: state.day, who: t(A.review.who), what, note: reason });
-    persist(); render();
-  }
-
-  // ---------- المقصورة ----------
-  function screenHabitat() {
-    const d = state.day, lim = sim.radiation.limit;
-    const doses = crew.map(c => `<div class="dose-row"><span>${tx(c.m.name)}</span><div class="dose-track"><span class="dose-fill" style="width:${clamp(c.ast.rad[d] / lim * 100, 0, 100)}%"></span></div><span class="mono" dir="ltr">${fmt(c.ast.rad[d], 1)}</span></div>`).join("");
-    return `<div class="grid g-main">
-      <div class="card"><h3>${tx(L.cabinCo2)} <span class="unit">mmHg</span></h3>${chartBox("cvCo2", "tall")}
-        <div class="legend"><span><i style="background:#8b7bff"></i>${tx(L.observed)}</span><span><i style="background:${css("--fixed")}"></i>${tx(L.fixedThr)}</span><span class="muted">${tx(L.hover)}</span></div></div>
-      <div class="card"><h3>${tx(L.dose)} <span class="unit">mSv · ${tx(L.limitDemo)} <span dir="ltr">${lim}</span></span></h3>
-        <p class="card-sub">${tx((C.channels.find(x => x.id === "rad") || {}).reason)}</p>${doses}
-        <div style="margin-top:14px">${chartBox("cvRad", "short")}</div></div>
-    </div>`;
-  }
-  function afterHabitat() {
-    const d = state.day, co2 = cabinCo2();
-    drawChart($("cvCo2"), { day: d, series: [{ data: co2, color: "#8b7bff", width: 2.2, fill: true, glow: true, head: true, label: "CO2", unit: "mmHg", dec: 2 }],
-      hlines: [{ y: sim.fixed.thresholds.co2.value, color: css("--fixed"), label: t(L.fixedThr) }] });
-    attachHover($("cvCo2").parentNode);
-    const cols = ["#5fd4ff", "#3ddc97", "#ffb547", "#c08bff"];
-    drawChart($("cvRad"), { day: d, yMin: 0, series: crew.map((c, i) => ({ data: c.ast.rad, color: cols[i], width: 1.8, glow: true, head: true, label: t(c.m.name), unit: "mSv" })),
-      hlines: [{ y: sim.radiation.limit, color: css("--danger"), label: t(L.limitDemo) }] });
-    attachHover($("cvRad").parentNode);
-  }
-
-  // ---------- الإعدادات ----------
-  function screenSettings() {
-    const U = C.ui.controls, p = sim.personal;
-    const rng = (id, lab, min, max, step, v) => `<div class="card set"><label for="${id}">${tx(lab)} <span class="val" id="${id}V" dir="ltr">${v}</span></label><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${v}"></div>`;
-    return `<p class="muted" style="margin-top:0">${tx(A.settingsUi.intro)}</p>
-      <div class="set-grid">
-        <div class="card set"><label for="sMode">${tx(U.baseline)}</label><select id="sMode">${Object.keys(U.modes).map(k => `<option value="${k}" ${p.baselineMode === k ? "selected" : ""}>${tx(U.modes[k])}</option>`).join("")}</select></div>
-        ${rng("sK", U.k, 0.1, 1.5, 0.1, p.k)}
-        ${rng("sH", U.h, 2, 10, 0.5, p.h)}
-        ${rng("sW", U.window, 5, 21, 1, sim.projection.window)}
-        <div class="card set"><label class="chk"><input type="checkbox" id="sChem" ${p.includeChem ? "checked" : ""}> ${tx(U.chem)}</label>
-          <label class="chk" style="margin-top:10px"><input type="checkbox" id="sAnchor" ${p.useAnchor ? "checked" : ""}> ${tx(U.anchor)}</label></div>
-      </div>
-      <div class="toolbar" style="margin-top:16px"><button class="abtn bad" type="button" id="sReset">${tx(A.settingsUi.reset)}</button>
-        <a class="abtn" href="details.html#demo">${tx(C.ui.nav.demo)} ↗</a> <a class="abtn" href="devices.html">${tx(A.screens.devices)} ↗</a></div>`;
-  }
-
-  // ---------- الرئيسية (مثل لوحة التحكم في التصميم) ----------
+  // ---------- الرئيسية ----------
   const VICON = {
     hr: '<path d="M12 21s-7-4.4-9.3-9A5.3 5.3 0 0 1 12 6.2 5.3 5.3 0 0 1 21.3 12C19 16.6 12 21 12 21Z"/><path d="M4 12h4l2-3 3 6 2-3h5"/>',
     sleep: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/><path d="M15 4h4l-4 4h4"/>',
@@ -803,16 +444,16 @@
     const radCol = dose / lim < .7 ? "#3ddc97" : dose / lim < .9 ? "#ffb547" : "#ff5d6c";
     const comp = c.pers.composite[d];
     const s = statusOf(c, d);
-    return row("hr", chName("hr"), fmt(c.ast.obs.hr[d], 0), "bpm", chanCol(c, "hr", d), "trends/hr")
-      + row("sleep", chName("sleep"), fmt(c.ast.obs.sleep[d], 1), "h", chanCol(c, "sleep", d), "trends/sleep")
-      + row("co2", chName("co2"), fmt(c.ast.obs.co2[d], 2), "mmHg", chanCol(c, "co2", d), "trends/co2")
-      + row("rad", t(L.radShort), fmt(dose, 1), "mSv", radCol, "habitat")
-      + row("comp", t(L.composite), calib ? "—" : fmt(comp, 1), "z", statusColor(s === "calib" ? 0 : s), "member/" + c.m.id);
+    return row("hr", chName("hr"), fmt(c.ast.obs.hr[d], 0), "bpm", chanCol(c, "hr", d), "solution")
+      + row("sleep", chName("sleep"), fmt(c.ast.obs.sleep[d], 1), "h", chanCol(c, "sleep", d), "solution")
+      + row("co2", chName("co2"), fmt(c.ast.obs.co2[d], 2), "mmHg", chanCol(c, "co2", d), "solution")
+      + row("rad", t(L.radShort), fmt(dose, 1), "mSv", radCol, "solution")
+      + row("comp", t(L.composite), calib ? "—" : fmt(comp, 1), "z", statusColor(s === "calib" ? 0 : s), "solution");
   }
   let hasAstroImg = false;
   function screenHome() {
     const d = state.day, c = crewById(state.member), s = statusOf(c, d);
-    const open = episodesUpTo(d).filter(e => e.open && e.level >= 2).length;
+    const open = crew.filter(x => { const sx = statusOf(x, d); return sx !== "calib" && sx >= 2; }).length;
     const crewCol = crew.map(x => { const sx = statusOf(x, d); return `<button type="button" class="mini-crew ${x.m.id === c.m.id ? "on" : ""}" data-member="${x.m.id}" style="--c:${statusCss(sx)}" title="${esc(t(x.m.name))}"><span class="avatar">${esc(x.m.id)}</span><small>${tx(A.status[sx])}</small></button>`; }).join("");
     return `<div class="home">
       <div class="vitals">${vitalsFor(c, d)}</div>
@@ -826,16 +467,10 @@
       </div>
       <div class="side-col">
         ${crewCol}
-        <button type="button" class="alert-btn ${open ? "hot" : ""}" data-go="alerts">${icon("alerts")}<b dir="ltr">${open}</b><small>${tx(A.screens.alerts)}</small></button>
+        <button type="button" class="alert-btn ${open ? "hot" : ""}" data-go="demo">${icon("alerts")}<b dir="ltr">${open}</b><small>${tx(A.status[2])}</small></button>
       </div>
     </div>`;
   }
-
-  function screenVideo() {
-    return `<div class="video-wrap"><video controls playsinline preload="metadata" poster="media/vitalx-poster.jpg">
-      <source src="media/vitalx-trailer.webm" type="video/webm"><source src="media/vitalx-trailer.mp4" type="video/mp4"></video></div>`;
-  }
-
   // ---------- شريط القياسات العلوي ----------
   function tinySpark(cv, data, day, color) {
     const s = setupCanvas(cv); if (!s) return;
@@ -864,26 +499,173 @@
     items.forEach(it => tinySpark($("telemetry").querySelector(`[data-tm="${it.k}"]`), it.data, d, it.col));
   }
 
+  // =====================================================================
+  //  الشاشات الست
+  // =====================================================================
+  const S6 = A;
+  const lastAlertDay = (c, d) => { for (let i = d; i >= c.pers.active; i--) if (c.pers.level[i] >= 1) return i; return null; };
+  const firstDet = (lv, from) => { for (let i = from; i < D; i++) if (lv[i] >= 2) return i; return null; };
+  const monitorThr = c => { const b = c.pers.band.hr[c.pers.active], ch = sim.channels.hr; return b.med + ch.direction * sim.projection.monitorZ * b.scale; };
+  function projectionNow(c, d) {
+    if (d < c.pers.active + sim.projection.window) return null;
+    const thr = monitorThr(c);
+    return { thr, p: E.projectCrossing(c.ast.obs.hr, d, sim.projection.window, thr, sim.channels.hr.direction) };
+  }
+  const projOk = (pj, d) => pj && pj.p && pj.p.day > d && pj.p.day - d <= 60;
+
+  // رسم نبض الراحة: o = { band, fixed, proj, onset, ours, fixedDet }
+  function drawHr(cv, c, d, o) {
+    const pers = c.pers, series = [{ data: c.ast.obs.hr, color: "#e7ecf7", width: 1.8, fill: true, glow: true, head: true, label: chName("hr"), unit: "bpm", dec: 0 }];
+    const hl = [], vl = [];
+    let band = null;
+    if (o.band) band = { lo: pers.band.hr.map((b, i) => i >= pers.active ? b.med - 3 * b.scale : null), hi: pers.band.hr.map((b, i) => i >= pers.active ? b.med + 3 * b.scale : null) };
+    if (o.fixed) hl.push({ y: sim.fixed.thresholds.hr.value, color: css("--fixed"), label: t(L.fixedThr) });
+    if (o.proj) {
+      const pj = projectionNow(c, d);
+      hl.push({ y: monitorThr(c), color: css("--accent-2"), dash: [2, 3] });
+      if (projOk(pj, d)) {
+        const xs = [], ys = [], end = Math.min(D - 1, Math.ceil(pj.p.day) + 2);
+        for (let x = d - sim.projection.window + 1; x <= end; x++) { xs.push(x); ys.push(pj.p.fit.at(x)); }
+        series.push({ data: ys, xs, color: css("--accent-2"), width: 2.2, dash: [7, 5], glow: true });
+      }
+    }
+    if (o.onset && d >= c.ast.onset) vl.push({ x: c.ast.onset, color: "rgba(255,255,255,.45)", label: t(S6.problem.onset) });
+    if (o.ours != null && o.ours <= d) vl.push({ x: o.ours, color: css("--personal"), label: "VITALX" });
+    if (o.fixedDet != null && o.fixedDet <= d) vl.push({ x: o.fixedDet, color: css("--fixed"), label: t(L.fixedThr) });
+    const markers = o.markers ? c.events.filter(e => e.level >= 2).map(e => ({ x: e.day, level: e.level })) : [];
+    drawChart(cv, { day: d, series, band, hlines: hl, vlines: vl, markers });
+    attachHover(cv.parentNode);
+  }
+  const legend = items => `<div class="legend">${items.map(([col, lab]) => `<span><i style="background:${col}"></i>${tx(lab)}</span>`).join("")}</div>`;
+
+  // ---------- 1) المشكلة ----------
+  function screenProblem() {
+    const P = S6.problem;
+    return `<div class="six-head">${tx(P.head)}</div>
+      <div class="stat-row">${P.stats.map(s => `<div class="card stat"><b dir="ltr">${esc(s.v)}<em>${tx(s.u)}</em></b><span>${tx(s.t)}</span></div>`).join("")}</div>
+      <div class="card" style="margin-top:14px"><h3>${tx(P.chart)} <span class="unit">bpm</span></h3>${chartBox("cvProblem", "mid")}
+        ${legend([["#e7ecf7", L.observed], [css("--fixed"), L.fixedThr]])}</div>`;
+  }
+  function afterProblem() { const c = crewById("A"); drawHr($("cvProblem"), c, state.day, { fixed: true, onset: true }); }
+
+  // ---------- 2) الحل: الساعة + اللوحي ----------
+  function watchFace(c, d) {
+    const s = statusOf(c, d), col = statusColor(s === "calib" ? 0 : s);
+    const comp = c.pers.composite[d], frac = s === "calib" ? .15 : clamp((comp == null ? 0 : comp + 1) / 5, .06, 1);
+    const R = 64, C2 = 2 * Math.PI * R;
+    const row = (k, v, u) => `<div class="w-row"><span class="w-i" style="color:${chanCol(c, k, d)}">${vicon(k)}</span><b dir="ltr">${v}<em>${u}</em></b></div>`;
+    return `<div class="dev wdev" style="--c:${col}">
+        <i class="w-crown"></i><i class="w-btn"></i><i class="w-strap top"></i><i class="w-strap bot"></i>
+        <div class="w-screen">
+          <div class="w-top"><span dir="ltr">D${d}</span><span>${esc(c.m.id)}</span></div>
+          <div class="w-ring"><svg viewBox="0 0 160 160"><circle cx="80" cy="80" r="${R}" stroke="rgba(255,255,255,.1)" stroke-width="10" fill="none"/>
+            <circle cx="80" cy="80" r="${R}" stroke="${col}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="${(C2 * frac).toFixed(1)} ${C2.toFixed(1)}" transform="rotate(-90 80 80)" style="filter:drop-shadow(0 0 6px ${col})"/></svg>
+            <div class="w-mid"><b dir="ltr">${fmt(c.ast.obs.hr[d], 0)}</b><small>bpm</small></div></div>
+          ${row("sleep", fmt(c.ast.obs.sleep[d], 1), "h")}${row("co2", fmt(c.ast.obs.co2[d], 2), "mmHg")}
+          <div class="w-status">${tx(A.status[s])}</div>
+        </div></div>`;
+  }
+  function tabletFace(d) {
+    const rows = crew.map(x => { const s = statusOf(x, d);
+      return `<button type="button" class="t-row ${x.m.id === state.member ? "on" : ""}" data-member="${x.m.id}" style="--c:${statusCss(s)}"><span class="avatar">${esc(x.m.id)}</span>
+        <b dir="ltr">${fmt(x.ast.obs.hr[d], 0)}<em>bpm</em></b><span class="lv-pill">${tx(A.status[s])}</span></button>`; }).join("");
+    return `<div class="dev tablet"><i class="t-cam"></i><div class="t-screen">
+        <div class="t-crew">${rows}</div>
+        <div class="t-chart">${chartBox("cvTablet", "short")}</div>
+      </div></div>`;
+  }
+  function screenSolution() {
+    const c = crewById(state.member), d = state.day, P = S6.solution;
+    return `<div class="flow">${P.steps.map((s, i) => `<span class="flow-step">${tx(s)}</span>${i < P.steps.length - 1 ? '<i class="flow-arr"></i>' : ""}`).join("")}</div>
+      <div class="devices">
+        <figure>${watchFace(c, d)}<figcaption>${tx(P.watch)} · ${tx(c.m.name)}</figcaption></figure>
+        <figure class="wide">${tabletFace(d)}<figcaption>${tx(P.tablet)}</figcaption></figure>
+      </div>
+      <p class="six-note">${tx(P.adapt)}</p>`;
+  }
+  function afterSolution() { drawHr($("cvTablet"), crewById(state.member), state.day, { band: true, markers: true }); }
+
+  // ---------- 3) ما يميزنا ----------
+  function screenEdge() {
+    const c = crewById(state.member), d = state.day, P = S6.edge, calib = d < c.pers.active;
+    const b = c.pers.band.hr[d], ch = sim.channels.hr;
+    const g = gauge({ id: "edgehr", label: ch.name, unit: "bpm", value: c.ast.obs.hr[d], med: b.med, scale: b.scale, dir: ch.direction, dec: 0, calibrating: calib });
+    const chips = crew.map(x => `<span dir="ltr" class="bchip ${x.m.id === c.m.id ? "on" : ""}" data-member="${x.m.id}"><b>${esc(x.m.id)}</b> <span dir="ltr">${fmt(x.pers.band.hr[x.pers.active].med, 0)}</span></span>`).join("");
+    const ad = lastAlertDay(c, d);
+    let bars = `<p class="muted">${tx(P.noAlert)}</p>`;
+    if (ad != null) {
+      const ex = c.pers.explain[ad].filter(x => x.bad > 0), tot = ex.reduce((s, x) => s + x.bad * x.w, 0) || 1;
+      bars = `<div class="bars">${chIds().map(id => { const e = ex.find(x => x.id === id), pc = e ? e.bad * e.w / tot * 100 : 0;
+        return `<div class="bar-row"><span>${esc(chName(id))}</span><div class="bar-track"><span class="bar-fill" style="--c:${pc > 40 ? "#ff5d6c" : pc > 0 ? "#ffb547" : "#3ddc97"};left:0;width:${pc.toFixed(0)}%"></span></div><span class="mono" dir="ltr">${pc.toFixed(0)}%</span></div>`; }).join("")}</div>
+        <div class="why-day" style="--c:${LV(c.pers.level[ad])}">${tx(C.alerts[c.pers.level[ad]].name)} · ${tx(A.player.day)} <b dir="ltr">${ad}</b></div>`;
+    }
+    const pj = projectionNow(c, d);
+    const pTxt = projOk(pj, d) ? `${tx(P.projAt)} <b dir="ltr">${Math.round(pj.p.day)}</b>` : tx(P.projNone);
+    const pe = cohortStats.projection.find(p => p.off === 14) || cohortStats.projection[0];
+    return `<div class="grid g3 edge-grid">
+        <div class="card"><h3>${tx(P.personal)}</h3>${g.replace('<div class="card gauge">', '<div class="gauge">')}
+          <div class="chips">${chips}</div><p class="six-note">${tx(P.personalNote)} · bpm</p></div>
+        <div class="card"><h3>${tx(P.why)}</h3>${bars}<p class="six-note">${tx(P.whyNote)}</p></div>
+        <div class="card"><h3>${tx(P.proj)}</h3>${chartBox("cvProj", "short")}<p class="big-line">${pTxt}</p>
+          <p class="six-note">${tx(P.projErr)} <span dir="ltr">±${fmt(pe.medAbs, 0)}</span> ${tx(P.days)}</p></div>
+      </div>`;
+  }
+  function afterEdge() { drawHr($("cvProj"), crewById(state.member), state.day, { proj: true }); }
+
+  // ---------- 4) العرض الحي ----------
+  function screenDemo() {
+    const c = crewById(state.member), d = state.day, P = S6.demo;
+    const ours = firstDet(c.pers.level, c.ast.onset), fx = firstDet(c.fx.level, c.ast.onset);
+    const box = (cls, name, det) => `<div class="card score ${cls}"><small>${tx(name)}</small>${det != null && det <= d
+        ? `<b>${tx(P.detected)} <span dir="ltr">${det}</span></b>` : `<b class="wait">${tx(P.waiting)}</b>`}</div>`;
+    const gap = ours != null && ours <= d && (fx == null || fx > ours) ? (fx != null && fx <= d ? fx - ours : d - ours) : null;
+    const cs = cohortStats, pct = v => Math.round(v * 100) + "%";
+    const m = (lab, a, b) => `<div class="cmp"><span>${tx(lab)}</span><b class="o" dir="ltr">${a}</b><b class="f" dir="ltr">${b}</b></div>`;
+    return `<div class="demo">
+        <div class="card demo-chart"><h3>${tx(c.m.name)} · ${esc(chName("hr"))} <span class="unit">bpm</span></h3>${chartBox("cvDemo", "tall")}
+          ${legend([["#e7ecf7", L.observed], ["rgba(95,212,255,.45)", L.baselineBand], [css("--fixed"), L.fixedThr]])}</div>
+        <div class="demo-side">
+          ${box("o", P.ours, ours)}${box("f", P.fixed, fx)}
+          ${gap ? `<div class="gap">${tx(P.earlier)} <b dir="ltr">${gap}</b> ${tx(S6.edge.days)}</div>` : `<p class="six-note">${tx(P.hint)}</p>`}
+          <div class="card cohort"><h3>${tx(P.cohort)}</h3>
+            <div class="cmp head"><span></span><b class="o">VITALX</b><b class="f">${tx(L.fixedThr)}</b></div>
+            ${m(P.rate, pct(cs.personal.rate), pct(cs.fixed.rate))}
+            ${m(P.delay, fmt(cs.personal.medianDelay, 0), fmt(cs.fixed.medianDelay, 0))}
+            ${m(P.fa, fmt(cs.personal.faPer100, 2), fmt(cs.fixed.faPer100, 2))}</div>
+        </div></div>`;
+  }
+  function afterDemo() {
+    const c = crewById(state.member);
+    drawHr($("cvDemo"), c, state.day, { band: true, fixed: true, markers: true, ours: firstDet(c.pers.level, c.ast.onset), fixedDet: firstDet(c.fx.level, c.ast.onset) });
+  }
+
+  // ---------- 5) ناسا ----------
+  function screenNasa() {
+    const P = S6.nasa;
+    const nm = k => k === "rad" ? t(L.radShort) : chName(k);
+    return `<div class="six-head">${tx(P.head)}</div>
+      <div class="grid g2 hrp">${P.map.map(r => `<div class="card hrp-row"><span class="vi" style="--c:var(--accent)">${vicon(r.ch)}</span><div><b>${esc(nm(r.ch))}</b><small>${tx(r.risk)}</small></div></div>`).join("")}</div>
+      <div class="card honest"><span class="tag-synth">${tx(A.synthetic)}</span><p>${tx(P.honest)}</p>
+        <a class="key" href="https://humanresearchroadmap.nasa.gov/" target="_blank" rel="noopener">${tx(P.link)} ↗</a></div>
+      <div class="team-row"><div><small>${tx(P.team)}</small><b>NovaCore</b></div><div><small>${tx(P.challenge)}</small><b>${tx(P.challengeName)}</b></div><div><small>${tx(P.members)}</small><b>${tx(P.membersNames)}</b></div></div>`;
+  }
+
   const SCREENS = {
-    home: [screenHome], video: [screenVideo],
-    crew: [screenCrew, afterCrew], member: [screenMember, afterMember], trends: [screenTrends, afterTrends],
-    alerts: [screenAlerts], review: [screenReview, afterReview], habitat: [screenHabitat, afterHabitat], settings: [screenSettings]
+    home: [screenHome], problem: [screenProblem, afterProblem], solution: [screenSolution, afterSolution],
+    edge: [screenEdge, afterEdge], demo: [screenDemo, afterDemo], nasa: [screenNasa]
   };
 
   // =====================================================================
   //  الإطار: التنقل، المشغّل، خط الزمن
   // =====================================================================
   function renderTabs() {
-    const open = episodesUpTo(state.day).filter(e => e.open && e.level >= 2).length;
-    $("tabs").innerHTML = TABS.map(k => `<a class="tab ${state.screen === k ? "on" : ""}" href="#${k}" ${state.screen === k ? 'aria-current="page"' : ""}>${icon(k)}<span>${tx(A.screens[k])}</span>${k === "alerts" && open ? `<span class="badge">${open}</span>` : ""}</a>`).join("")
-      + `<a class="tab ext" href="devices.html">${icon("devices")}<span>${tx(A.screens.devices)}</span></a>`;
+    $("tabs").innerHTML = TABS.map(k => `<a class="tab ${state.screen === k ? "on" : ""}" href="#${k}" ${state.screen === k ? 'aria-current="page"' : ""}>${icon(k)}<span>${tx(A.screens[k])}</span></a>`).join("");
   }
   function renderFrame() {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
     document.title = t(A.title);
     $("langBtn").textContent = "🌐 " + t(C.ui.langToggle);
-    $("backLink").textContent = t(A.screens.details);
     if ($("subtitle")) $("subtitle").textContent = t(A.subtitle);
     if ($("nextBtn")) $("nextBtn").textContent = t(A.player.next) + " ›";
     $("restartBtn").textContent = "⏮ " + t(A.player.restart);
@@ -929,7 +711,7 @@
   function stepMember(k) {
     const i = crew.findIndex(c => c.m.id === state.member);
     state.member = crew[(i + k + crew.length) % crew.length].m.id;
-    if (state.screen === "member") go("member/" + state.member); else render();
+    render();
   }
   // أثناء التشغيل: لا نعيد بناء الشاشة إذا كان المستخدم يكتب
   function tickRender() {
@@ -974,8 +756,8 @@
   function toast(c, e) {
     const el = document.createElement("div");
     el.className = "toast"; el.style.setProperty("--c", lvColor(e.level));
-    el.innerHTML = `<span class="dot" style="--c:${lvColor(e.level)};margin-top:6px"></span><div><b>${tx(A.alertsUi.newAlert)} · ${tx(C.alerts[e.level].name)}</b>${tx(c.m.name)} · ${tx(A.player.day)} <span dir="ltr">${e.day}</span></div>`;
-    el.onclick = () => { state.member = c.m.id; go("alerts"); el.remove(); };
+    el.innerHTML = `<span class="dot" style="--c:${lvColor(e.level)};margin-top:6px"></span><div><b>${tx(L.newAlert)} · ${tx(C.alerts[e.level].name)}</b>${tx(c.m.name)} · ${tx(A.player.day)} <span dir="ltr">${e.day}</span></div>`;
+    el.onclick = () => { state.member = c.m.id; go("demo"); el.remove(); };
     $("toasts").appendChild(el);
     while ($("toasts").children.length > 3) $("toasts").firstChild.remove();
     setTimeout(() => el.remove(), 6000);
@@ -1098,16 +880,12 @@
   function route() {
     const [scr, arg] = location.hash.slice(1).split("/");
     state.screen = SCREENS[scr] ? scr : "home";
-    if (scr === "trends" && arg && sim.channels[arg]) state.channel = arg;
-    if (scr === "member" && arg) state.member = arg;
-    if (scr === "review" && arg) state.episode = arg;
     render();
     $("view").focus({ preventScroll: true });
     window.scrollTo({ top: 0 });
   }
 
   // ---------- الأحداث ----------
-  function recompute() { compute(); renderFrame(); render(); }
   function bind() {
     $("playBtn").onclick = () => setPlaying(!state.playing);
     $("restartBtn").onclick = () => { setPlaying(false); setDay(0); };
@@ -1129,42 +907,19 @@
       if (e.key === "PageDown" || e.key === "[") setDay(state.day - 1);
     });
     $("view").addEventListener("click", e => {
-      const el = e.target.closest("[data-go],[data-member],[data-step],[data-channel],[data-filter],[data-ack],button[id]");
+      const el = e.target.closest("[data-go],[data-member],[data-step]");
       if (!el) return;
       if (el.dataset.go) return go(el.dataset.go);
       if (el.dataset.member) { state.member = el.dataset.member; return render(); }
       if (el.dataset.step) return stepMember(+el.dataset.step);
-      if (el.dataset.channel) { state.channel = el.dataset.channel; return render(); }
-      if (el.dataset.filter) { state.filter = el.dataset.filter; return render(); }
-      if (el.dataset.ack) { saved.acks[el.dataset.ack] = state.day; persist(); return render(); }
-      switch (el.id) {
-        case "approveBtn": return decide("approved");
-        case "dismissBtn": return decide("dismissed");
-        case "escBtn": return decide("escalated");
-        case "undoDec": delete saved.decisions[state.episode]; persist(); return render();
-        case "clearLog": saved.log = []; persist(); return render();
-        case "sReset": sim = clone(DEFAULT_SIM); saved = { acks: {}, decisions: {}, log: [] }; persist(); return recompute();
-      }
     });
     $("view").addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.dataset && e.target.dataset.go) { e.preventDefault(); go(e.target.dataset.go); } });
-    $("view").addEventListener("change", e => {
-      const el = e.target;
-      if (el.id === "truthChk") { state.showTruth = el.checked; return render(); }
-      if (el.id === "infoChk") { state.showInfo = el.checked; return render(); }
-      if (el.id === "sMode") { sim.personal.baselineMode = el.value; return recompute(); }
-      if (el.id === "sChem") { sim.personal.includeChem = el.checked; return recompute(); }
-      if (el.id === "sAnchor") { sim.personal.useAnchor = el.checked; return recompute(); }
-      if (el.id === "sK") { sim.personal.k = +el.value; return recompute(); }
-      if (el.id === "sH") { sim.personal.h = +el.value; return recompute(); }
-      if (el.id === "sW") { sim.projection.window = +el.value; return recompute(); }
-    });
-    $("view").addEventListener("input", e => { const v = $(e.target.id + "V"); if (v) v.textContent = e.target.value; });
   }
 
   // ---------- البدء ----------
   compute();
-  // يوم البداية: بعد المعايرة بقليل حتى تظهر البيانات فوراً (يمكن الرجوع لليوم 0)
-  let start = 40;
+  // يوم البداية: نظامنا كشف الانحراف والحد الثابت لم يكشفه بعد (يمكن الرجوع لليوم 0)
+  let start = 75;
   try { const q = new URLSearchParams(location.search).get("day"); if (q != null) start = clamp(parseInt(q, 10) || 0, 0, D - 1); } catch (e) { /* */ }
   state.day = start; seenUpTo(start);
   // صور اختيارية: خلفية المركبة وصورة الرائد. إذا لم تكن موجودة يبقى الرسم المدمج
