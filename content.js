@@ -197,7 +197,7 @@ window.VITALX_CONTENT = {
       link: { ar: "خارطة أبحاث HRP", en: "HRP Human Research Roadmap" },
       team: { ar: "الفريق", en: "Team" },
       challenge: { ar: "التحدي", en: "Challenge" },
-      challengeName: { ar: "⟨اسم تحدي ناسا⟩", en: "⟨NASA challenge name⟩" },
+      challengeName: { ar: "Create Health Monitoring Software for Astronauts on Space Missions", en: "Create Health Monitoring Software for Astronauts on Space Missions" },
       members: { ar: "الأعضاء", en: "Members" },
       membersNames: { ar: "الفارس الزكواني · عبدالملك الغنيمي · معن الشبيبي · رَونق الزكواني · فاطمة الحارثي", en: "Al-Faris AlZakwani · Abdulmalik AlGhunaimi · Maan AlShabibi · Rawnuq AlZakwani · Fatma AlHarthi" }
     },
