@@ -47,10 +47,10 @@ window.VITALX_CONTENT = {
     // 2) الحل: الساعة واللوحي
     solution: {
       steps: [
-        { ar: "خط أساس شخصي", en: "Personal baseline" },
-        { ar: "robust z", en: "robust z" },
-        { ar: "CUSUM", en: "CUSUM" },
-        { ar: "تنبيه مع السبب", en: "Alert + reason" }
+        { ar: "قياس", en: "Measure" },
+        { ar: "خط أساسك", en: "Your baseline" },
+        { ar: "انحراف", en: "Drift" },
+        { ar: "تنبيه + السبب", en: "Alert + why" }
       ],
       watch: { ar: "ساعة الرائد", en: "Astronaut watch" },
       tablet: { ar: "لوحة طبيب الطاقم", en: "Crew medical officer tablet" },
