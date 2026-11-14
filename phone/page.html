@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>VITALX</title>
+<style>/*CSS*/</style>
+</head><body>
+<section class="view on" id="menu"><div class="shade"></div><div class="in">
+  <div class="holo m-head"><h1 class="brand">VITAL<span>X</span></h1><p class="team" id="team"></p></div>
+  <div class="hero"><img src="astronaut.png" alt=""><i class="pad"></i></div>
+  <div class="choices"><button class="choice" id="bWatch"></button><button class="choice" id="bGround"></button></div>
+</div><p class="note" id="note"></p><div class="lang"><button id="langBtn"></button></div></section>
+
+<section class="view" id="watch"><div class="shade"></div><div class="w holo">
+  <div class="w-top"><span id="wDay"></span><b id="wName"></b></div>
+  <div class="ring"><canvas id="wRing"></canvas><div class="mid"><span class="lab" id="wLab"></span><span class="hr mono" id="wHr"></span><span class="u">bpm</span></div></div>
+  <div class="tiles"><div class="tile" id="wSleep"></div><div class="tile" id="wCo2"></div><div class="tile" id="wDose"></div></div>
+  <div class="state" id="wState"></div>
+  <p class="why" id="wWhy"></p>
+  <div class="spark"><canvas id="wSpark"></canvas></div>
+</div><div class="pause">❚❚</div></section>
+
+<section class="view" id="ground"><div class="shade"></div><div class="g">
+  <div class="g-head holo"><span class="brand">VITAL<span>X</span></span><span class="t" id="gTitle"></span><span class="day" id="gDay"></span></div>
+  <div class="g-body">
+    <div class="crew" id="gCrew"></div>
+    <div class="main" id="gMain">
+      <div class="panel holo chart"><h3 id="gChartT"></h3><canvas id="gCv"></canvas></div>
+      <p class="legend" id="gLegend"></p>
+      <div class="row2"><div class="panel" id="gOurs"></div><div class="panel" id="gFixed"></div><div class="panel alert" id="gAlert"></div></div>
+    </div>
+  </div>
+</div><div class="pause">❚❚</div></section>
+<div class="pin" id="pin"><div class="pin-box holo">
+  <b id="pinT"></b><div class="pdots" id="pinDots"></div><p id="pinMsg"></p>
+  <div class="keys" id="pinKeys"></div><div class="pexit" id="pinExit"></div>
+</div></div>
+<script>/*JS*/</script>
+</body></html>
