@@ -114,3 +114,29 @@
 .tag-real { display: inline-block; font-size: .7rem; font-weight: 600; padding: 1px 9px; border-radius: 999px; vertical-align: middle;
   color: var(--built, #3ddc97); border: 1px solid currentColor; background: rgba(61,220,151,.08); }
 .cohort h3 .tag-synth, .demo-chart h3 .tag-real { font-size: .68rem; padding: 1px 8px; white-space: nowrap; }
+/* المستشار الذكي — رموز فقط، بنفس الزجاج والتوهج */
+.advisor { --c: var(--accent); margin-top: 10px; padding: 10px 12px 12px; border-radius: 14px; position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); border: 1px solid rgba(120,230,255,.18);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 0 22px rgba(0,0,0,.25); }
+.advisor::before { content: ""; position: absolute; inset-inline-start: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--c); box-shadow: 0 0 10px var(--c); }
+.advisor.calm { --c: var(--built, #3ddc97); }
+.adv-head { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.adv-head b { font-size: .82rem; letter-spacing: .02em; }
+.adv-head .tag-synth { font-size: .64rem; padding: 0 8px; margin-inline-start: auto; }
+.adv-spark { display: inline-flex; width: 16px; height: 16px; color: var(--c); filter: drop-shadow(0 0 4px var(--c)); }
+.adv-spark svg { width: 100%; height: 100%; }
+.adv-flow { display: flex; align-items: flex-start; justify-content: space-around; gap: 4px; }
+.adv-node { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; flex: 1; cursor: help; }
+.adv-orb { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; color: var(--c);
+  background: radial-gradient(circle at 50% 35%, rgba(255,255,255,.10), rgba(0,0,0,.35)); border: 1.5px solid var(--c);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--c) 45%, transparent), inset 0 0 10px color-mix(in srgb, var(--c) 25%, transparent); }
+.adv-orb svg { width: 24px; height: 24px; }
+.adv-node.act .adv-orb { --c: var(--built, #3ddc97); color: var(--c); border-color: var(--c); }
+.adv-node small { font-size: .72rem; font-weight: 600; text-align: center; color: var(--text, #e7ecf7); white-space: nowrap; }
+.adv-arr { flex: 0 0 16px; height: 46px; display: grid; place-items: center; font-style: normal; color: var(--muted); font-size: 1.3rem; line-height: 1; opacity: .8; }
+.adv-arr::after { content: "›"; }
+[dir="rtl"] .adv-arr::after { content: "‹"; }
+.t-chart .advisor { margin-top: 8px; }
+.w-status { display: flex; align-items: center; justify-content: center; gap: 5px; }
+.w-adv { display: inline-flex; width: 14px; height: 14px; }
+.w-adv svg { width: 100%; height: 100%; }

@@ -20,7 +20,7 @@ window.VITALX_CONTENT = {
   site: {
     title: { ar: "VITALX", en: "VITALX" },
     subtitle: { ar: "فريق NovaCare · يكشف الانحراف البطيء في صحة الرائد قبل الحدود الثابتة", en: "Team NovaCare · catches slow drift in astronaut health before fixed limits do" },
-    synthetic: { ar: "بيانات مولّدة · ليست بيانات رواد حقيقيين", en: "Synthetic data · not real crew data" },
+    synthetic: { ar: "العلامات الحيوية محاكاة · CO2 من ناسا", en: "Vital signs simulated · CO2 from NASA" },
     disclaimer: { ar: "أداة دعم قرار لطبيب الطاقم، وليست تشخيصاً.", en: "Decision support for the crew medical officer, not diagnosis." },
 
     screens: {
@@ -50,7 +50,8 @@ window.VITALX_CONTENT = {
         { ar: "خط أساس شخصي", en: "Personal baseline" },
         { ar: "robust z", en: "robust z" },
         { ar: "CUSUM", en: "CUSUM" },
-        { ar: "تنبيه مع السبب", en: "Alert + reason" }
+        { ar: "تنبيه مع السبب", en: "Alert + reason" },
+        { ar: "المستشار الذكي", en: "Smart Advisor" }
       ],
       watch: { ar: "ساعة الرائد", en: "Astronaut watch" },
       tablet: { ar: "لوحة طبيب الطاقم", en: "Crew medical officer tablet" },
@@ -100,6 +101,43 @@ window.VITALX_CONTENT = {
       never: { ar: "لم يكشف", en: "Never" },
       day: { ar: "يوم", en: "day" },
       source: { ar: "المصدر: NASA OSDR Environmental Data App · أول 5 أيام قيمة تعبئة ثابتة فاستُبعدت", en: "Source: NASA OSDR Environmental Data App · first 5 days were a constant fill value and were excluded" }
+    },
+
+    // طبقة الاقتراحات: عند الإنذار نعرض ماذا تغيّر، ماذا قد يحدث، وماذا نقترح. اقتراح لطبيب الطاقم فقط، ليس وصفة.
+    advice: {
+      head: { ar: "المستشار الذكي", en: "Smart Advisor" },
+      tag: { ar: "اقتراح", en: "Suggestion" },
+      foot: { ar: "يراجعه طبيب الطاقم ويقرر", en: "Crew medical officer reviews and decides" },
+      ok: { ar: "كل شيء ضمن خطك", en: "All within baseline" },
+      what: { ar: "ما تغيّر", en: "What changed" },
+      risk: { ar: "إن استمر", en: "If it continues" },
+      act: { ar: "نقترح", en: "We suggest" },
+      ch: {
+        sleep: {
+          s: { what: { ar: "النوم ↓", en: "Sleep ↓" }, risk: { ar: "إرهاق", en: "Fatigue" }, act: { ar: "نوم 7 س", en: "Sleep 7 h" } },
+          what: { ar: "نومك أقل من معدلك الشخصي لعدة ليالٍ", en: "Sleep below your personal norm for several nights" },
+          risk: { ar: "إرهاق، بطء رد الفعل، أخطاء انتباه في المهام", en: "Fatigue, slower reactions, attention errors on tasks" },
+          act: { ar: "نافذة نوم 7 ساعات، تخفيف الإضاءة والشاشات قبل النوم، مراجعة الجدول", en: "7-hour sleep window, dim lights and screens before bed, review the schedule" }
+        },
+        hr: {
+          s: { what: { ar: "النبض ↑", en: "Heart rate ↑" }, risk: { ar: "إجهاد", en: "Strain" }, act: { ar: "راحة + ماء", en: "Rest + water" } },
+          what: { ar: "نبض الراحة أعلى من خطك الشخصي", en: "Resting heart rate above your personal baseline" },
+          risk: { ar: "إجهاد متراكم أو بداية عارض صحي", en: "Accumulated strain or an early health issue" },
+          act: { ar: "تقليل الحمل اليوم، شرب الماء، قياس متابعة غدًا مع الطبيب", en: "Lighter load today, hydrate, follow-up check with the doctor tomorrow" }
+        },
+        co2: {
+          s: { what: { ar: "CO2 ↑", en: "CO2 ↑" }, risk: { ar: "صداع", en: "Headache" }, act: { ar: "تهوية", en: "Ventilate" } },
+          what: { ar: "CO2 المقصورة يرتفع ببطء عن المعتاد", en: "Cabin CO2 creeping above its usual level" },
+          risk: { ar: "صداع، ضعف التركيز، نوم أسوأ", en: "Headache, poor focus, worse sleep" },
+          act: { ar: "فحص التهوية وجهاز إزالة CO2، تجنّب التجمع في وحدة واحدة", en: "Check ventilation and the CO2 scrubber, avoid crowding one module" }
+        },
+        chem: {
+          s: { what: { ar: "مؤشر ↕", en: "Marker ↕" }, risk: { ar: "يحتاج فحص", en: "Needs check" }, act: { ar: "إعادة القياس", en: "Re-measure" } },
+          what: { ar: "المؤشر الكيميائي خارج نطاقك الشخصي", en: "Chemical marker outside your personal range" },
+          risk: { ar: "تغيّر يحتاج تفسيرًا من الطبيب", en: "A change the doctor should interpret" },
+          act: { ar: "تكرار القياس ومراجعته مع الطبيب", en: "Repeat the measurement and review with the doctor" }
+        }
+      }
     },
 
     // 5) ناسا

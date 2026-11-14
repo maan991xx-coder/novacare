@@ -562,7 +562,7 @@
             <circle cx="80" cy="80" r="${R}" stroke="${col}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="${(C2 * frac).toFixed(1)} ${C2.toFixed(1)}" transform="rotate(-90 80 80)" style="filter:drop-shadow(0 0 6px ${col})"/></svg>
             <div class="w-mid"><b dir="ltr">${fmt(c.ast.obs.hr[d], 0)}</b><small>bpm</small></div></div>
           ${row("sleep", fmt(c.ast.obs.sleep[d], 1), "h")}${row("co2", fmt(c.ast.obs.co2[d], 2), "mmHg")}
-          <div class="w-status">${tx(A.status[s])}</div>
+          <div class="w-status">${(tc => tc && AICON[tc.id] && s !== "calib" && s !== 0 ? `<span class="w-adv" title="${esc(t(A.advice.ch[tc.id].act))}">${svgI(AICON[tc.id].act)}</span>` : "")(topChannel(c, d))}${tx(A.status[s])}</div>
         </div></div>`;
   }
   function tabletFace(d) {
@@ -571,7 +571,8 @@
         <b dir="ltr">${fmt(x.ast.obs.hr[d], 0)}<em>bpm</em></b><span class="lv-pill">${tx(A.status[s])}</span></button>`; }).join("");
     return `<div class="dev tablet"><i class="t-cam"></i><div class="t-screen">
         <div class="t-crew">${rows}</div>
-        <div class="t-chart">${chartBox("cvTablet", "short")}</div>
+        <div class="t-chart">${chartBox("cvTablet", "short")}
+          ${(tc => advisor(tc && tc.id, tc && tc.level))(topChannel(crewById(state.member), d))}</div>
       </div></div>`;
   }
   function screenSolution() {
@@ -611,6 +612,35 @@
       </div>`;
   }
   function afterEdge() { drawHr($("cvProj"), crewById(state.member), state.day, { proj: true }); }
+
+  // ---------- طبقة الاقتراحات ----------
+  // القناة الأكثر مساهمة في آخر إنذار → ماذا تغيّر / إن استمر / نقترح. اقتراح لطبيب الطاقم، ليس تشخيصًا.
+  // أيقونات المستشار: ما تغيّر (أيقونة القناة) ← ماذا قد يحدث ← ماذا نقترح. الجملة الكاملة في التلميح (title).
+  const AICON = {
+    sleep: { risk: '<rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2"/><path d="M5 10v4"/>',
+             act: '<path d="M3 18V8"/><path d="M3 14h18v4"/><path d="M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/>' },
+    hr:    { risk: '<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/>',
+             act: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/>' },
+    co2:   { risk: '<circle cx="12" cy="10" r="7"/><path d="M9 21h6"/><path d="m8.5 9 2 2-2 2M15.5 9l-2 2 2 2"/>',
+             act: '<circle cx="12" cy="12" r="1.6"/><path d="M12 10.4c0-4 1-7 3.5-7 1.6 0 2 1.8.5 3.5L12 10.4ZM13.4 12.8c3.5 2 5.6 4.3 4.4 6.4-.8 1.4-2.6.9-3.3-1.3l-1.1-5.1ZM10.6 12.8c-3.5 2-6.6 2.6-7.8.5-.8-1.4.5-2.7 2.8-2.2l5 1.7Z"/>' },
+    chem:  { risk: '<path d="M9 3h6M10 3v6L4.5 19A1.5 1.5 0 0 0 6 21h12a1.5 1.5 0 0 0 1.5-2L14 9V3"/>',
+             act: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>' },
+    ok: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>'
+  };
+  const svgI = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+  function topChannel(c, d) {
+    const ad = lastAlertDay(c, d); if (ad == null) return null;
+    const ex = (c.pers.explain[ad] || []).filter(x => x.bad > 0).sort((a, b) => b.bad * b.w - a.bad * a.w);
+    return ex.length ? { id: ex[0].id, day: ad, level: c.pers.level[ad] } : null;
+  }
+  function advisor(id, level) {
+    const V = A.advice, head = `<div class="adv-head"><span class="adv-spark">${svgI('<path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5 19 19M5 19l2.5-2.5M16.5 7.5 19 5"/>')}</span><b>${tx(V.head)}</b><span class="tag-synth">${tx(V.tag)}</span></div>`;
+    if (!id || !V.ch[id]) return `<div class="advisor calm">${head}<div class="adv-flow"><div class="adv-node" title="${esc(t(V.ok))}"><span class="adv-orb">${svgI(AICON.ok)}</span><small>${tx(V.ok)}</small></div></div></div>`;
+    const a = V.ch[id], node = (k, icon) => `<div class="adv-node ${k}" title="${esc(t(V[k]) + ": " + t(a[k]))}"><span class="adv-orb">${icon}</span><small>${tx(a.s[k])}</small></div>`;
+    const arr = '<i class="adv-arr"></i>';
+    return `<div class="advisor" style="--c:${LV(level || 1)}">${head}<div class="adv-flow">
+      ${node("what", vicon(id))}${arr}${node("risk", svgI(AICON[id].risk))}${arr}${node("act", svgI(AICON[id].act))}</div></div>`;
+  }
 
   // ---------- 4ب) بيانات ناسا الحقيقية: RR-12 من OSDR EDA ----------
   // نفس المحرك: خط أساس من أول 14 يومًا، CUSUM (k,h من content.js)، CO2 خطره في الارتفاع فقط.
@@ -655,6 +685,7 @@
             <div class="cmp head"><span></span><b class="o">VITALX</b><b class="f">${tx(L.fixedThr)}</b></div>
             <div class="cmp"><span>${tx(P.detected)}</span><b class="o" dir="ltr">${R.t.ours == null ? "—" : realDate(R.t.ours)}</b><b class="f" dir="ltr">${R.t.fixed == null ? "—" : realDate(R.t.fixed)}</b></div></div>
           ${gap ? `<div class="gap">${tx(P.earlier)} <b dir="ltr">${gap}</b> ${tx(S6.edge.days)}</div>` : ""}
+          ${advisor(R.t.ours != null ? "co2" : null, 2)}
         </div></div>`;
   }
   function afterReal() {
