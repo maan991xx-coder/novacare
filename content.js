@@ -231,7 +231,10 @@ window.VITALX_CONTENT = {
       observed: { ar: "القراءة اليومية", en: "Daily reading" },
       fixedThr: { ar: "العتبة الثابتة", en: "Fixed threshold" },
       monitorLine: { ar: "عتبة المراقبة الشخصية", en: "Personal monitoring line" },
-      newAlert: { ar: "تنبيه جديد", en: "New alert" }
+      newAlert: { ar: "تنبيه جديد", en: "New alert" },
+      alertsLog: { ar: "آخر التنبيهات", en: "Recent alerts" },
+      noAlerts: { ar: "لا تنبيهات بعد", en: "No alerts yet" },
+      close: { ar: "إغلاق", en: "Close" }
     },
 
     /* الطاقم: أعضاء فريق NovaCare (البيانات مولّدة وليست قياساتهم). driftMult: 0 = لا انحراف (رائد مستقر) */
