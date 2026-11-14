@@ -1,11 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="76.5 69 152 152">
+  <title>NovaCare</title>
   <defs>
     <radialGradient id="bg" cx="50%" cy="35%" r="75%"><stop offset="0" stop-color="#12303f"/><stop offset="1" stop-color="#050914"/></radialGradient>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6fe3ff"/><stop offset="1" stop-color="#3d8bff"/></linearGradient>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="100" y1="93" x2="205" y2="198"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#3b82f6"/></linearGradient>
+    <mask id="gap"><rect x="76" y="69" width="153" height="153" fill="#fff"/><rect x="80" y="141" width="32" height="20.5" fill="#000"/></mask>
   </defs>
-  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
-  <rect x="1" y="1" width="62" height="62" rx="13" fill="none" stroke="#6fe3ff" stroke-opacity=".35" stroke-width="1.5"/>
-  <ellipse cx="32" cy="32" rx="23" ry="9.5" fill="none" stroke="url(#ring)" stroke-width="2.4" transform="rotate(-28 32 32)" opacity=".9"/>
-  <path d="M9 34h11l4-10 6 20 5-15 3 5h17" fill="none" stroke="#e7fbff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="51.5" cy="21.6" r="3.4" fill="#3ddc97"/>
+  <rect x="76.5" y="69" width="152" height="152" rx="33" fill="url(#bg)"/>
+  <path mask="url(#gap)" fill="url(#g)" d="M196.906 162.781C187.238 187.035 159.953 199.105 135.504 189.949 111.055 180.789 98.418 153.766 107.059 129.129 115.703 104.496 142.461 91.293 167.27 99.418c2.214.727 4.601-.481 5.328-2.699.726-2.215-.485-4.598-2.7-5.324C140.723 81.836 109.258 97.363 99.09 126.336 88.926 155.305 103.789 187.086 132.543 197.855c28.754 10.77 60.836-3.426 72.207-31.949.864-2.164-.195-4.621-2.359-5.484-2.168-.863-4.621.195-5.485 2.359Z"/>
+  <path fill="url(#g)" d="M92.582 155.133h33.777c1.7 0 3.235-1.02 3.895-2.586l12.281-29.172-7.918-.371 16.887 53.738c1.207 3.832 6.574 3.977 7.984.215l13.817-36.848-7.332 1.051 9.214 12.285c.797 1.063 2.047 1.688 3.375 1.688h33.782c2.332 0 4.219-1.891 4.219-4.223s-1.887-4.223-4.219-4.223h-33.782l3.379 1.688-9.211-12.281c-2.004-2.668-6.16-2.071-7.332 1.051l-13.82 36.848 7.984.218-16.89-53.738c-1.18-3.75-6.395-3.996-7.918-.375l-12.285 29.176 3.89-2.586H92.582c-2.332 0-4.223 1.891-4.223 4.223s1.891 4.223 4.223 4.223Z"/>
+  <path fill="#22d3ee" d="M189.313 94.867c1.277 7.422 5.628 11.774 13.05 13.051-7.422 1.281-11.773 5.633-13.05 13.051-1.282-7.418-5.63-11.77-13.051-13.051 7.421-1.277 11.769-5.629 13.051-13.051Z"/>
 </svg>
