@@ -580,7 +580,7 @@
     const FI = ['<path d="M3 12h4l2-5 4 10 2-5h6"/>', '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>', '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>', '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>', '<path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5 19 19M5 19l2.5-2.5M16.5 7.5 19 5"/>'];
     return `<div class="flow">${P.steps.map((s, i) => `<span class="flow-step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${FI[i] || ""}</svg>${tx(s)}</span>${i < P.steps.length - 1 ? '<i class="flow-arr"></i>' : ""}`).join("")}</div>
       <div class="devices">
-        <figure>${watchFace(c, d)}<figcaption>${tx(P.watch)} · ${tx(c.m.name)}</figcaption></figure>
+        <figure>${watchFace(c, d)}<figcaption>${tx(P.watch)} · ${tx(c.m.name)}</figcaption>${personalAdvice(c, d)}</figure>
         <figure class="wide">${tabletFace(d)}<figcaption>${tx(P.tablet)}</figcaption></figure>
       </div>
       `;
@@ -641,6 +641,16 @@
     const arr = '<i class="adv-arr"></i>';
     return `<div class="advisor" style="--c:${LV(level || 1)}">${head}<div class="adv-flow">
       ${node("what", vicon(id))}${arr}${node("risk", svgI(AICON[id].risk))}${arr}${node("act", svgI(AICON[id].act))}</div></div>`;
+  }
+
+  // الاستشارة الشخصية تحت الساعة: نفس المستشار للرائد المختار، بجمل قصيرة مكتوبة.
+  function personalAdvice(c, d) {
+    const V = A.advice, tc = topChannel(c, d), id = tc && tc.id, a = id && V.ch[id];
+    const head = `<div class="adv-head"><span class="adv-spark">${svgI('<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>')}</span><b>${tx(V.personal)}</b><span class="tag-synth">${tx(V.tag)}</span></div>`;
+    const foot = `<p class="pa-foot">${tx(V.foot)}</p>`;
+    if (!a) return `<div class="advisor personal calm">${head}<div class="pa-row act"><span class="adv-orb">${svgI(AICON.ok)}</span><div><small>${esc(t(c.m.name))}</small><p>${tx(V.ok)}</p></div></div>${foot}</div>`;
+    const row = (k, icon) => `<div class="pa-row ${k}"><span class="adv-orb">${icon}</span><div><small>${tx(V[k])}</small><p>${tx(a[k])}</p></div></div>`;
+    return `<div class="advisor personal" style="--c:${LV(tc.level || 1)}">${head}${row("what", vicon(id))}${row("risk", svgI(AICON[id].risk))}${row("act", svgI(AICON[id].act))}${foot}</div>`;
   }
 
   // ---------- 4ب) بيانات ناسا الحقيقية: RR-12 من OSDR EDA ----------

@@ -112,6 +112,7 @@ window.VITALX_CONTENT = {
     // طبقة الاقتراحات: عند الإنذار نعرض ماذا تغيّر، ماذا قد يحدث، وماذا نقترح. اقتراح لطبيب الطاقم فقط، ليس وصفة.
     advice: {
       head: { ar: "المستشار الذكي", en: "Smart Advisor" },
+      personal: { ar: "الاستشارة الشخصية", en: "Personal Advice" },
       tag: { ar: "اقتراح", en: "Suggestion" },
       foot: { ar: "يراجعه طبيب الطاقم ويقرر", en: "Crew medical officer reviews and decides" },
       ok: { ar: "كل شيء ضمن خطك", en: "All within baseline" },
