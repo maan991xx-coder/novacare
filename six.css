@@ -270,3 +270,70 @@ button, .key, .mini-crew, .t-row, .bchip { transition: transform .22s cubic-bezi
   .bell-list { width: min(300px, calc(100vw - 40px)); }
 }
 @media (prefers-reduced-motion: reduce) { .toast, .toast.fresh, .toast.out { transition: none; transform: none; } .toast.urgent .t-ic { animation: none; } }
+
+/* ===== مسار البيانات: ناسا ← تحقق ← محرك ← مخرجات (رموز + أرقام حية، بنفس الزجاج) ===== */
+.pipe { display: flex; align-items: stretch; gap: 6px; margin: 0 0 10px; padding: 6px; border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.012)); border: 1px solid rgba(120,230,255,.16); }
+.pipe.loading { align-items: center; justify-content: center; color: var(--muted); gap: 8px; padding: 10px; }
+.pipe svg { width: 18px; height: 18px; flex: none; }
+.pipe-st { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-radius: 10px; background: rgba(255,255,255,.03); min-width: 0; }
+.pipe-st b { display: block; font: 700 1.05rem/1.1 var(--mono); color: var(--text, #e7ecf7); }
+.pipe-st small, .pipe-o small, .pipe-play small { display: block; font-size: .66rem; color: var(--muted); white-space: nowrap; }
+.pipe-i { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: var(--accent);
+  background: rgba(95,212,255,.08); box-shadow: 0 0 12px rgba(95,212,255,.18); flex: none; }
+.pipe-st.v .pipe-i { color: var(--fixed); background: rgba(255,181,71,.08); box-shadow: 0 0 12px rgba(255,181,71,.18); }
+.pipe-st.e .pipe-i { color: var(--personal); }
+.pipe-arr { align-self: center; width: 14px; height: 2px; flex: none; background: linear-gradient(90deg, rgba(95,212,255,.15), rgba(95,212,255,.7)); position: relative; }
+.pipe-arr::after { content: ""; position: absolute; inset-inline-end: -1px; top: -3px; border: 4px solid transparent; border-inline-start-color: rgba(95,212,255,.8); }
+[dir="rtl"] .pipe-arr { background: linear-gradient(270deg, rgba(95,212,255,.15), rgba(95,212,255,.7)); }
+.pipe-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-inline-start: 2px; }
+.pipe-chip { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 999px; font-size: .68rem; color: var(--muted); border: 1px solid rgba(255,255,255,.07); }
+.pipe-chip svg { width: 12px; height: 12px; }
+.pipe-chip b { font: 600 .68rem/1 var(--mono); }
+.pipe-chip.on { color: var(--fixed); border-color: rgba(255,181,71,.35); }
+.pipe-outs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; flex: 1; min-width: 0; }
+.pipe-o, .pipe-play { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px; border-radius: 10px; cursor: pointer;
+  font: inherit; color: var(--accent); background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); }
+.pipe-o:hover, .pipe-play:hover { border-color: rgba(95,212,255,.45); }
+.pipe-o.on { background: rgba(95,212,255,.12); border-color: rgba(95,212,255,.5); }
+.pipe-n { position: absolute; top: 2px; inset-inline-end: 6px; min-width: 16px; padding: 0 4px; border-radius: 999px; font: 700 .62rem/16px var(--mono); color: #1b1203; background: var(--fixed); }
+.pipe-play { flex: none; width: 58px; color: #1b1203; background: linear-gradient(180deg, #ffd27a, #f0a93a); border-color: transparent; box-shadow: 0 0 14px rgba(255,181,71,.35); }
+.pipe-play small { color: #3a2604; font-weight: 700; }
+.pipe-play b { font: 700 .66rem/1 var(--mono); }
+.pipe-play.on { background: linear-gradient(180deg, #8fe9ff, #38bde6); }
+/* التحليلات + مراقبة المخاطر */
+.ana-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ana-cap { display: block; text-align: center; font-size: .72rem; color: var(--muted); margin-top: 2px; }
+.ana-cap b { color: var(--accent); font-family: var(--mono); }
+.demo.ana .chartbox canvas { height: 150px; }
+.risk-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto 10px; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid rgba(255,255,255,.06); font-size: .82rem; }
+.risk-row:first-of-type { border-top: 0; }
+.risk-row .vi { display: inline-flex; width: 20px; height: 20px; color: var(--c); }
+.risk-row .vi svg { width: 100%; height: 100%; }
+.risk-row b { font-family: var(--mono); } .risk-row b em { font-style: normal; font-size: .7rem; color: var(--muted); margin-inline-start: 3px; }
+.risk-row .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+.cohort h3 > svg { width: 16px; height: 16px; vertical-align: -3px; color: var(--accent); }
+.vr-l { display: inline-flex; align-items: center; gap: 6px; } .vr-l svg { width: 14px; height: 14px; color: var(--fixed); }
+.cmp.all.ok b, .cmp.all.ok span { color: var(--built, #3ddc97); }
+.demo.ana .cmp.all { grid-template-columns: minmax(0, 1fr) 64px; }
+.honest-line { margin: 0; font-size: .72rem; line-height: 1.5; }
+@media (max-width: 860px) {
+  .pipe { flex-wrap: wrap; }
+  .pipe-arr { display: none; }
+  .pipe-st { flex: 1 1 40%; }
+  .pipe-st.v { flex-basis: 100%; order: 3; }
+  .pipe-play { order: -1; }
+  .pipe-outs { flex-basis: 100%; order: 5; }
+  .ana-two { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) { .demo-mode { gap: 6px; } .demo-mode .key { flex: 1 1 0; min-width: 0; padding: 0 6px; font-size: .76rem; } }
+/* نفس الهواء، استجابة مختلفة */
+.cmp.ex { grid-template-columns: minmax(0, 1fr) 54px 54px 54px; }
+.cmp.ex b { color: var(--c, var(--muted)); font-size: .8rem; }
+.cmp.ex b.hit { color: var(--c); font-weight: 700; }
+.cmp.head.ex b { color: var(--muted); font-size: .68rem; }
+.sens { display: inline-flex; gap: 2px; justify-content: center; align-items: flex-end; height: 14px; }
+.sens i { width: 5px; border-radius: 2px; background: rgba(255,255,255,.12); }
+.sens i:nth-child(1) { height: 6px; } .sens i:nth-child(2) { height: 10px; } .sens i:nth-child(3) { height: 14px; }
+.sens i.on { background: var(--fixed); box-shadow: 0 0 6px rgba(255,181,71,.5); }
+.expo .advisor { margin-top: 8px; }
