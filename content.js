@@ -20,7 +20,7 @@ window.VITALX_CONTENT = {
   site: {
     title: { ar: "VITALX", en: "VITALX" },
     subtitle: { ar: "فريق NovaCare · يكشف الانحراف البطيء في صحة الرائد قبل الحدود الثابتة", en: "Team NovaCare · catches slow drift in astronaut health before fixed limits do" },
-    synthetic: { ar: "بيانات مولّدة · ليست بيانات رواد حقيقيين", en: "Synthetic data · not real crew data" },
+    synthetic: { ar: "العلامات الحيوية محاكاة · CO2 من ناسا", en: "Vital signs simulated · CO2 from NASA" },
     disclaimer: { ar: "أداة دعم قرار لطبيب الطاقم، وليست تشخيصاً.", en: "Decision support for the crew medical officer, not diagnosis." },
 
     screens: {
@@ -50,7 +50,8 @@ window.VITALX_CONTENT = {
         { ar: "قياس", en: "Measure" },
         { ar: "خط أساسك", en: "Your baseline" },
         { ar: "انحراف", en: "Drift" },
-        { ar: "تنبيه + السبب", en: "Alert + why" }
+        { ar: "تنبيه + السبب", en: "Alert + why" },
+        { ar: "المستشار", en: "Advisor" }
       ],
       watch: { ar: "ساعة الرائد", en: "Astronaut watch" },
       tablet: { ar: "لوحة طبيب الطاقم", en: "Crew medical officer tablet" },
@@ -82,7 +83,67 @@ window.VITALX_CONTENT = {
       rate: { ar: "نسبة الكشف", en: "Detection rate" },
       delay: { ar: "التأخير (الوسيط)", en: "Delay (median)" },
       fa: { ar: "إنذار كاذب / 100 يوم", en: "False alarms / 100 days" },
-      hint: { ar: "اضغط تشغيل وشاهد من يكشف أولاً", en: "Press play and see who catches it first" }
+      hint: { ar: "اضغط تشغيل وشاهد من يكشف أولاً", en: "Press play and see who catches it first" },
+      // وضع بيانات ناسا الحقيقية (RR-12)
+      modeSim: { ar: "محاكاة الطاقم", en: "Crew simulation" },
+      modeReal: { ar: "بيانات ناسا حقيقية", en: "Real NASA data" },
+      realTitle: { ar: "CO2 مقصورة محطة الفضاء · مهمة RR-12 (2019)", en: "ISS cabin CO2 · mission RR-12 (2019)" },
+      realTag: { ar: "بيانات ناسا حقيقية", en: "Real NASA data" },
+      testTag: { ar: "اختبار مصطنع", en: "Synthetic test" },
+      observed: { ar: "CO2 الحقيقي (وسيط يومي)", en: "Real CO2 (daily median)" },
+      drift: { ar: "+ ارتفاع مصطنع 0.05/يوم", en: "+ synthetic rise 0.05/day" },
+      limit: { ar: "حد ناسا 3 mmHg", en: "NASA limit 3 mmHg" },
+      realOurs: { ar: "VITALX على البيانات الحقيقية", en: "VITALX on real data" },
+      realFixed: { ar: "حد ناسا الثابت", en: "NASA fixed limit" },
+      noAlarm: { ar: "لا إنذار كاذب", en: "No false alarm" },
+      noBreach: { ar: "لم يُتجاوز", en: "Not crossed" },
+      driftHead: { ar: "اختبار: نضيف ارتفاعًا بطيئًا فوق البيانات الحقيقية", en: "Test: add a slow rise on top of the real data" },
+      never: { ar: "لم يكشف", en: "Never" },
+      day: { ar: "يوم", en: "day" },
+      allHead: { ar: "على 10 مهمات ناسا حقيقية", en: "Across 10 real NASA missions" },
+      allQuiet: { ar: "هادئة: لا إنذار", en: "Quiet: no alert" },
+      allBelow: { ar: "ارتفاع رصده VITALX دون الحد", en: "Rise VITALX caught below the limit" },
+      allSame: { ar: "VITALX والحد معًا", en: "VITALX and limit together" },
+      allFixed: { ar: "قفزة مفاجئة: الحد أسبق", en: "Sudden spike: limit first" },
+      allNote: { ar: "الحد الثابت يلتقط القفزات، وVITALX يلتقط الانجراف البطيء: يعملان معًا", en: "Fixed limits catch spikes, VITALX catches slow drift: they work together" },
+      source: { ar: "المصدر: NASA OSDR Environmental Data App · أول 5 أيام قيمة تعبئة ثابتة فاستُبعدت", en: "Source: NASA OSDR Environmental Data App · first 5 days were a constant fill value and were excluded" }
+    },
+
+    // طبقة الاقتراحات: عند الإنذار نعرض ماذا تغيّر، ماذا قد يحدث، وماذا نقترح. اقتراح لطبيب الطاقم فقط، ليس وصفة.
+    advice: {
+      head: { ar: "المستشار الذكي", en: "Smart Advisor" },
+      tag: { ar: "اقتراح", en: "Suggestion" },
+      foot: { ar: "يراجعه طبيب الطاقم ويقرر", en: "Crew medical officer reviews and decides" },
+      ok: { ar: "كل شيء ضمن خطك", en: "All within baseline" },
+      what: { ar: "ما تغيّر", en: "What changed" },
+      risk: { ar: "إن استمر", en: "If it continues" },
+      act: { ar: "نقترح", en: "We suggest" },
+      ch: {
+        sleep: {
+          s: { what: { ar: "النوم ↓", en: "Sleep ↓" }, risk: { ar: "إرهاق", en: "Fatigue" }, act: { ar: "نوم 7 س", en: "Sleep 7 h" } },
+          what: { ar: "نومك أقل من معدلك الشخصي لعدة ليالٍ", en: "Sleep below your personal norm for several nights" },
+          risk: { ar: "إرهاق، بطء رد الفعل، أخطاء انتباه في المهام", en: "Fatigue, slower reactions, attention errors on tasks" },
+          act: { ar: "نافذة نوم 7 ساعات، تخفيف الإضاءة والشاشات قبل النوم، مراجعة الجدول", en: "7-hour sleep window, dim lights and screens before bed, review the schedule" }
+        },
+        hr: {
+          s: { what: { ar: "النبض ↑", en: "Heart rate ↑" }, risk: { ar: "إجهاد", en: "Strain" }, act: { ar: "راحة + ماء", en: "Rest + water" } },
+          what: { ar: "نبض الراحة أعلى من خطك الشخصي", en: "Resting heart rate above your personal baseline" },
+          risk: { ar: "إجهاد متراكم أو بداية عارض صحي", en: "Accumulated strain or an early health issue" },
+          act: { ar: "تقليل الحمل اليوم، شرب الماء، قياس متابعة غدًا مع الطبيب", en: "Lighter load today, hydrate, follow-up check with the doctor tomorrow" }
+        },
+        co2: {
+          s: { what: { ar: "CO2 ↑", en: "CO2 ↑" }, risk: { ar: "صداع", en: "Headache" }, act: { ar: "تهوية", en: "Ventilate" } },
+          what: { ar: "CO2 المقصورة يرتفع ببطء عن المعتاد", en: "Cabin CO2 creeping above its usual level" },
+          risk: { ar: "صداع، ضعف التركيز، نوم أسوأ", en: "Headache, poor focus, worse sleep" },
+          act: { ar: "فحص التهوية وجهاز إزالة CO2، تجنّب التجمع في وحدة واحدة", en: "Check ventilation and the CO2 scrubber, avoid crowding one module" }
+        },
+        chem: {
+          s: { what: { ar: "مؤشر ↕", en: "Marker ↕" }, risk: { ar: "يحتاج فحص", en: "Needs check" }, act: { ar: "إعادة القياس", en: "Re-measure" } },
+          what: { ar: "المؤشر الكيميائي خارج نطاقك الشخصي", en: "Chemical marker outside your personal range" },
+          risk: { ar: "تغيّر يحتاج تفسيرًا من الطبيب", en: "A change the doctor should interpret" },
+          act: { ar: "تكرار القياس ومراجعته مع الطبيب", en: "Repeat the measurement and review with the doctor" }
+        }
+      }
     },
 
     // 5) ناسا
@@ -90,11 +151,11 @@ window.VITALX_CONTENT = {
       head: { ar: "كل إشارة مربوطة بخطر في برنامج أبحاث الإنسان HRP", en: "Every signal maps to a NASA Human Research Program (HRP) risk" },
       map: [
         { ch: "sleep", risk: "Sleep Loss, Circadian Desynchronization & Work Overload" },
-        { ch: "co2", risk: { ar: "⟨اسم خطر HRP المرتبط بـ CO2 — تحققوا من الاسم الدقيق⟩", en: "⟨HRP risk related to CO2 — verify exact title⟩" } },
+        { ch: "co2", risk: "Ambient Carbon Dioxide Exposure in Crewed Vehicles (CO2 Risk)" },
         { ch: "rad", risk: "Radiation Carcinogenesis" },
         { ch: "hr", risk: { ar: "مؤشر عام للإجهاد، يُقرأ مع النوم وCO2", en: "General strain marker, read with sleep and CO2" } }
       ],
-      honest: { ar: "البيانات مولّدة، والسيناريوهات مبنية على مخاطر HRP. لم نستخدم أي مجموعة بيانات من ناسا.", en: "The data is synthetic; the scenarios are based on HRP risks. We did not use any NASA dataset." },
+      honest: { ar: "بيئة المقصورة (CO2) بيانات ناسا حقيقية من OSDR لمهمة RR-12. العلامات الحيوية للرواد محاكاة، لأن بيانات البشر عند ناسا محمية.", en: "Cabin environment (CO2) is real NASA OSDR data from mission RR-12. Crew vital signs are simulated, because NASA human data is access-controlled." },
       link: { ar: "خارطة أبحاث HRP", en: "HRP Human Research Roadmap" },
       team: { ar: "الفريق", en: "Team" },
       challenge: { ar: "التحدي", en: "Challenge" },
