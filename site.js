@@ -26,7 +26,7 @@
   const lvColor = l => css("--lv" + l) || ["#3ddc97", "#6aa8ff", "#ffb547", "#ff5d6c"][l];
 
   const state = {
-    day: 0, playing: false, speed: 2, screen: "home", member: "A", demoMode: "sim" };
+    day: 0, playing: false, speed: 2, screen: "home", member: "A", demoMode: "sim", rp: null };
   const SPEEDS = [0.5, 1, 2, 4, 8];
 
   // ---------- تشغيل المحرك لكل رائد ----------
@@ -434,7 +434,9 @@
     sleep: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/><path d="M15 4h4l-4 4h4"/>',
     co2: '<text x="12" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" stroke="none" font-family="sans-serif">CO2</text><rect x="2.5" y="5" width="19" height="14" rx="3"/>',
     rad: '<circle cx="12" cy="12" r="2"/><path d="M12 10 9 4.8A8 8 0 0 0 4.2 13H10M14 12h6a8 8 0 0 0-4.8-7.4L12 10M13 13.7l3 5.2a8 8 0 0 1-8 0l3-5.2"/>',
-    comp: '<path d="M3 12h4l2-6 4 12 2-6h6"/>'
+    comp: '<path d="M3 12h4l2-6 4 12 2-6h6"/>',
+    temp: '<path d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0Z"/><path d="M12 9v7"/>',
+    hum: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/>'
   };
   const vicon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${VICON[k]}</svg>`;
   function vitalsFor(c, d) {
@@ -695,11 +697,12 @@
     return `<div class="advisor personal" style="--c:${LV(tc.level || 1)}">${head}${row("what", vicon(id))}${row("risk", svgI(AICON[id].risk))}${row("act", svgI(AICON[id].act))}${foot}</div>`;
   }
 
-  // ---------- 4ب) بيانات ناسا الحقيقية: RR-12 من OSDR EDA ----------
+  // ---------- 4ب) بيانات ناسا الحقيقية: RR-12 عبر المسار الكامل (pipeline.js) ----------
+  // ناسا EDA (قراءات خام كل 5 دقائق) ← تحقق وتنظيف ← محرك المخاطر ← مراقبة، تنبيهات، لوحة، تحليلات.
   // نفس المحرك: خط أساس من أول 14 يومًا، CUSUM (k,h من content.js)، CO2 خطره في الارتفاع فقط.
-  const NASA = window.VITALX_NASA || null;
+  const NASA = window.VITALX_NASA || null, PL = window.VITALX_PIPELINE || null;
   const REAL = { base: sim.personal.stableWindow || 14, drift: 0.05, from: 16, limit: 3 };
-  function runReal(series) {
+  function runReal(series) {   // احتياط إذا لم يُحمَّل الملف الخام: الوسيط اليومي الجاهز
     const st = E.baselineStats(series.slice(0, REAL.base), { type: "relative", value: 0.05 });
     const step = E.makeCusum(sim.personal.k, sim.personal.h);
     let ours = null, fixed = null; const marks = [];
@@ -711,64 +714,214 @@
     });
     return { st, ours, fixed, marks };
   }
-  let realCache = null;
-  function realData() {
-    if (realCache || !NASA) return realCache;
-    const real = NASA.co2, test = real.map((v, i) => +(v + Math.max(0, i - REAL.from) * REAL.drift).toFixed(3));
-    realCache = { real, test, r: runReal(real), t: runReal(test) };
-    return realCache;
+  let realCache = null, fallCache = null, rawLoading = false;
+  function ensureRaw() {   // 20KB مضغوطة، تُحمَّل فقط عند فتح بيانات ناسا
+    if (window.VITALX_RAW || rawLoading || !PL) return;
+    rawLoading = true;
+    const s = document.createElement("script"); s.src = "data/rr12-raw.js";
+    s.onload = () => { realCache = null; if (state.screen === "demo" && state.demoMode !== "sim") render(); };
+    s.onerror = () => { rawLoading = false; };
+    document.head.appendChild(s);
   }
-  const realDate = (i, long) => { const s = NASA.dates[i] || ""; return long ? s : s.slice(5).replace("-", "/"); };
+  function realData() {
+    if (realCache) return realCache;
+    if (PL && window.VITALX_RAW) {
+      const P = PL.run(window.VITALX_RAW, { drift: REAL.drift, from: REAL.from });
+      // خطوات إعادة التشغيل: يوم تقويمي واحد في كل خطوة، مع عدّادات المسار حتى نهاية ذلك اليوم
+      const V = P.V, day0 = Date.parse(V.time[0] ? new Date(V.time[0]).toISOString().slice(0, 10) : 0), steps = [];
+      let i = 0, fl = 0, cl = 0, gp = 0, g = 0;
+      for (let k = 0; ; k++) {
+        const end = day0 + (k + 1) * 864e5;
+        while (i < V.n && V.time[i] < end) {
+          ["co2", "temp", "hum"].forEach(ch => { const s = V.status[ch][i]; if (s !== "ok") { fl++; if (s === "spike") cl++; } });
+          while (g < V.gaps.length && V.gaps[g].at < V.time[i]) { g++; gp++; }
+          i++;
+        }
+        steps.push({ date: new Date(end - 864e5).toISOString().slice(0, 10), readings: i, flagged: fl, cleaned: cl, gaps: gp });
+        if (i >= V.n) break;
+      }
+      realCache = { real: P.daily.co2, test: P.test, r: P.eng.co2, t: P.eng.test, dates: P.daily.dates, P, steps };
+      return realCache;
+    }
+    if (!NASA) return null;
+    if (!fallCache) { const real = NASA.co2, test = real.map((v, i) => +(v + Math.max(0, i - REAL.from) * REAL.drift).toFixed(3));
+      fallCache = { real, test, r: runReal(real), t: runReal(test), dates: NASA.dates, P: null }; }
+    return fallCache;
+  }
+  const realDate = (i, long) => { const R = realData(), s = (R && R.dates[i]) || ""; return long ? s : s.slice(5).replace("-", "/"); };
+  // إعادة التشغيل: state.rp = رقم الخطوة (null = المهمة كاملة)
+  function rpDate() { const R = realData(); return state.rp == null || !R.steps ? null : R.steps[state.rp].date; }
+  function curIdx(dates) { const d = rpDate(); if (d == null) return dates.length - 1; let k = -1; dates.forEach((x, i) => { if (x <= d) k = i; }); return k; }
+  let rpTimer = 0;
+  function stopReplay() { clearInterval(rpTimer); rpTimer = 0; state.rp = null; }
+  function startReplay() {
+    const R = realData(); if (!R || !R.steps) return;
+    clearInterval(rpTimer); state.rp = 0; render();
+    rpTimer = setInterval(() => {
+      if (state.screen !== "demo" || state.demoMode === "sim") return stopReplay();
+      if (state.rp >= R.steps.length - 1) { stopReplay(); return render(); }
+      state.rp++;
+      const d = R.steps[state.rp].date;
+      R.P.alerts.filter(a => a.date === d).forEach(a => toast(nasaWho(a), { day: d.slice(5).replace("-", "/"), level: a.level }));
+      render();
+    }, 260);
+  }
+  const nasaWho = a => ({ m: { id: "nasa", name: a.src === "test" ? S6.demo.pipe.alertTest : { ar: chLabel(a.ch, "ar") + " · RR-12", en: chLabel(a.ch, "en") + " · RR-12" } } });
+  const chLabel = (k, lg) => { const Q = S6.demo.pipe.ch[k]; return Q ? (Q[lg] || Q.ar) : k; };
+
+  // أيقونات المسار
+  const PI = {
+    db: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+    filter: '<path d="M3 4h18l-7 8.5V19l-4 2v-8.5z"/>',
+    chip: '<rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+    mon: '<path d="M3 12h4l2-6 4 12 2-6h6"/>',
+    bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>',
+    dash: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+    ana: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m7 15 3-4 3 2 4-6"/>',
+    play: '<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>',
+    stop: '<rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor"/>',
+    stuck: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+    spike: '<path d="M3 17h5l3-12 3 12h7"/>',
+    gap: '<path d="M3 12h5M16 12h5M11 7l-2 10M15 7l-2 10"/>',
+    range: '<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/>',
+    missing: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>'
+  };
+  const nf = v => Number(v).toLocaleString("en-US");
+  function pipeStrip(R) {
+    const Q = S6.demo.pipe;
+    if (!R || !R.P) return `<div class="pipe loading"><span class="pipe-i">${svgI(PI.db)}</span><small>${tx(Q.loading)}</small></div>`;
+    const P = R.P, s = P.stats, st = state.rp == null ? null : R.steps[state.rp];
+    const rd = st ? st.readings : s.readings, fl = st ? st.flagged : s.flagged, gp = st ? st.gaps : s.gaps;
+    const d = rpDate(), al = P.alerts.filter(a => d == null || a.date <= d).length;
+    const chips = [["stuck", s.counts.stuck], ["spike", s.counts.spike], ["gap", s.gaps], ["range", s.counts.range], ["missing", s.counts.missing]]
+      .map(([k, v]) => `<span class="pipe-chip ${v ? "on" : ""}" title="${esc(t(Q.f[k]))}: ${v}">${svgI(PI[k])}<b dir="ltr">${nf(v)}</b></span>`).join("");
+    const out = (k, i, lab, attr, n) => `<button type="button" class="pipe-o ${k === state.demoMode ? "on" : ""}" ${attr} title="${esc(t(lab))}">${svgI(i)}${n ? `<span class="pipe-n" dir="ltr">${n}</span>` : ""}<small>${tx(lab)}</small></button>`;
+    return `<div class="pipe" role="group" aria-label="${esc(t(Q.head))}">
+      <button type="button" class="pipe-play ${state.rp != null ? "on" : ""}" data-replay title="${esc(t(Q.replayTip))}">${svgI(state.rp != null ? PI.stop : PI.play)}<small>${tx(Q.replay)}</small>${d ? `<b dir="ltr">${d.slice(5).replace("-", "/")}</b>` : ""}</button>
+      <div class="pipe-st" title="${esc(t(Q.srcTip))}"><span class="pipe-i">${svgI(PI.db)}</span><div><b dir="ltr">${nf(rd)}</b><small>${tx(Q.src)}</small></div></div>
+      <i class="pipe-arr" aria-hidden="true"></i>
+      <div class="pipe-st v" title="${esc(t(Q.valTip))}"><span class="pipe-i">${svgI(PI.filter)}</span><div><b dir="ltr">${nf(fl)}</b><small>${tx(Q.val)}</small></div><span class="pipe-chips">${chips}</span></div>
+      <i class="pipe-arr" aria-hidden="true"></i>
+      <div class="pipe-st e" title="${esc(t(Q.engTip))}"><span class="pipe-i">${svgI(PI.chip)}</span><div><b dir="ltr">${nf(s.channels)}</b><small>${tx(Q.eng)}</small></div></div>
+      <i class="pipe-arr" aria-hidden="true"></i>
+      <div class="pipe-outs">${out("mon", PI.mon, Q.o.mon, 'data-demomode="analytics"')}${out("alerts", PI.bell, Q.o.alerts, "data-bellopen", al)}${out("real", PI.dash, Q.o.dash, 'data-demomode="real"')}${out("analytics", PI.ana, Q.o.ana, 'data-demomode="analytics"')}</div>
+    </div>`;
+  }
   function modeSwitch() {
     if (!NASA) return "";
     const P = S6.demo, b = (m, lab) => `<button type="button" class="key ${state.demoMode === m ? "primary" : ""}" data-demomode="${m}">${tx(lab)}</button>`;
-    return `<div class="demo-mode">${b("sim", P.modeSim)}${b("real", P.modeReal)}</div>`;
+    return `<div class="demo-mode">${b("sim", P.modeSim)}${b("real", P.modeReal)}${PL ? b("analytics", P.pipe.modeAna) : ""}</div>`;
   }
   function screenReal() {
-    const P = S6.demo, R = realData(), dt = i => i == null ? `<b class="wait">${tx(P.never)}</b>` : `<b>${tx(P.day)} <span dir="ltr">${realDate(i)}</span></b>`;
-    const gap = R.t.ours != null && R.t.fixed != null ? R.t.fixed - R.t.ours : null;
+    ensureRaw();
+    const P = S6.demo, R = realData(), cur = curIdx(R.dates), seenI = i => i != null && i <= cur;
+    const gap = seenI(R.t.ours) && seenI(R.t.fixed) ? R.t.fixed - R.t.ours : null;
     const X = window.VITALX_NASA_ALL;
     const all = X ? `<div class="card cohort all-missions"><h3>${tx(P.allHead)} <span class="tag-real">${tx(P.realTag)}</span></h3><div class="all-grid">
             ${[["quiet", P.allQuiet, "var(--built)"], ["below", P.allBelow, "var(--personal)"], ["same", P.allSame, "var(--accent)"], ["fixedFirst", P.allFixed, "var(--fixed)"]].map(([k, lab, col]) =>
               `<div class="all-cell" style="--k:${col}"><b dir="ltr">${X.count[k] || 0}</b><span>${tx(lab)}</span></div>`).join("")}</div>
             <p class="six-note" title="${esc(X.rows.map(r => r.mission + ": " + r.cat).join(" · "))}">${tx(P.allNote)}</p></div>` : "";
-    return `${modeSwitch()}<div class="demo real">
+    return `${modeSwitch()}${pipeStrip(R)}<div class="demo real">
         <div class="demo-main"><div class="card demo-chart"><h3>${tx(P.realTitle)} <span class="unit">mmHg</span> <span class="tag-real">${tx(P.realTag)}</span></h3>${chartBox("cvReal")}
           ${legend([["#e7ecf7", P.observed], ["rgba(95,212,255,.45)", L.baselineBand], [css("--personal"), P.drift], [css("--fixed"), P.limit]])}
           <p class="six-note">${tx(P.source)}</p></div>${all}</div>
         <div class="demo-side">
-          <div class="duo"><div class="card score o"><small>${tx(P.realOurs)}</small><b>${R.r.ours == null ? tx(P.noAlarm) : `${tx(P.day)} <span dir="ltr">${realDate(R.r.ours)}</span>`}</b></div>
-          <div class="card score f"><small>${tx(P.realFixed)}</small><b>${R.r.fixed == null ? tx(P.noBreach) : `${tx(P.day)} <span dir="ltr">${realDate(R.r.fixed)}</span>`}</b></div></div>
+          <div class="duo"><div class="card score o"><small>${tx(P.realOurs)}</small><b>${seenI(R.r.ours) ? `${tx(P.day)} <span dir="ltr">${realDate(R.r.ours)}</span>` : tx(P.noAlarm)}</b></div>
+          <div class="card score f"><small>${tx(P.realFixed)}</small><b>${seenI(R.r.fixed) ? `${tx(P.day)} <span dir="ltr">${realDate(R.r.fixed)}</span>` : tx(P.noBreach)}</b></div></div>
           <div class="card cohort"><h3>${tx(P.driftHead)} <span class="tag-synth">${tx(P.testTag)}</span></h3>
             <div class="cmp head"><span></span><b class="o">VITALX</b><b class="f">${tx(L.fixedThr)}</b></div>
-            <div class="cmp"><span>${tx(P.detected)}</span><b class="o" dir="ltr">${R.t.ours == null ? "—" : realDate(R.t.ours)}</b><b class="f" dir="ltr">${R.t.fixed == null ? "—" : realDate(R.t.fixed)}</b></div>
+            <div class="cmp"><span>${tx(P.detected)}</span><b class="o" dir="ltr">${seenI(R.t.ours) ? realDate(R.t.ours) : "—"}</b><b class="f" dir="ltr">${seenI(R.t.fixed) ? realDate(R.t.fixed) : "—"}</b></div>
             ${gap ? `<div class="gap">${tx(P.earlier)} <b dir="ltr">${gap}</b> ${tx(S6.edge.days)}</div>` : ""}</div>
-          ${advisor(R.t.ours != null ? "co2" : null, 2)}
+          ${advisor(seenI(R.t.ours) ? "co2" : null, 2)}
         </div></div>`;
   }
   function afterReal() {
-    const R = realData(), n = R.real.length, band = { lo: [], hi: [] };
+    const R = realData(), n = R.real.length, band = { lo: [], hi: [] }, cur = curIdx(R.dates);
     for (let i = 0; i < n; i++) { band.lo.push(i < REAL.base ? null : +(R.r.st.med - 2 * R.r.st.scale).toFixed(3)); band.hi.push(i < REAL.base ? null : +(R.r.st.med + 2 * R.r.st.scale).toFixed(3)); }
     const P = S6.demo;
     drawChart($("cvReal"), {
-      n, day: n - 1, noAdapt: true, gridEvery: 7, labelEvery: 7, xLabel: realDate, band,
+      n, day: Math.max(0, cur), noAdapt: true, gridEvery: 7, labelEvery: 7, xLabel: realDate, band, yMin: 1, yMax: 3.3,
       series: [
         { data: R.test, color: css("--personal"), width: 1.6, dash: [5, 4], alpha: .9, label: t(P.drift), unit: "mmHg", dec: 2 },
         { data: R.real, color: "#e7ecf7", width: 2.2, glow: true, fill: true, head: true, label: t(P.observed), unit: "mmHg", dec: 2 }
       ],
       hlines: [{ y: REAL.limit, color: css("--fixed"), label: t(P.limit) }],
-      vlines: [R.t.ours != null ? { x: R.t.ours, color: css("--personal"), label: "VITALX" } : null, R.t.fixed != null ? { x: R.t.fixed, color: css("--fixed") } : null].filter(Boolean),
+      vlines: [R.t.ours != null && R.t.ours <= cur ? { x: R.t.ours, color: css("--personal"), label: "VITALX" } : null, R.t.fixed != null && R.t.fixed <= cur ? { x: R.t.fixed, color: css("--fixed") } : null].filter(Boolean),
       markers: R.t.marks.map(x => ({ x, level: 2 }))
     });
     attachHover($("cvReal").parentElement);
   }
+
+  // ---------- 4ج) التحليلات + مراقبة المخاطر (من نفس المسار) ----------
+  function co2Trend(R, cur) {   // اتجاه آخر 14 يومًا (انحدار خطي) وإسقاطه حتى حد 3 mmHg — إسقاط فقط
+    const lo = Math.max(0, cur - 13), y = R.real.slice(lo, cur + 1).filter(v => v != null), n = y.length;
+    if (n < 5) return null;
+    const xm = (n - 1) / 2, ym = y.reduce((a, b) => a + b, 0) / n;
+    let num = 0, den = 0; y.forEach((v, i) => { num += (i - xm) * (v - ym); den += (i - xm) ** 2; });
+    const slope = num / den, last = ym + slope * (n - 1 - xm);
+    return { lo, slope, last, days: slope > 0.002 ? Math.ceil((REAL.limit - last) / slope) : null };
+  }
+  function screenAnalytics() {
+    ensureRaw();
+    const R = realData(), Q = S6.demo.pipe, P = S6.demo;
+    if (!R || !R.P) return `${modeSwitch()}${pipeStrip(R)}`;
+    const X = R.P, cur = curIdx(R.dates), rc = curIdx(X.rad.dates), tr = co2Trend(R, cur);
+    const lvAt = (r, i) => i < 0 ? 0 : r.level.slice(0, i + 1).slice(-3).reduce((a, b) => Math.max(a, b), 0);
+    const row = (k, val, unit, dec, r, i) => { const l = lvAt(r, i), v = i < 0 ? null : val[i];
+      return `<div class="risk-row" style="--c:${LV(l)}" title="${esc(t(Q.base))}: ${fmt(r.st.med, dec)} ${unit}"><span class="vi">${vicon(k)}</span><span class="rn">${tx(Q.ch[k])}</span><b dir="ltr">${fmt(v, dec)}<em>${unit}</em></b><i class="dot" title="${esc(t(Q.lvl[l] || Q.lvl[0]))}"></i></div>`; };
+    const c = X.stats.counts;
+    const vr = (k, v) => `<div class="cmp all"><span class="vr-l">${svgI(PI[k])}${tx(Q.f[k])}</span><b dir="ltr">${nf(v)}</b></div>`;
+    const trendTxt = !tr ? "" : tr.days != null ? `${tx(Q.toLimit)} <b dir="ltr">${tr.days}</b> ${tx(S6.edge.days)}` : tx(Q.noRise);
+    return `${modeSwitch()}${pipeStrip(R)}<div class="demo real ana">
+      <div class="demo-main">
+        <div class="card demo-chart"><h3>${tx(Q.radHead)} <span class="unit">mGy</span> <span class="tag-real">${tx(P.realTag)}</span></h3>
+          <div class="ana-two"><div>${chartBox("cvRate")}<small class="ana-cap">${tx(Q.radRate)} <span dir="ltr">mGy/d</span></small></div><div>${chartBox("cvCum")}<small class="ana-cap">${tx(Q.radCum)} <b dir="ltr">${fmt(rc < 0 ? 0 : X.rad.cum[rc], 2)} mGy</b></small></div></div>
+          ${legend([["#e7ecf7", Q.total], [css("--accent"), Q.gcr], [css("--fixed"), Q.saa]])}</div>
+        <div class="card demo-chart"><h3>${tx(Q.trendHead)} <span class="unit">mmHg</span> <span class="tag-real">${tx(P.realTag)}</span></h3>${chartBox("cvTrend")}
+          ${legend([["#e7ecf7", P.observed], [css("--personal"), Q.trend], [css("--fixed"), P.limit]])}
+          <p class="six-note">${trendTxt} · ${tx(Q.hour)} <b dir="ltr">${X.hour.mmhg} mmHg</b></p></div>
+      </div>
+      <div class="demo-side">
+        <div class="card cohort"><h3>${svgI(PI.mon)} ${tx(Q.o.mon)}</h3>
+          ${row("co2", X.daily.co2, "mmHg", 2, X.eng.co2, cur)}${row("temp", X.daily.temp, "°C", 1, X.eng.temp, cur)}${row("hum", X.daily.hum, "%", 0, X.eng.hum, cur)}${row("rad", X.rad.rate, "mGy", 3, X.eng.rad, rc)}
+          <p class="six-note">${tx(Q.monNote)}</p></div>
+        <div class="card cohort"><h3>${svgI(PI.filter)} ${tx(Q.valHead)}</h3>
+          <div class="cmp all"><span>${tx(Q.checked)}</span><b dir="ltr">${nf(X.stats.checked)}</b></div>
+          ${vr("stuck", c.stuck)}${vr("spike", c.spike)}${vr("gap", X.stats.gaps)}${vr("range", c.range)}${vr("missing", c.missing)}
+          <div class="cmp all ok"><span>${tx(Q.valid)}</span><b dir="ltr">${nf(X.stats.valid)}</b></div></div>
+        <p class="six-note honest-line"><span class="tag-real">${tx(P.realTag)}</span> ${tx(Q.honest)}</p>
+      </div></div>`;
+  }
+  function afterAnalytics() {
+    const R = realData(); if (!R || !R.P) return;
+    const X = R.P, Q = S6.demo.pipe, rad = X.rad, rn = rad.dates.length, rc = Math.max(0, curIdx(rad.dates)), cur = Math.max(0, curIdx(R.dates));
+    const rLab = (i, long) => { const s = rad.dates[i] || ""; return long ? s : s.slice(5).replace("-", "/"); };
+    drawChart($("cvRate"), { n: rn, day: rc, noAdapt: true, gridEvery: 7, labelEvery: 14, xLabel: rLab, yMin: 0,
+      series: [{ data: rad.gcr, color: css("--accent"), width: 1.4, label: t(Q.gcr), unit: "mGy", dec: 3 }, { data: rad.saa, color: css("--fixed"), width: 1.4, label: t(Q.saa), unit: "mGy", dec: 3 },
+        { data: rad.rate, color: "#e7ecf7", width: 2, glow: true, head: true, label: t(Q.total), unit: "mGy", dec: 3 }],
+      markers: X.eng.rad.marks.map(x => ({ x, level: 2 })) });
+    drawChart($("cvCum"), { n: rn, day: rc, noAdapt: true, gridEvery: 7, labelEvery: 14, xLabel: rLab, yMin: 0,
+      series: [{ data: rad.cum, color: css("--accent"), width: 2.2, glow: true, fill: true, head: true, label: t(Q.radCum), unit: "mGy", dec: 2 }] });
+    const tr = co2Trend(R, cur), n0 = R.real.length, ext = tr && tr.days != null ? Math.min(tr.days, 45) : 0, n = n0 + ext;
+    const line = new Array(n).fill(null);
+    if (tr) for (let i = tr.lo; i < n; i++) line[i] = +(tr.last + tr.slope * (i - cur)).toFixed(3);
+    const lab = (i, long) => i < n0 ? realDate(i, long) : "+" + (i - n0 + 1);
+    drawChart($("cvTrend"), { n, day: state.rp == null ? n - 1 : cur, noAdapt: true, gridEvery: 7, labelEvery: 14, xLabel: lab, yMin: 1, yMax: 3.3,
+      series: [{ data: line, color: css("--personal"), width: 1.6, dash: [5, 4], xs: line.map((_, i) => i), label: t(Q.trend) },
+        { data: R.real, color: "#e7ecf7", width: 2.2, glow: true, fill: true, head: true, label: t(S6.demo.observed), unit: "mmHg", dec: 2 }],
+      hlines: [{ y: REAL.limit, color: css("--fixed"), label: t(S6.demo.limit) }] });
+    ["cvRate", "cvCum", "cvTrend"].forEach(id => attachHover($(id).parentElement));
+  }
   function bindDemoMode() {
-    document.querySelectorAll("[data-demomode]").forEach(b => b.addEventListener("click", () => { state.demoMode = b.dataset.demomode; route(); }));
+    document.querySelectorAll("[data-demomode]").forEach(b => b.addEventListener("click", () => { if (state.demoMode !== b.dataset.demomode) { state.demoMode = b.dataset.demomode; render(); } }));
+    document.querySelectorAll("[data-replay]").forEach(b => b.addEventListener("click", () => { if (state.rp != null) { stopReplay(); render(); } else startReplay(); }));
+    document.querySelectorAll("[data-bellopen]").forEach(b => b.addEventListener("click", ev => { ev.stopPropagation(); $("bell").click(); }));
   }
 
   // ---------- 4) العرض الحي ----------
   function screenDemo() {
     if (state.demoMode === "real" && NASA) return screenReal();
+    if (state.demoMode === "analytics" && PL) return screenAnalytics();
     const c = crewById(state.member), d = state.day, P = S6.demo;
     const ours = firstDet(c.pers.level, c.ast.onset), fx = firstDet(c.fx.level, c.ast.onset);
     const box = (cls, name, det) => `<div class="card score ${cls}"><small>${tx(name)}</small>${det != null && det <= d
@@ -792,6 +945,7 @@
   function afterDemo() {
     bindDemoMode();
     if (state.demoMode === "real" && NASA) return afterReal();
+    if (state.demoMode === "analytics" && PL) return afterAnalytics();
     const c = crewById(state.member);
     drawHr($("cvDemo"), c, state.day, { band: true, fixed: true, markers: true, ours: firstDet(c.pers.level, c.ast.onset), fixedDet: firstDet(c.fx.level, c.ast.onset) });
   }
@@ -928,7 +1082,10 @@
   const TOAST = { gap: 3000, auto: 4000 }, alertLog = [];
   let tEl = null, tShown = 0, tExtra = 0, tTimer = 0, tCur = null, unread = 0;
   const ALERT_I = '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>';
-  function openMember(id) { state.member = id; closeBell(); go("demo"); }
+  function openMember(id) {   // تنبيه من بيانات ناسا يفتح لوحة البيانات الحقيقية
+    if (id === "nasa") { if (state.demoMode === "sim") state.demoMode = "real"; } else state.member = id;
+    closeBell(); go("demo");
+  }
   function toast(c, e) {
     alertLog.unshift({ id: c.m.id, name: c.m.name, day: e.day, level: e.level }); alertLog.length = Math.min(alertLog.length, 20);
     unread++; renderBell();

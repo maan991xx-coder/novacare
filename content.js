@@ -143,7 +143,41 @@ window.VITALX_CONTENT = {
       allSame: { ar: "VITALX والحد معًا", en: "VITALX and limit together" },
       allFixed: { ar: "قفزة مفاجئة: الحد أسبق", en: "Sudden spike: limit first" },
       allNote: { ar: "الحد الثابت يلتقط القفزات، وVITALX يلتقط الانجراف البطيء: يعملان معًا", en: "Fixed limits catch spikes, VITALX catches slow drift: they work together" },
-      source: { ar: "المصدر: NASA OSDR Environmental Data App · أول 5 أيام قيمة تعبئة ثابتة فاستُبعدت", en: "Source: NASA OSDR Environmental Data App · first 5 days were a constant fill value and were excluded" }
+      source: { ar: "المصدر: NASA OSDR Environmental Data App · خطوة التحقق اكتشفت قيمة التعبئة الثابتة (3000 ppm) في أول 5 أيام واستبعدتها", en: "Source: NASA OSDR Environmental Data App · the validation step found the constant fill value (3000 ppm) in the first 5 days and excluded it" },
+      // مسار البيانات: ناسا ← تحقق ← محرك المخاطر ← المخرجات (pipeline.js)
+      pipe: {
+        head: { ar: "مسار البيانات", en: "Data pipeline" },
+        modeAna: { ar: "التحليلات", en: "Analytics" },
+        loading: { ar: "تحميل قراءات ناسا الخام…", en: "Loading raw NASA readings…" },
+        replay: { ar: "RR-12", en: "RR-12" },
+        replayTip: { ar: "إعادة تشغيل مهمة RR-12 يومًا بيوم عبر المسار كاملًا", en: "Replay mission RR-12 day by day through the whole pipeline" },
+        src: { ar: "قراءة ناسا", en: "NASA readings" },
+        srcTip: { ar: "قراءات خام كل 5 دقائق من NASA OSDR EDA: CO2 والحرارة والرطوبة، وجرعة الإشعاع اليومية", en: "Raw 5-minute readings from NASA OSDR EDA: CO2, temperature, humidity, plus daily radiation dose" },
+        val: { ar: "تحقق: مُعلَّمة", en: "Validation: flagged" },
+        valTip: { ar: "كل قيمة تُفحص: فجوات، قيم مفقودة، خارج المدى الفيزيائي، حساس عالق، قفزات. العالق والمستحيل يُستبعد، والقفزة تُصحَّح بوسيط الساعة.", en: "Every value is checked: gaps, missing, physically impossible, stuck sensor, spikes. Stuck and impossible values are excluded; spikes are replaced by the hourly median." },
+        eng: { ar: "محرك المخاطر", en: "Risk engine" },
+        engTip: { ar: "4 قنوات: CO2 والحرارة والرطوبة والإشعاع. خط أساس من أول 14 يومًا + CUSUM، وحد ناسا الثابت لـ CO2 (3 mmHg).", en: "4 channels: CO2, temperature, humidity, radiation. 14-day baseline + CUSUM, plus NASA's fixed CO2 limit (3 mmHg)." },
+        o: { mon: { ar: "المخاطر", en: "Risk" }, alerts: { ar: "تنبيهات", en: "Alerts" }, dash: { ar: "اللوحة", en: "Dashboard" }, ana: { ar: "تحليلات", en: "Analytics" } },
+        f: { stuck: { ar: "حساس عالق", en: "Stuck sensor" }, spike: { ar: "قفزة صُحّحت", en: "Spike corrected" }, gap: { ar: "فجوة في البث", en: "Data gap" }, range: { ar: "خارج المدى", en: "Out of range" }, missing: { ar: "مفقودة", en: "Missing" } },
+        checked: { ar: "قيمة فُحصت", en: "Values checked" },
+        valid: { ar: "صالحة للمحرك", en: "Valid for the engine" },
+        valHead: { ar: "تحقق البيانات", en: "Data validation" },
+        ch: { co2: { ar: "CO2", en: "CO2" }, temp: { ar: "حرارة المقصورة", en: "Cabin temp" }, hum: { ar: "الرطوبة", en: "Humidity" }, rad: { ar: "الإشعاع", en: "Radiation" } },
+        base: { ar: "خط الأساس", en: "Baseline" },
+        lvl: { 0: { ar: "ضمن خط الأساس", en: "Within baseline" }, 2: { ar: "مراقبة: تغيّر بطيء", en: "Monitor: slow change" }, 3: { ar: "تجاوز حد ناسا", en: "Over NASA limit" } },
+        monNote: { ar: "النقطة: لون أعلى مستوى في آخر 3 أيام", en: "Dot: highest level in the last 3 days" },
+        radHead: { ar: "الإشعاع: المعدل اليومي مقابل الجرعة التراكمية", en: "Radiation: daily rate vs cumulative dose" },
+        radRate: { ar: "المعدل", en: "Rate" },
+        radCum: { ar: "التراكمية", en: "Cumulative" },
+        total: { ar: "المجموع", en: "Total" }, gcr: { ar: "أشعة كونية GCR", en: "Cosmic rays GCR" }, saa: { ar: "شذوذ جنوب الأطلسي SAA", en: "South Atlantic Anomaly SAA" },
+        trendHead: { ar: "اتجاه CO2 مقابل حد ناسا", en: "CO2 trend vs NASA limit" },
+        trend: { ar: "اتجاه آخر 14 يومًا (إسقاط)", en: "Last-14-day trend (projection)" },
+        toLimit: { ar: "إن استمر الاتجاه يصل الحد بعد ≈", en: "If the trend continues, limit in ≈" },
+        noRise: { ar: "لا اتجاه صاعد الآن", en: "No rising trend now" },
+        hour: { ar: "أعلى متوسط ساعة", en: "Max 1-hour average" },
+        honest: { ar: "البيئة والإشعاع قياسات ناسا حقيقية للمقصورة، وليست قياسات طبية للرواد. العلامات الحيوية في العرض محاكاة.", en: "Environment and radiation are real NASA cabin measurements, not medical readings of astronauts. Vitals in the demo are simulated." },
+        alertTest: { ar: "CO2 · اختبار مصطنع", en: "CO2 · synthetic test" }
+      }
     },
 
     // طبقة الاقتراحات: عند الإنذار نعرض ماذا تغيّر، ماذا قد يحدث، وماذا نقترح. اقتراح لطبيب الطاقم فقط، ليس وصفة.

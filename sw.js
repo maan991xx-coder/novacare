@@ -1,11 +1,11 @@
 /* VITALX service worker: offline + install as an app.
    Bump VERSION on each deploy so visitors get the new files. */
-const VERSION = "vitalx-v2";
+const VERSION = "vitalx-v3";
 const CORE = [
   "./", "index.html", "manifest.webmanifest",
   "styles.css", "fonts.css", "appmode.css", "console.css", "six.css",
-  "content.js", "engine.js", "site.js",
-  "data/rr12-daily.js", "data/eda-missions.js",
+  "content.js", "engine.js", "pipeline.js", "site.js",
+  "data/rr12-daily.js", "data/eda-missions.js", "data/rr12-raw.js",
   "icons/icon.svg", "icons/icon-32.png", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png",
   "media/astronaut.webp", "media/astronaut-440.webp", "media/ship-bg.webp", "media/ship-bg-1000.webp",
   "webfonts/ibm-plex-mono-400-latin-ext.woff2",
