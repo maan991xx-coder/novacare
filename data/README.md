@@ -14,7 +14,7 @@ https://visualization.osdr.nasa.gov/eda/ — قياسات مقصورة محطة 
 المحرك نفسه (`engine.js`) لا يتغير. إذا اختلفت أسماء الأعمدة استخدم `--column CO2`.
 
 ## نتيجة أول تشغيل على بيانات حقيقية: RR-12 (2019-04-17 → 2019-05-28)
-ملفات `data/rr12/` منزّلة من EDA API (`/eda/api/missions/RR-12/telemetry_data/` و `radiation_data/`).
+ملفات `data/nasa/` منزّلة من EDA API (`/eda/api/missions/RR-12/telemetry_data/` و `radiation_data/`).
 
 - أول 5 أيام قيمة CO2 ثابتة 3000 ppm (قيمة تعبئة) فاستُبعدت تلقائيًا.
 - CO2 الحقيقي: وسيط يومي 2.02 mmHg، أعلى وسيط يومي 2.37 mmHg، أعلى متوسط ساعة 2.77 mmHg. لا إنذار من VITALX ولا تجاوز لحد 3 mmHg ⇒ **لا إنذارات كاذبة على مهمة مستقرة**.
