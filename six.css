@@ -140,3 +140,18 @@
 .w-status { display: flex; align-items: center; justify-content: center; gap: 5px; }
 .w-adv { display: inline-flex; width: 14px; height: 14px; }
 .w-adv svg { width: 100%; height: 100%; }
+.cmp.all { grid-template-columns: minmax(0, 1fr) 40px; }
+/* وضع البيانات الحقيقية: مضغوط ليظهر كاملاً */
+.demo.real .demo-main { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.demo.real .chartbox canvas { height: 170px; }
+.demo.real .gap { font-size: .85rem; } .demo.real .cohort h3 { margin-bottom: 6px; }
+.demo.real .demo-chart .six-note { margin-top: 4px; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.duo .score { padding: 8px 6px; } .duo .score b { font-size: 1rem; }
+.demo.real .cohort .gap { margin-top: 8px; padding: 5px; }
+.demo.real .advisor { margin-top: 0; }
+.all-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.all-cell { text-align: center; padding: 6px 4px; border-radius: 10px; background: rgba(255,255,255,.03); border-top: 2px solid var(--k); }
+.all-cell b { display: block; font: 700 1.4rem/1.1 var(--mono); color: var(--k); }
+.all-cell span { display: block; font-size: .7rem; color: var(--muted); margin-top: 3px; line-height: 1.3; }
+@media (max-width: 760px) { .all-grid { grid-template-columns: 1fr 1fr; } }

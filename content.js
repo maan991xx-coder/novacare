@@ -100,6 +100,12 @@ window.VITALX_CONTENT = {
       driftHead: { ar: "اختبار: نضيف ارتفاعًا بطيئًا فوق البيانات الحقيقية", en: "Test: add a slow rise on top of the real data" },
       never: { ar: "لم يكشف", en: "Never" },
       day: { ar: "يوم", en: "day" },
+      allHead: { ar: "على 10 مهمات ناسا حقيقية", en: "Across 10 real NASA missions" },
+      allQuiet: { ar: "هادئة: لا إنذار", en: "Quiet: no alert" },
+      allBelow: { ar: "ارتفاع رصده VITALX دون الحد", en: "Rise VITALX caught below the limit" },
+      allSame: { ar: "VITALX والحد معًا", en: "VITALX and limit together" },
+      allFixed: { ar: "قفزة مفاجئة: الحد أسبق", en: "Sudden spike: limit first" },
+      allNote: { ar: "الحد الثابت يلتقط القفزات، وVITALX يلتقط الانجراف البطيء: يعملان معًا", en: "Fixed limits catch spikes, VITALX catches slow drift: they work together" },
       source: { ar: "المصدر: NASA OSDR Environmental Data App · أول 5 أيام قيمة تعبئة ثابتة فاستُبعدت", en: "Source: NASA OSDR Environmental Data App · first 5 days were a constant fill value and were excluded" }
     },
 

@@ -674,17 +674,22 @@
   function screenReal() {
     const P = S6.demo, R = realData(), dt = i => i == null ? `<b class="wait">${tx(P.never)}</b>` : `<b>${tx(P.day)} <span dir="ltr">${realDate(i)}</span></b>`;
     const gap = R.t.ours != null && R.t.fixed != null ? R.t.fixed - R.t.ours : null;
-    return `${modeSwitch()}<div class="demo">
-        <div class="card demo-chart"><h3>${tx(P.realTitle)} <span class="unit">mmHg</span> <span class="tag-real">${tx(P.realTag)}</span></h3>${chartBox("cvReal", "tall")}
+    const X = window.VITALX_NASA_ALL;
+    const all = X ? `<div class="card cohort all-missions"><h3>${tx(P.allHead)} <span class="tag-real">${tx(P.realTag)}</span></h3><div class="all-grid">
+            ${[["quiet", P.allQuiet, "var(--built)"], ["below", P.allBelow, "var(--personal)"], ["same", P.allSame, "var(--accent)"], ["fixedFirst", P.allFixed, "var(--fixed)"]].map(([k, lab, col]) =>
+              `<div class="all-cell" style="--k:${col}"><b dir="ltr">${X.count[k] || 0}</b><span>${tx(lab)}</span></div>`).join("")}</div>
+            <p class="six-note" title="${esc(X.rows.map(r => r.mission + ": " + r.cat).join(" · "))}">${tx(P.allNote)}</p></div>` : "";
+    return `${modeSwitch()}<div class="demo real">
+        <div class="demo-main"><div class="card demo-chart"><h3>${tx(P.realTitle)} <span class="unit">mmHg</span> <span class="tag-real">${tx(P.realTag)}</span></h3>${chartBox("cvReal")}
           ${legend([["#e7ecf7", P.observed], ["rgba(95,212,255,.45)", L.baselineBand], [css("--personal"), P.drift], [css("--fixed"), P.limit]])}
-          <p class="six-note">${tx(P.source)}</p></div>
+          <p class="six-note">${tx(P.source)}</p></div>${all}</div>
         <div class="demo-side">
-          <div class="card score o"><small>${tx(P.realOurs)}</small><b>${R.r.ours == null ? tx(P.noAlarm) : `${tx(P.day)} <span dir="ltr">${realDate(R.r.ours)}</span>`}</b></div>
-          <div class="card score f"><small>${tx(P.realFixed)}</small><b>${R.r.fixed == null ? tx(P.noBreach) : `${tx(P.day)} <span dir="ltr">${realDate(R.r.fixed)}</span>`}</b></div>
+          <div class="duo"><div class="card score o"><small>${tx(P.realOurs)}</small><b>${R.r.ours == null ? tx(P.noAlarm) : `${tx(P.day)} <span dir="ltr">${realDate(R.r.ours)}</span>`}</b></div>
+          <div class="card score f"><small>${tx(P.realFixed)}</small><b>${R.r.fixed == null ? tx(P.noBreach) : `${tx(P.day)} <span dir="ltr">${realDate(R.r.fixed)}</span>`}</b></div></div>
           <div class="card cohort"><h3>${tx(P.driftHead)} <span class="tag-synth">${tx(P.testTag)}</span></h3>
             <div class="cmp head"><span></span><b class="o">VITALX</b><b class="f">${tx(L.fixedThr)}</b></div>
-            <div class="cmp"><span>${tx(P.detected)}</span><b class="o" dir="ltr">${R.t.ours == null ? "—" : realDate(R.t.ours)}</b><b class="f" dir="ltr">${R.t.fixed == null ? "—" : realDate(R.t.fixed)}</b></div></div>
-          ${gap ? `<div class="gap">${tx(P.earlier)} <b dir="ltr">${gap}</b> ${tx(S6.edge.days)}</div>` : ""}
+            <div class="cmp"><span>${tx(P.detected)}</span><b class="o" dir="ltr">${R.t.ours == null ? "—" : realDate(R.t.ours)}</b><b class="f" dir="ltr">${R.t.fixed == null ? "—" : realDate(R.t.fixed)}</b></div>
+            ${gap ? `<div class="gap">${tx(P.earlier)} <b dir="ltr">${gap}</b> ${tx(S6.edge.days)}</div>` : ""}</div>
           ${advisor(R.t.ours != null ? "co2" : null, 2)}
         </div></div>`;
   }
