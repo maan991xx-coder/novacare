@@ -46,9 +46,11 @@
   }
 
   // ---------- الحالة والتشغيل ----------
+  var L = function (type, data) { try { if (window.VXLOG) window.VXLOG.log(type, data); } catch (e) { /* */ } };
   var st = { mode: "menu", day: 40, playing: true, member: "A", gMember: "A" };
   var timer = null;
   function setMode(m) {
+    if (m !== st.mode) L("screen", { from: st.mode, to: m });
     st.mode = m;
     ["menu", "watch", "ground"].forEach(function (k) { $(k).className = "view" + (k === m ? " on" : ""); });
     try { if (window.Android && window.Android.setMode) window.Android.setMode(m); } catch (e) { /* */ }
@@ -98,6 +100,7 @@
     if (pin.code.length < 5) return;
     var b = bridge(), ok = false;
     try { ok = b && b.tryPin ? b.tryPin(pin.code) : pin.code === "12345"; } catch (e) { ok = false; }
+    L("exit_code", { ok: !!ok });
     if (!ok) {
       $("pinMsg").textContent = t(PX.bad); $("pin").className = "pin on shake";
       setTimeout(function () { pin.code = ""; pinDraw(); $("pin").className = "pin on"; }, 500);
@@ -112,11 +115,26 @@
   $("pinExit").onclick = function (e) {
     var x = e.target.getAttribute && e.target.getAttribute("data-x"); if (!x) return;
     if (x === "c") { closePin(); return; }
-    var b = bridge(); if (b && b.exit) b.exit(x === "1"); else closePin();
+    L("exit", { removeFullLock: x === "1" }); try { window.VXLOG && window.VXLOG.flush(); } catch (e2) { /* */ }
+    var b = bridge(); if (b && b.exit) setTimeout(function () { b.exit(x === "1"); }, 800); else closePin();
   };
   window.vxMode = function () { return st.mode; };
   window.addEventListener("resize", function () { if (st.mode !== "menu") draw(); });
-  function draw() { if (st.mode === "watch") drawWatch(); else if (st.mode === "ground") drawGround(); }
+  var lastAlert = {};
+  function snapshot() {
+    var d = st.day, rows = {};
+    crew.forEach(function (c) {
+      var s = status(c, d), o = c.ast.obs;
+      var r2 = function (v) { return v == null || isNaN(v) ? null : Math.round(v * 100) / 100; };
+      rows[c.m.id] = { name: c.m.name.en, hr: r2(o.hr[d]), sleep: r2(o.sleep[d]), co2: r2(o.co2[d]), dose: r2(c.ast.rad[d]), composite: r2(c.pers.composite[d]), status: String(s) };
+      if (s !== "calib" && s >= 2 && lastAlert[c.m.id] !== d) {
+        if (lastAlert[c.m.id] == null || d < lastAlert[c.m.id] || d - lastAlert[c.m.id] > 3) L("alert", { crew: c.m.id, name: c.m.name.en, day: d, level: s, reason: reason(c, d) });
+        lastAlert[c.m.id] = d;
+      }
+    });
+    if (d % 5 === 0) L("day_snapshot", { mode: st.mode, day: d, crew: rows });
+  }
+  function draw() { if (st.mode === "watch") drawWatch(); else if (st.mode === "ground") drawGround(); if (st.mode !== "menu") snapshot(); }
 
   // ---------- القائمة ----------
   function renderMenu() {
@@ -238,9 +256,9 @@
   // ---------- الأحداث ----------
   $("bWatch").onclick = function () { setMode("watch"); };
   $("bGround").onclick = function () { setMode("ground"); };
-  $("langBtn").onclick = function () { lang = lang === "ar" ? "en" : "ar"; try { localStorage.setItem("vx-phone-lang", lang); } catch (e) { /* */ } renderMenu(); };
+  $("langBtn").onclick = function () { lang = lang === "ar" ? "en" : "ar"; L("lang", { lang: lang }); try { localStorage.setItem("vx-phone-lang", lang); } catch (e) { /* */ } renderMenu(); };
   $("watch").onclick = function () { st.playing = !st.playing; $("watch").className = "view on" + (st.playing ? "" : " paused"); };
-  $("gCrew").onclick = function (e) { var b = e.target; while (b && !b.getAttribute("data-m")) b = b.parentNode; if (b && b.getAttribute) { st.gMember = b.getAttribute("data-m"); drawGround(); } };
+  $("gCrew").onclick = function (e) { var b = e.target; while (b && !b.getAttribute("data-m")) b = b.parentNode; if (b && b.getAttribute) { st.gMember = b.getAttribute("data-m"); L("select_crew", { crew: st.gMember }); drawGround(); } };
   $("gMain").onclick = function () { st.playing = !st.playing; $("ground").className = "view on" + (st.playing ? "" : " paused"); };
   // بدون جسر أندرويد (في المتصفح): زر Esc يرجع
   var escT = 0, escLong = false;

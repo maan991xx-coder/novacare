@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // الجوال يضيف أحداثاً فقط (بعد تسجيل دخول مجهول). لا قراءة ولا تعديل ولا حذف من التطبيق.
+    match /vitalx_events/{id} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if false;
+    }
+  }
+}

@@ -7,7 +7,7 @@ if(!Object.assign)Object.assign=function(t){for(var i=1;i<arguments.length;i++){
 if(!Array.prototype.find)Array.prototype.find=function(f){for(var i=0;i<this.length;i++)if(f(this[i],i))return this[i]};
 if(!Array.prototype.includes)Array.prototype.includes=function(x){return this.indexOf(x)>=0};
 if(!Math.imul)Math.imul=function(a,b){var ah=a>>>16&65535,al=a&65535,bh=b>>>16&65535,bl=b&65535;return al*bl+((ah*bl+al*bh)<<16>>>0)|0};`;
-const js = [R("../content.js"), R("../engine.js"), R("app.js")].join("\n;\n");
+const js = [R("cloud-config.js"), R("cloud.js"), R("../content.js"), R("../engine.js"), R("app.js")].join("\n;\n");
 const es5 = B.transform(js, { presets: [["env", { targets: "chrome 30", loose: true }]], sourceType: "script" }).code;
 const out = R("page.html").replace("/*CSS*/", () => R("app.css")).replace("/*JS*/", () => poly + "\n" + es5.replace(/<\/script/g, "<\\/script"));
 fs.writeFileSync(process.argv[3], out);

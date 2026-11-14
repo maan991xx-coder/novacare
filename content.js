@@ -40,7 +40,7 @@ window.VITALX_CONTENT = {
         { v: "+0.25", u: "bpm/day", t: { ar: "ارتفاع بطيء لا يُلاحظ يوماً بيوم (محاكى)", en: "A slow rise you can't see day to day (simulated)" } },
         { v: "85", u: "bpm", t: { ar: "حد ثابت واحد لكل الرواد", en: "One fixed limit for every astronaut" } }
       ],
-      chart: { ar: "نبض الراحة للرائد أ", en: "Resting HR, Crew A" },
+      chart: { ar: "نبض الراحة: الفارس الزكواني", en: "Resting HR: Al-Faris AlZakwani" },
       onset: { ar: "بدء الانحراف", en: "Drift starts" }
     },
 
@@ -100,7 +100,7 @@ window.VITALX_CONTENT = {
       challenge: { ar: "التحدي", en: "Challenge" },
       challengeName: { ar: "⟨اسم تحدي ناسا⟩", en: "⟨NASA challenge name⟩" },
       members: { ar: "الأعضاء", en: "Members" },
-      membersNames: { ar: "⟨أسماء أعضاء الفريق⟩", en: "⟨Team member names⟩" }
+      membersNames: { ar: "الفارس الزكواني · عبدالملك الغنيمي · معن الشبيبي · رَونق الزكواني · فاطمة الحارثي", en: "Al-Faris AlZakwani · Abdulmalik AlGhunaimi · Maan AlShabibi · Rawnuq AlZakwani · Fatma AlHarthi" }
     },
 
     player: {
@@ -135,16 +135,18 @@ window.VITALX_CONTENT = {
       newAlert: { ar: "تنبيه جديد", en: "New alert" }
     },
 
-    /* الطاقم: رموز وليس أسماء أشخاص حقيقيين. driftMult: 0 = لا انحراف (رائد مستقر) */
+    /* الطاقم: أعضاء فريق NovaCare (البيانات مولّدة وليست قياساتهم). driftMult: 0 = لا انحراف (رائد مستقر) */
     crew: [
       { id: "A", seed: 11, driftMult: 1.2, noiseMult: 1.0, onset: 50,
-        name: { ar: "الرائد أ", en: "Crew A" }, role: { ar: "قائد المهمة", en: "Commander" } },
+        name: { ar: "الفارس الزكواني", en: "Al-Faris AlZakwani" }, role: { ar: "القيادة", en: "Command" } },
       { id: "B", seed: 23, driftMult: 0,   noiseMult: 1.0, onset: 60,
-        name: { ar: "الرائد ب", en: "Crew B" }, role: { ar: "مهندس الطيران", en: "Flight engineer" } },
+        name: { ar: "عبدالملك الغنيمي", en: "Abdulmalik AlGhunaimi" }, role: { ar: "هندسة الطيران", en: "Flight engineering" } },
       { id: "C", seed: 37, driftMult: 0.8, noiseMult: 1.1, onset: 68,
-        name: { ar: "الرائد ج", en: "Crew C" }, role: { ar: "أخصائي المهمة", en: "Mission specialist" } },
+        name: { ar: "معن الشبيبي", en: "Maan AlShabibi" }, role: { ar: "عمليات المهمة", en: "Mission operations" } },
       { id: "D", seed: 53, driftMult: 1.0, noiseMult: 1.3, onset: 58,
-        name: { ar: "الرائد د", en: "Crew D" }, role: { ar: "عالم المهمة", en: "Science officer" } }
+        name: { ar: "رَونق الزكواني", en: "Rawnuq AlZakwani" }, role: { ar: "العلوم", en: "Science" } },
+      { id: "E", seed: 71, driftMult: 0.6, noiseMult: 1.0, onset: 64,
+        name: { ar: "فاطمة الحارثي", en: "Fatma AlHarthi" }, role: { ar: "الطب", en: "Medical" } }
     ]
   },
 

@@ -20,6 +20,14 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import org.json.JSONObject;
 
 /**
  * VITALX للهاتف: شاشة اختيار، ثم ساعة الرائد (عمودي) أو لوحة الأرض (أفقي).
@@ -32,6 +40,7 @@ public class MainActivity extends Activity {
   private WebView web;
   private volatile String mode = "menu";
   private volatile boolean pinOk = false;
+  private volatile String token = "";
   private boolean unlocked = false, resumed = false, longPress = false;
   private final Handler h = new Handler();
 
@@ -51,6 +60,35 @@ public class MainActivity extends Activity {
       runOnUiThread(new Runnable() { public void run() { unlockAndExit(clearOwner); } });
     }
     @JavascriptInterface public void pinClosed() { pinOk = false; }
+    @JavascriptInterface public String deviceInfo() {
+      try { return new JSONObject().put("model", Build.MANUFACTURER + " " + Build.MODEL).put("android", Build.VERSION.RELEASE).put("sdk", Build.VERSION.SDK_INT).toString(); }
+      catch (Exception e) { return "{}"; }
+    }
+    @JavascriptInterface public void setToken(String t) { token = t; }
+    /** طلب HTTPS للسجل السحابي (يتجاوز قيود المتصفح ويفعّل TLS 1.2 في أندرويد القديم). */
+    @JavascriptInterface public void http(final String id, final String method, final String url, final String body) {
+      new Thread(new Runnable() { public void run() {
+        int code = 0; String out = "";
+        try {
+          HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+          if (c instanceof HttpsURLConnection && Build.VERSION.SDK_INT < 21) {
+            SSLContext sc = SSLContext.getInstance("TLSv1.2"); sc.init(null, null, null);
+            ((HttpsURLConnection) c).setSSLSocketFactory(new Tls12Factory(sc.getSocketFactory()));
+          }
+          c.setConnectTimeout(15000); c.setReadTimeout(20000); c.setRequestMethod(method);
+          c.setRequestProperty("Content-Type", "application/json");
+          String tk = token;
+          if (tk != null && tk.length() > 0 && url.contains("firestore.googleapis.com")) c.setRequestProperty("Authorization", "Bearer " + tk);
+          if (body != null && body.length() > 0) { c.setDoOutput(true); OutputStream os = c.getOutputStream(); os.write(body.getBytes("UTF-8")); os.close(); }
+          code = c.getResponseCode();
+          InputStream is = code >= 400 ? c.getErrorStream() : c.getInputStream();
+          if (is != null) { ByteArrayOutputStream bo = new ByteArrayOutputStream(); byte[] b = new byte[4096]; int n; while ((n = is.read(b)) > 0) bo.write(b, 0, n); is.close(); out = bo.toString("UTF-8"); }
+          c.disconnect();
+        } catch (Exception e) { code = 0; out = String.valueOf(e); }
+        final String js = "javascript:window.vxHttpCb&&window.vxHttpCb(" + JSONObject.quote(id) + "," + code + "," + JSONObject.quote(out) + ")";
+        runOnUiThread(new Runnable() { public void run() { web.loadUrl(js); } });
+      } }).start();
+    }
   }
 
   @Override protected void onCreate(Bundle b) {

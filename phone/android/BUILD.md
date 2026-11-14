@@ -28,3 +28,14 @@ apksigner sign --ks <keystore> --out bin/VITALX-phone.apk bin/aligned.apk
 ```
 
 `android/assets/` is generated; open `android/assets/index.html` in a browser to preview (Esc = back, hold Esc = exit code pad).
+
+## Cloud log (Firebase / Firestore)
+Every event is saved on the phone first, then uploaded in batches to Firestore when there is internet (collection `vitalx_events`):
+`session_start` (device model, Android version), `screen`, `select_crew`, `lang`, `day_snapshot` (all crew readings every 5 sim days), `alert`, `exit_code` (ok/wrong), `exit`.
+Daily upload cap: 15,000 documents (Firestore free tier is 20,000 writes/day).
+
+Setup:
+1. console.firebase.google.com → Add project.
+2. Build → Authentication → Get started → Sign-in method → enable **Anonymous**.
+3. Build → Firestore Database → Create database. In the **Rules** tab, paste `phone/firestore.rules` and publish.
+4. Project settings → General → Your apps → add a **Web** app → copy `apiKey` and `projectId` into `phone/cloud-config.js`, then rebuild.

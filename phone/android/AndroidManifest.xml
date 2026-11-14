@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.novacare.vitalx" android:versionCode="3" android:versionName="3.0">
+    package="com.novacare.vitalx" android:versionCode="4" android:versionName="3.1">
   <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="23" />
   <uses-permission android:name="android.permission.REORDER_TASKS" />
+  <uses-permission android:name="android.permission.INTERNET" />
   <application android:label="VITALX" android:icon="@drawable/ic_launcher" android:allowBackup="false"
       android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" android:hardwareAccelerated="true">
     <activity android:name=".MainActivity" android:screenOrientation="portrait" android:launchMode="singleTask"
