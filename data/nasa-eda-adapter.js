@@ -17,7 +17,9 @@ if (!args[0]) { console.error("usage: node data/nasa-eda-adapter.js <file.csv> [
 const opt = (n, d) => { const i = args.indexOf(n); return i > -1 ? args[i + 1] : d; };
 const BASE_DAYS = +opt("--baseline-days", 14);
 const WANT = (opt("--column", "") || "").toLowerCase();
-const K = 0.5, H = 5;               // نفس قيم content.js
+const K = 0.5, H = 5;
+// اختبار حساسية فقط: --inject-drift <mmHg/day> --from-day <n> يضيف انجرافا مصطنعا فوق البيانات الحقيقية (يُطبع ذلك بوضوح)
+const DRIFT = +opt("--inject-drift", 0), FROM = +opt("--from-day", 20);               // نفس قيم content.js
 const CO2_LIMIT_MMHG = 3.0;         // NASA-STD-3001 V2 6004 + flight rule 2016 (24-h avg)
 
 function parseCSV(txt) {
@@ -71,25 +73,33 @@ for (const c of cols) {
     if (!byDay.has(k)) byDay.set(k, []);
     byDay.get(k).push(v);
   }
+  // نحذف الأيام الثابتة تماما (قيمة واحدة طوال اليوم = قيمة تعبئة وليست قياسا، مثل 3000 ppm في أول أيام RR-12)
+  const flat = [];
+  for (const [k, a] of byDay) if (a.length > 3 && Math.min(...a) === Math.max(...a)) { flat.push(k); byDay.delete(k); }
   const days = [...byDay.keys()].sort((a, b) => (isNaN(a) ? a.localeCompare(b) : a - b));
   let daily = days.map(d => E.median(byDay.get(d)));
   const isCO2 = /co2/i.test(name);
   let unit = "";
   if (isCO2 && E.median(daily) > 50) { daily = daily.map(v => v * 760 / 1e6); unit = " (ppm→mmHg)"; } else if (isCO2) unit = " mmHg";
+  if (DRIFT && isCO2) { daily = daily.map((v, i) => v + Math.max(0, i - FROM) * DRIFT); unit += ` + انجراف مصطنع ${DRIFT}/يوم من اليوم ${FROM}`; }
   if (daily.length < BASE_DAYS + 3) { console.log(`\n# ${name}: ${daily.length} يوم فقط — غير كافٍ (نحتاج > ${BASE_DAYS + 3})`); continue; }
 
   const st = E.baselineStats(daily.slice(0, BASE_DAYS), { type: "relative", value: 0.05 });
   const step = E.makeCusum(K, H);
   const alerts = [], over = [];
+  let maxDaily = Math.max(...daily);
   daily.forEach((v, i) => {
     if (isCO2 && v > CO2_LIMIT_MMHG) over.push(days[i]);
     if (i < BASE_DAYS) return;
     const r = step(E.robustZ(v, st));
-    if (r.fired) alerts.push(`${days[i]} (${r.side > 0 ? "↑" : "↓"} ${v.toFixed(2)})`);
+    // CO2: الخطر في الارتفاع فقط (direction +1 كما في content.js)
+    if (r.fired && !(isCO2 && r.side < 0)) alerts.push(`${days[i]} (${r.side > 0 ? "↑" : "↓"} ${v.toFixed(2)})`);
   });
   console.log(`\n# ${name}${unit}`);
+  if (flat.length) console.log(`أيام مستبعدة (قيمة تعبئة ثابتة): ${flat.sort().join(", ")}`);
   console.log(`أيام: ${daily.length} | من ${days[0]} إلى ${days.at(-1)}`);
   console.log(`خط الأساس (أول ${BASE_DAYS} يوم): وسيط ${st.med.toFixed(3)} | مقياس ${st.scale.toFixed(3)}`);
   console.log(`إنذارات VITALX (CUSUM k=${K}, h=${H}): ${alerts.length ? alerts.join(", ") : "لا يوجد"}`);
+  if (isCO2) console.log(`أعلى وسيط يومي: ${maxDaily.toFixed(2)} mmHg`);
   if (isCO2) console.log(`أيام تجاوزت حد ناسا الثابت ${CO2_LIMIT_MMHG} mmHg: ${over.length ? over.join(", ") : "لا يوجد"}`);
 }
