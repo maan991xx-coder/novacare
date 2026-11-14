@@ -82,7 +82,24 @@ window.VITALX_CONTENT = {
       rate: { ar: "نسبة الكشف", en: "Detection rate" },
       delay: { ar: "التأخير (الوسيط)", en: "Delay (median)" },
       fa: { ar: "إنذار كاذب / 100 يوم", en: "False alarms / 100 days" },
-      hint: { ar: "اضغط تشغيل وشاهد من يكشف أولاً", en: "Press play and see who catches it first" }
+      hint: { ar: "اضغط تشغيل وشاهد من يكشف أولاً", en: "Press play and see who catches it first" },
+      // وضع بيانات ناسا الحقيقية (RR-12)
+      modeSim: { ar: "محاكاة الطاقم", en: "Crew simulation" },
+      modeReal: { ar: "بيانات ناسا حقيقية", en: "Real NASA data" },
+      realTitle: { ar: "CO2 مقصورة محطة الفضاء · مهمة RR-12 (2019)", en: "ISS cabin CO2 · mission RR-12 (2019)" },
+      realTag: { ar: "بيانات ناسا حقيقية", en: "Real NASA data" },
+      testTag: { ar: "اختبار مصطنع", en: "Synthetic test" },
+      observed: { ar: "CO2 الحقيقي (وسيط يومي)", en: "Real CO2 (daily median)" },
+      drift: { ar: "+ ارتفاع مصطنع 0.05/يوم", en: "+ synthetic rise 0.05/day" },
+      limit: { ar: "حد ناسا 3 mmHg", en: "NASA limit 3 mmHg" },
+      realOurs: { ar: "VITALX على البيانات الحقيقية", en: "VITALX on real data" },
+      realFixed: { ar: "حد ناسا الثابت", en: "NASA fixed limit" },
+      noAlarm: { ar: "لا إنذار كاذب", en: "No false alarm" },
+      noBreach: { ar: "لم يُتجاوز", en: "Not crossed" },
+      driftHead: { ar: "اختبار: نضيف ارتفاعًا بطيئًا فوق البيانات الحقيقية", en: "Test: add a slow rise on top of the real data" },
+      never: { ar: "لم يكشف", en: "Never" },
+      day: { ar: "يوم", en: "day" },
+      source: { ar: "المصدر: NASA OSDR Environmental Data App · أول 5 أيام قيمة تعبئة ثابتة فاستُبعدت", en: "Source: NASA OSDR Environmental Data App · first 5 days were a constant fill value and were excluded" }
     },
 
     // 5) ناسا
@@ -90,11 +107,11 @@ window.VITALX_CONTENT = {
       head: { ar: "كل إشارة مربوطة بخطر في برنامج أبحاث الإنسان HRP", en: "Every signal maps to a NASA Human Research Program (HRP) risk" },
       map: [
         { ch: "sleep", risk: "Sleep Loss, Circadian Desynchronization & Work Overload" },
-        { ch: "co2", risk: { ar: "⟨اسم خطر HRP المرتبط بـ CO2 — تحققوا من الاسم الدقيق⟩", en: "⟨HRP risk related to CO2 — verify exact title⟩" } },
+        { ch: "co2", risk: "Ambient Carbon Dioxide Exposure in Crewed Vehicles (CO2 Risk)" },
         { ch: "rad", risk: "Radiation Carcinogenesis" },
         { ch: "hr", risk: { ar: "مؤشر عام للإجهاد، يُقرأ مع النوم وCO2", en: "General strain marker, read with sleep and CO2" } }
       ],
-      honest: { ar: "البيانات مولّدة، والسيناريوهات مبنية على مخاطر HRP. لم نستخدم أي مجموعة بيانات من ناسا.", en: "The data is synthetic; the scenarios are based on HRP risks. We did not use any NASA dataset." },
+      honest: { ar: "بيئة المقصورة (CO2) بيانات ناسا حقيقية من OSDR لمهمة RR-12. العلامات الحيوية للرواد محاكاة، لأن بيانات البشر عند ناسا محمية.", en: "Cabin environment (CO2) is real NASA OSDR data from mission RR-12. Crew vital signs are simulated, because NASA human data is access-controlled." },
       link: { ar: "خارطة أبحاث HRP", en: "HRP Human Research Roadmap" },
       team: { ar: "الفريق", en: "Team" },
       challenge: { ar: "التحدي", en: "Challenge" },
