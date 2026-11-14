@@ -450,7 +450,7 @@
       + row("rad", t(L.radShort), fmt(dose, 1), "mSv", radCol, "solution")
       + row("comp", t(L.composite), calib ? "—" : fmt(comp, 1), "z", statusColor(s === "calib" ? 0 : s), "solution");
   }
-  let hasAstroImg = false;
+  let hasAstroImg = true; // الصورة موجودة في media/؛ إن فشل تحميلها يعود الرسم المدمج (انظر probe)
   function screenHome() {
     const d = state.day, c = crewById(state.member), s = statusOf(c, d);
     const open = crew.filter(x => { const sx = statusOf(x, d); return sx !== "calib" && sx >= 2; }).length;
@@ -458,7 +458,7 @@
     return `<div class="home">
       <div class="vitals">${vitalsFor(c, d)}</div>
       <div class="figure">
-        ${hasAstroImg ? `<div class="astro-img"><img src="media/astronaut.png" alt="${esc(t(c.m.name))}"><i class="pad"></i></div>` : astronautSVG(c, d)}
+        ${hasAstroImg ? `<div class="astro-img"><img src="media/astronaut.webp" srcset="media/astronaut-440.webp 1x, media/astronaut.webp 2x" width="418" height="880" decoding="async" fetchpriority="high" alt="${esc(t(c.m.name))}"><i class="pad"></i></div>` : astronautSVG(c, d)}
         <div class="namepill" style="--c:${statusCss(s)}">
           <button type="button" class="pill-nav" data-step="-1" aria-label="prev">‹</button>
           <span><b>${tx(c.m.name)}</b> · ${tx(A.status[s])}</span>
@@ -1104,9 +1104,11 @@
   try { const q = new URLSearchParams(location.search).get("day"); if (q != null) start = clamp(parseInt(q, 10) || 0, 0, D - 1); } catch (e) { /* */ }
   state.day = start; seenUpTo(start);
   // صور اختيارية: خلفية المركبة وصورة الرائد. إذا لم تكن موجودة يبقى الرسم المدمج
-  const probe = (src, cls, cb) => { const im = new Image(); im.onload = () => { document.body.classList.add(cls); if (cb) cb(); }; im.src = src; };
-  probe("media/ship-bg.jpg", "has-ship");
-  probe("media/astronaut.png", "has-astro", () => { hasAstroImg = true; render(); });
+  // أداء: الصورتان مفعّلتان من البداية (class في <body>) بدل انتظار التحميل ثم إعادة الرسم — كان ذلك يسبب إزاحة في التخطيط وتأخر LCP
+  const probe = (src, cls, cb) => { const im = new Image(); im.onerror = () => { document.body.classList.remove(cls); if (cb) cb(); }; im.src = src; };
+  probe(matchMedia("(max-width: 860px)").matches ? "media/ship-bg-1000.webp" : "media/ship-bg.webp", "has-ship");
+  probe(devicePixelRatio > 1 ? "media/astronaut.webp" : "media/astronaut-440.webp", "has-astro", () => { hasAstroImg = false; render(); });
   renderFrame(); bind(); route();
+  document.documentElement.classList.add("vx-ready"); // أداء: الواجهة تظهر بعد أول رسم كامل (يمنع إزاحة التخطيط)
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
 })();

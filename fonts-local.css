@@ -1,0 +1,11 @@
+/* يُحمَّل فقط على جهازك (file:// أو localhost) — ملفات fonts/ غير مرفوعة بسبب ترخيص خط ثمانية */
+@font-face { font-family: "VX Thmanyah"; font-weight: 300; font-display: swap;
+  src: local("thmanyah sans Light"), local("thmanyahsans-Light"), url("fonts/thmanyahsans-Light.woff2") format("woff2"); }
+@font-face { font-family: "VX Thmanyah"; font-weight: 400; font-display: swap;
+  src: local("thmanyah sans Regular"), local("thmanyahsans-Regular"), url("fonts/thmanyahsans-Regular.woff2") format("woff2"); }
+@font-face { font-family: "VX Thmanyah"; font-weight: 500; font-display: swap;
+  src: local("thmanyah sans Medium"), local("thmanyahsans-Medium"), url("fonts/thmanyahsans-Medium.woff2") format("woff2"); }
+@font-face { font-family: "VX Thmanyah"; font-weight: 700; font-display: swap;
+  src: local("thmanyah sans Bold"), local("thmanyahsans-Bold"), url("fonts/thmanyahsans-Bold.woff2") format("woff2"); }
+@font-face { font-family: "VX Thmanyah"; font-weight: 900; font-display: swap;
+  src: local("thmanyah sans Black"), local("thmanyahsans-Black"), url("fonts/thmanyahsans-Black.woff2") format("woff2"); }
