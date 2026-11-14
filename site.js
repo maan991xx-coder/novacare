@@ -544,7 +544,49 @@
     return `<div class="six-head">${tx(P.head)}</div>
       <div class="stat-row">${P.stats.map(s => `<div class="card stat"><b dir="ltr">${esc(s.v)}<em>${tx(s.u)}</em></b><span>${tx(s.t)}</span></div>`).join("")}</div>
       <div class="card" style="margin-top:14px"><h3>${tx(P.chart)} <span class="unit">bpm</span></h3>${chartBox("cvProblem", "mid")}
-        ${legend([["#e7ecf7", L.observed], [css("--fixed"), L.fixedThr]])}</div>`;
+        ${legend([["#e7ecf7", L.observed], [css("--fixed"), L.fixedThr]])}</div>
+      ${challengesCard()}`;
+  }
+  // ---------- تحديات الجسم + المؤشرات ----------
+  const BICON = {
+    fluid: '<path d="M12 3s-4 4.6-4 7.5a4 4 0 0 0 8 0C16 7.6 12 3 12 3Z"/><path d="M12 21v-6M9 18l3-3 3 3"/>',
+    sans: '<path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.6"/>',
+    cardio: '<path d="M12 20s-7-4.2-9-8.6A5 5 0 0 1 12 6a5 5 0 0 1 9 5.4C19 15.8 12 20 12 20Z"/><path d="M12 9v6M9.5 12.5 12 15l2.5-2.5"/>',
+    arrhythmia: '<path d="M2 12h3l2-5 3 10 2-8 2 6 2-3h6"/>',
+    ortho: '<circle cx="12" cy="4.5" r="2"/><path d="M12 7v7M8 10h8M12 14l-3 6M12 14l3 6"/><path d="M19 4v5M17.5 7.5 19 9l1.5-1.5"/>',
+    circadian: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    stress: '<path d="M9 21v-3a7 7 0 1 1 8-6.9V13l2 3h-2v2a2 2 0 0 1-2 2h-1"/><path d="m10 8 2 2-2 2 2 2"/>',
+    heat: '<path d="M10 14.5V5a2 2 0 0 1 4 0v9.5a4 4 0 1 1-4 0Z"/><path d="M19 4s-2 2.3-2 3.6a2 2 0 0 0 4 0C21 6.3 19 4 19 4Z"/>',
+    hypoxia: '<path d="M12 4v7M12 11c-2 0-3-2-5-2-2.5 0-4 4-4 8 0 2 1 3 3 3 3 0 5-3 6-6M12 11c2 0 3-2 5-2 2.5 0 4 4 4 8 0 2-1 3-3 3-3 0-5-3-6-6"/>',
+    immune: '<path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6l-8-3Z"/><path d="M12 9v6M9 12h6"/>',
+    radiation: '<circle cx="12" cy="12" r="2"/><path d="M12 10 9 4.8A8 8 0 0 0 4.2 13H10M14 12h6a8 8 0 0 0-4.8-7.4L12 10M13 13.7l3 5.2a8 8 0 0 1-8 0l3-5.2"/>',
+    hrsleep: '<path d="M12 20s-7-4.2-9-8.6A5 5 0 0 1 12 6a5 5 0 0 1 9 5.4"/><path d="M21.5 16.5a4 4 0 1 1-4.5-4.5 3.2 3.2 0 0 0 4.5 4.5Z"/>',
+    co2: '<text x="12" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" stroke="none" font-family="sans-serif">CO2</text><rect x="2.5" y="5" width="19" height="14" rx="3"/>',
+    rad: '<circle cx="12" cy="12" r="2"/><path d="M12 10 9 4.8A8 8 0 0 0 4.2 13H10M14 12h6a8 8 0 0 0-4.8-7.4L12 10M13 13.7l3 5.2a8 8 0 0 1-8 0l3-5.2"/>',
+    bp: '<path d="M4 18a8 8 0 1 1 16 0"/><path d="m12 18 4-5"/><circle cx="12" cy="18" r="1.3"/>',
+    ecg: '<rect x="2.5" y="4" width="19" height="16" rx="3"/><path d="M5 12h3l1.5-3 2 6 1.5-3H19"/>',
+    hrv: '<path d="M3 12c1.5-4 3-4 4.5 0s3 4 4.5 0 3-4 4.5 0 3 4 4.5 0"/><path d="M3 5v2M21 5v2M3 17v2M21 17v2"/>',
+    temp: '<path d="M10 14.5V5a2 2 0 0 1 4 0v9.5a4 4 0 1 1-4 0Z"/><path d="M12 9v7"/>',
+    spo2: '<text x="12" y="15.5" text-anchor="middle" font-size="8.5" font-weight="700" fill="currentColor" stroke="none" font-family="sans-serif">O2</text><circle cx="12" cy="12" r="9"/>',
+    eva: '<path d="M5 13a7 7 0 0 1 14 0v3a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-3Z"/><path d="M8 12.5a4 4 0 0 1 8 0v1H8Z"/>',
+    inflam: '<path d="M9 3h6M10 3v6L4.5 19A1.5 1.5 0 0 0 6 21h12a1.5 1.5 0 0 0 1.5-2L14 9V3"/><path d="M8 15h8"/>'
+  };
+  function challengesCard() {
+    const B = A.body;
+    const by = id => B.ind.filter(x => x.ch.includes(id)).map(x => t(x.s)).join("، ");
+    return `<div class="card body-card"><h3>${tx(B.challengesHead)}</h3><div class="ch-grid">${B.ch.map(c => {
+      const live = B.ind.some(x => x.st === "live" && x.ch.includes(c.id));
+      return `<div class="ch-tile ${live ? "live" : ""}" title="${esc(t(c.d) + "\n" + t(B.detectedBy) + ": " + by(c.id))}"><span class="b-orb">${svgI(BICON[c.id])}</span><small>${tx(c.s)}</small></div>`; }).join("")}</div></div>`;
+  }
+  function indicatorsCard() {
+    const B = A.body, chName = id => (B.ch.find(c => c.id === id) || {}).s;
+    const lab = { live: B.live, plan: B.planned, sim: B.simulated };
+    return `<div class="card body-card ind-card"><h3>${tx(B.indicatorsHead)}
+        <span class="ind-key">${["live", "plan", "sim"].map(k => `<i class="st-dot ${k}"></i>${tx(lab[k])}`).join("")}</span></h3>
+      <div class="ind-grid">${B.ind.map(x => `<div class="ind-tile ${x.st}" title="${esc(t(x.d) + "\n" + t(B.detects) + ": " + x.ch.map(id => t(chName(id))).join("، "))}">
+        <span class="b-orb">${svgI(BICON[x.id])}<i class="st-dot ${x.st}"></i></span><small>${tx(x.s)}</small>
+        <span class="ind-ch">${x.ch.map(id => `<i title="${esc(t(chName(id)))}">${svgI(BICON[id])}</i>`).join("")}</span></div>`).join("")}</div>
+      <p class="six-note">${tx(B.honest)}</p></div>`;
   }
   function afterProblem() { const c = crewById("A"); drawHr($("cvProblem"), c, state.day, { fixed: true, onset: true }); }
 
@@ -580,10 +622,10 @@
     const FI = ['<path d="M3 12h4l2-5 4 10 2-5h6"/>', '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>', '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>', '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>', '<path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5 19 19M5 19l2.5-2.5M16.5 7.5 19 5"/>'];
     return `<div class="flow">${P.steps.map((s, i) => `<span class="flow-step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${FI[i] || ""}</svg>${tx(s)}</span>${i < P.steps.length - 1 ? '<i class="flow-arr"></i>' : ""}`).join("")}</div>
       <div class="devices">
-        <figure>${watchFace(c, d)}<figcaption>${tx(P.watch)} · ${tx(c.m.name)}</figcaption></figure>
+        <figure>${watchFace(c, d)}<figcaption>${tx(P.watch)} · ${tx(c.m.name)}</figcaption>${personalAdvice(c, d)}</figure>
         <figure class="wide">${tabletFace(d)}<figcaption>${tx(P.tablet)}</figcaption></figure>
       </div>
-      `;
+      ${indicatorsCard()}`;
   }
   function afterSolution() { drawHr($("cvTablet"), crewById(state.member), state.day, { band: true, markers: true }); }
 
@@ -641,6 +683,16 @@
     const arr = '<i class="adv-arr"></i>';
     return `<div class="advisor" style="--c:${LV(level || 1)}">${head}<div class="adv-flow">
       ${node("what", vicon(id))}${arr}${node("risk", svgI(AICON[id].risk))}${arr}${node("act", svgI(AICON[id].act))}</div></div>`;
+  }
+
+  // الاستشارة الشخصية تحت الساعة: نفس المستشار للرائد المختار، بجمل قصيرة مكتوبة.
+  function personalAdvice(c, d) {
+    const V = A.advice, tc = topChannel(c, d), id = tc && tc.id, a = id && V.ch[id];
+    const head = `<div class="adv-head"><span class="adv-spark">${svgI('<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>')}</span><b>${tx(V.personal)}</b><span class="tag-synth">${tx(V.tag)}</span></div>`;
+    const foot = `<p class="pa-foot">${tx(V.foot)}</p>`;
+    if (!a) return `<div class="advisor personal calm">${head}<div class="pa-row act"><span class="adv-orb">${svgI(AICON.ok)}</span><div><small>${esc(t(c.m.name))}</small><p>${tx(V.ok)}</p></div></div>${foot}</div>`;
+    const row = (k, icon) => `<div class="pa-row ${k}"><span class="adv-orb">${icon}</span><div><small>${tx(V[k])}</small><p>${tx(a[k])}</p></div></div>`;
+    return `<div class="advisor personal" style="--c:${LV(tc.level || 1)}">${head}${row("what", vicon(id))}${row("risk", svgI(AICON[id].risk))}${row("act", svgI(AICON[id].act))}${foot}</div>`;
   }
 
   // ---------- 4ب) بيانات ناسا الحقيقية: RR-12 من OSDR EDA ----------
