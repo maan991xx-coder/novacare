@@ -577,12 +577,13 @@
   }
   function screenSolution() {
     const c = crewById(state.member), d = state.day, P = S6.solution;
-    return `<div class="flow">${P.steps.map((s, i) => `<span class="flow-step">${tx(s)}</span>${i < P.steps.length - 1 ? '<i class="flow-arr"></i>' : ""}`).join("")}</div>
+    const FI = ['<path d="M3 12h4l2-5 4 10 2-5h6"/>', '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>', '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>', '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>', '<path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5 19 19M5 19l2.5-2.5M16.5 7.5 19 5"/>'];
+    return `<div class="flow">${P.steps.map((s, i) => `<span class="flow-step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${FI[i] || ""}</svg>${tx(s)}</span>${i < P.steps.length - 1 ? '<i class="flow-arr"></i>' : ""}`).join("")}</div>
       <div class="devices">
         <figure>${watchFace(c, d)}<figcaption>${tx(P.watch)} · ${tx(c.m.name)}</figcaption></figure>
         <figure class="wide">${tabletFace(d)}<figcaption>${tx(P.tablet)}</figcaption></figure>
       </div>
-      <p class="six-note">${tx(P.adapt)}</p>`;
+      `;
   }
   function afterSolution() { drawHr($("cvTablet"), crewById(state.member), state.day, { band: true, markers: true }); }
 
@@ -605,10 +606,10 @@
     const pe = cohortStats.projection.find(p => p.off === 14) || cohortStats.projection[0];
     return `<div class="grid g3 edge-grid">
         <div class="card"><h3>${tx(P.personal)}</h3>${g.replace('<div class="card gauge">', '<div class="gauge">')}
-          <div class="chips">${chips}</div><p class="six-note">${tx(P.personalNote)} · bpm</p></div>
-        <div class="card"><h3>${tx(P.why)}</h3>${bars}<p class="six-note">${tx(P.whyNote)}</p></div>
+          <div class="chips" title="${esc(t(P.personalNote))}">${chips}</div></div>
+        <div class="card"><h3>${tx(P.why)}</h3>${bars}</div>
         <div class="card"><h3>${tx(P.proj)}</h3>${chartBox("cvProj", "short")}<p class="big-line">${pTxt}</p>
-          <p class="six-note">${tx(P.projErr)} <span dir="ltr">±${fmt(pe.medAbs, 0)}</span> ${tx(P.days)}</p></div>
+          <p class="six-note" title="${esc(t(P.projErr))}"><span dir="ltr">±${fmt(pe.medAbs, 0)}</span> ${tx(P.days)}</p></div>
       </div>`;
   }
   function afterEdge() { drawHr($("cvProj"), crewById(state.member), state.day, { proj: true }); }
@@ -765,21 +766,33 @@
   function renderTabs() {
     $("tabs").innerHTML = TABS.map(k => `<a class="tab ${state.screen === k ? "on" : ""}" href="#${k}" ${state.screen === k ? 'aria-current="page"' : ""}>${icon(k)}<span>${tx(A.screens[k])}</span></a>`).join("");
   }
+  // أيقونات لوحة الأزرار (بدل النصوص)
+  const KI = {
+    restart: '<path d="M6 5v14M19 6l-9 6 9 6z"/>',
+    play: '<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>',
+    pause: '<path d="M8 5v14M16 5v14" stroke-width="3"/>',
+    step: '<path d="M5 6l8 6-8 6zM17 6v12"/>',
+    next: '<circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M17 9l3 3-3 3"/>',
+    tilt: '<rect x="7" y="3" width="10" height="18" rx="2" transform="rotate(-15 12 12)"/><path d="M2 9a8 8 0 0 0 0 6M22 9a8 8 0 0 1 0 6"/>',
+    lang: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/>'
+  };
+  const kicon = k => `<svg class="ki" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${KI[k]}</svg>`;
+  const setKey = (id, ic, label, extra) => { const b = $(id); if (!b) return; b.innerHTML = kicon(ic) + (extra || ""); b.title = label; b.setAttribute("aria-label", label); };
   function renderFrame() {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
     document.title = t(A.title);
-    $("langBtn").textContent = "🌐 " + t(C.ui.langToggle);
-    if ($("subtitle")) $("subtitle").textContent = t(A.subtitle);
-    if ($("nextBtn")) $("nextBtn").textContent = t(A.player.next) + " ›";
-    $("restartBtn").textContent = "⏮ " + t(A.player.restart);
-    $("stepBtn").textContent = t(A.player.step) + " +1";
-    $("speedLab").textContent = t(A.player.speed);
-    $("speedSel").innerHTML = SPEEDS.map((s, i) => `<option value="${i}" ${i === state.speed ? "selected" : ""}>${s}× ${esc(t(A.player.perSec))}</option>`).join("");
+    setKey("langBtn", "lang", t(C.ui.langToggle), `<b class="kt">${lang === "ar" ? "EN" : "ع"}</b>`);
+    if ($("nextBtn")) setKey("nextBtn", "next", t(A.player.next));
+    setKey("restartBtn", "restart", t(A.player.restart));
+    setKey("stepBtn", "step", t(A.player.step) + " +1");
+    $("speedLab").textContent = "";
+    $("speedSel").title = t(A.player.speed); $("speedSel").setAttribute("aria-label", t(A.player.speed));
+    $("speedSel").innerHTML = SPEEDS.map((s, i) => `<option value="${i}" ${i === state.speed ? "selected" : ""}>×${s}</option>`).join("");
     $("dayLab").textContent = t(A.player.day);
     $("dayOf").textContent = "/" + (D - 1);
     $("synthTag").textContent = t(A.synthetic);
-    $("disclaimer").textContent = t(A.disclaimer);
+    $("disclaimer").textContent = ""; $("synthTag").title = t(A.disclaimer);
     const pct = x => x / (D - 1) * 100 + "%";
     $("tlAdapt").style.width = pct(sim.adaptation.days);
     $("tlCalib").style.left = pct(sim.adaptation.days); $("tlCalib").style.width = pct(crew[0].pers.active - sim.adaptation.days);
@@ -791,7 +804,7 @@
     $("tlTicks").innerHTML = crew.flatMap(c => c.events.filter(e => e.level >= 2 && e.day <= d).map(e => `<i style="left:${e.day / (D - 1) * 100}%;background:${LV(e.level)};box-shadow:0 0 6px ${LV(e.level)}"></i>`)).join("");
   }
   function renderPlayer() {
-    $("playBtn").textContent = state.playing ? "❚❚ " + t(A.player.pause) : "▶ " + t(A.player.play);
+    setKey("playBtn", state.playing ? "pause" : "play", state.playing ? t(A.player.pause) : t(A.player.play));
     $("dayNum").textContent = state.day;
     const ph = phaseOf(state.day);
     $("phase").className = "phase " + ph; $("phase").textContent = t(A.phase[ph]);
@@ -800,6 +813,7 @@
   function render() {
     cancelAnimationFrame(ecgRaf);
     const [html, after] = SCREENS[state.screen] || SCREENS.home;
+    if ($("subtitle")) $("subtitle").textContent = state.screen === "home" ? t(A.subtitle) : "";
     $("screenTitle").textContent = state.screen === "home" ? t(A.title) : t(A.screens[state.screen]);
     $("view").innerHTML = html();
     if (slideDir) {
@@ -878,26 +892,37 @@
   function bindGestures() {
     const vp = document.querySelector(".viewport") || $("view");
     let st = null, moved = false;
+    const view = () => $("view");
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const rubber = (x, dim) => { const c = .55; return (x * dim * c) / (dim + c * Math.abs(x)); };
     vp.addEventListener("pointerdown", e => {
       if (e.button > 0 || e.target.closest("input,select,textarea,video,.edge")) { st = null; return; }
-      st = { x: e.clientX, y: e.clientY, t: Date.now() }; moved = false;
+      st = { x: e.clientX, y: e.clientY, hist: [{ x: e.clientX, t: performance.now() }], id: e.pointerId, lock: 0 }; moved = false;
+      view().style.transition = "none";
     });
     vp.addEventListener("pointermove", e => {
       if (!st) return;
-      const dx = e.clientX - st.x;
-      if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(e.clientY - st.y)) { moved = true; $("view").style.transform = `translateX(${dx * .35}px)`; $("view").style.opacity = String(1 - Math.min(.5, Math.abs(dx) / 600)); }
+      const dx = e.clientX - st.x, dy = e.clientY - st.y;
+      if (!st.lock && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) st.lock = Math.abs(dx) > Math.abs(dy) ? 1 : -1;
+      if (st.lock !== 1) return;
+      if (!moved) { moved = true; try { vp.setPointerCapture(st.id); } catch (er) { /* */ } }
+      st.hist.push({ x: e.clientX, t: performance.now() }); if (st.hist.length > 6) st.hist.shift();
+      const w = vp.clientWidth || 800, x = rubber(dx, w);
+      if (!reduce) { view().style.transform = `translate3d(${x}px,0,0)`; view().style.opacity = String(1 - Math.min(.35, Math.abs(x) / w)); }
     });
+    const settle = () => { const v = view(); v.style.transition = "transform .42s cubic-bezier(.2,.9,.25,1), opacity .3s"; v.style.transform = ""; v.style.opacity = ""; };
     const end = e => {
       if (!st) return;
-      const dx = e.clientX - st.x, dy = e.clientY - st.y; st = null;
-      $("view").style.transform = ""; $("view").style.opacity = "";
-      if (moved && Math.abs(dx) > 70 && Math.abs(dx) > 1.4 * Math.abs(dy)) {
-        const next = isRtl() ? dx > 0 : dx < 0;
-        navStep(next ? 1 : -1);
-      }
+      const dx = e.clientX - st.x, h = st.hist, a = h[0], b = h[h.length - 1];
+      const vel = b.t > a.t ? (b.x - a.x) / (b.t - a.t) * 1000 : 0; // px/s
+      const proj = dx + (vel / 1000) * .998 / (1 - .998) * .25;      // إسقاط الزخم
+      const ok = moved && st.lock === 1 && Math.abs(proj) > Math.min(160, (vp.clientWidth || 800) * .18);
+      st = null;
+      if (ok) { const v = view(); v.style.transition = "none"; v.style.transform = ""; v.style.opacity = ""; navStep((isRtl() ? proj > 0 : proj < 0) ? 1 : -1); }
+      else settle();
     };
     vp.addEventListener("pointerup", end);
-    vp.addEventListener("pointercancel", () => { st = null; $("view").style.transform = ""; $("view").style.opacity = ""; });
+    vp.addEventListener("pointercancel", () => { st = null; settle(); });
     // منع النقرة بعد السحب
     vp.addEventListener("click", e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
     // عجلة/لوحة لمس أفقية
@@ -939,7 +964,7 @@
         const next = isRtl() ? gm < 0 : gm > 0;   // الإمالة نحو جهة الشاشة التالية
         navStep(next ? 1 : -1);
       };
-      const label = () => { tb.textContent = "📱 " + t(on ? A.player.tiltOn : A.player.tilt); tb.classList.toggle("on", on); };
+      const label = () => { setKey("tiltBtn", "tilt", t(on ? A.player.tiltOn : A.player.tilt)); tb.classList.toggle("on", on); };
       tb.onclick = async () => {
         if (!on && typeof DeviceOrientationEvent.requestPermission === "function") {
           try { await DeviceOrientationEvent.requestPermission(); } catch (e) { /* نكمل؛ إن لم يُسمح فلن تصل أحداث */ }

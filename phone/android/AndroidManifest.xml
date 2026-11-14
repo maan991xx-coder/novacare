@@ -1,15 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.novacare.vitalx" android:versionCode="2" android:versionName="2.0">
+    package="com.novacare.vitalx" android:versionCode="7" android:versionName="3.4">
   <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="23" />
+  <uses-permission android:name="android.permission.REORDER_TASKS" />
+  <uses-permission android:name="android.permission.INTERNET" />
   <application android:label="VITALX" android:icon="@drawable/ic_launcher" android:allowBackup="false"
       android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" android:hardwareAccelerated="true">
     <activity android:name=".MainActivity" android:screenOrientation="portrait" android:launchMode="singleTask"
-        android:configChanges="orientation|screenSize|keyboardHidden|screenLayout">
+        android:configChanges="orientation|screenSize|keyboardHidden|screenLayout"
+        android:excludeFromRecents="true" android:stateNotNeeded="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+    <!-- يجعل التطبيق شاشة "الرئيسية" ما دام مقفلاً، فزر الرئيسية يرجع إليه. يُعطَّل عند الخروج بالرمز -->
+    <activity-alias android:name=".HomeAlias" android:targetActivity=".MainActivity" android:enabled="true">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.HOME" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </activity-alias>
+    <receiver android:name=".AdminReceiver" android:permission="android.permission.BIND_DEVICE_ADMIN">
+      <meta-data android:name="android.app.device_admin" android:resource="@xml/device_admin" />
+      <intent-filter><action android:name="android.app.action.DEVICE_ADMIN_ENABLED" /></intent-filter>
+    </receiver>
   </application>
 </manifest>
