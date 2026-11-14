@@ -155,3 +155,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#e7ecf7;
 #watch .shade{background:rgba(3,10,18,.68)}
 .g-head:before,.g-head:after{width:3vmin;height:3vmin}
 #menu .lang,#menu .note{z-index:2}
+
+/* ================= خط ثمانية بأوزانه الخمسة (الملفات تُنسخ إلى assets/fonts وقت البناء ولا تُرفع على GitHub) ================= */
+@font-face{font-family:"Thmanyah";font-weight:300;src:url(fonts/thmanyahsans-Light.woff2) format("woff2"),url(fonts/thmanyahsans-Light.otf) format("opentype")}
+@font-face{font-family:"Thmanyah";font-weight:400;src:url(fonts/thmanyahsans-Regular.woff2) format("woff2"),url(fonts/thmanyahsans-Regular.otf) format("opentype")}
+@font-face{font-family:"Thmanyah";font-weight:500;src:url(fonts/thmanyahsans-Medium.woff2) format("woff2"),url(fonts/thmanyahsans-Medium.otf) format("opentype")}
+@font-face{font-family:"Thmanyah";font-weight:700;src:url(fonts/thmanyahsans-Bold.woff2) format("woff2"),url(fonts/thmanyahsans-Bold.otf) format("opentype")}
+@font-face{font-family:"Thmanyah";font-weight:900;src:url(fonts/thmanyahsans-Black.woff2) format("woff2"),url(fonts/thmanyahsans-Black.otf) format("opentype")}
+html,body,button{font-family:"Thmanyah","IBM Plex Sans Arabic","Noto Sans Arabic","Roboto",Tahoma,sans-serif;font-weight:400}
+/* Light 300: النصوص الثانوية */
+.choice small,.note,.why,.legend,.row2 small,.tile i,.ring .u,.w-top,.g-head .day,.cr .nm small,.chart h3 span,#menu .team{font-weight:300}
+/* Medium 500: العناوين الصغيرة والأزرار */
+.lang button,.ring .lab,.cr .nm,.chart h3,.alert,.keys button,.pexit button,.tile b{font-weight:500}
+/* Bold 700: العناوين */
+.choice b,.g-head .t,.row2 b,.w-top b,.pin-box b,.pexit button.go{font-weight:700}
+/* Black 900: الشعار والرقم الكبير والحالة */
+.brand,#menu h1,.state,.ring .hr,.cr .av{font-weight:900}
+.ring .hr{font-family:"Thmanyah",sans-serif;direction:ltr}

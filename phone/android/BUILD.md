@@ -16,6 +16,7 @@ Build (Ubuntu: `apt install aapt apksigner dalvik-exchange android-sdk-platform-
 cd phone
 node build-html.js <path>/node_modules/@babel/standalone android/assets/index.html
 cp ../media/ship-bg.jpg ../media/astronaut.png android/assets/
+mkdir -p android/assets/fonts && cp ../fonts/thmanyahsans-*.woff2 ../fonts/thmanyahsans-*.otf android/assets/fonts/   # Thmanyah, 5 weights (local only)
 cd android
 AJ=/usr/lib/android-sdk/platforms/android-23/android.jar
 mkdir -p gen obj bin
@@ -39,3 +40,9 @@ Setup:
 2. Build → Authentication → Get started → Sign-in method → enable **Anonymous**.
 3. Build → Firestore Database → Create database. In the **Rules** tab, paste `phone/firestore.rules` and publish.
 4. Project settings → General → Your apps → add a **Web** app → copy `apiKey` and `projectId` into `phone/cloud-config.js`, then rebuild.
+
+## Thmanyah font
+The app uses the Thmanyah Sans family in all 5 weights (Light 300, Regular 400, Medium 500, Bold 700, Black 900).
+Its license forbids hosting or redistributing the font files, so they are **not** in this repo and the APK built with
+them is shared privately (not committed). Put the `.woff2` and `.otf` files from the Thmanyah package in `../fonts/` before building.
+Without them the app falls back to IBM Plex / system fonts.
