@@ -44,6 +44,43 @@ window.VITALX_CONTENT = {
       onset: { ar: "بدء الانحراف", en: "Drift starts" }
     },
 
+    // تحديات الجسم في الفضاء + المؤشرات التي نرصدها بها (رموز أولًا، التفاصيل في التلميح)
+    body: {
+      challengesHead: { ar: "تحديات الجسم في الفضاء", en: "Space physiology challenges" },
+      indicatorsHead: { ar: "ما نرصده وما يكشفه", en: "What we monitor and what it detects" },
+      detectedBy: { ar: "نرصده بـ", en: "Detected by" },
+      detects: { ar: "يكشف", en: "Detects" },
+      live: { ar: "يعمل الآن", en: "Live now" },
+      planned: { ar: "مخطط · نفس المحرك", en: "Planned · same engine" },
+      simulated: { ar: "محاكى", en: "Simulated" },
+      honest: { ar: "الأخضر يعمل الآن في المحرك. البقية إشارات إضافية تدخل نفس خط الأساس الشخصي ونفس الإنذار.", en: "Green runs in the engine today. The rest are extra signals feeding the same personal baseline and alert." },
+      ch: [
+        { id: "fluid", s: { ar: "انتقال السوائل", en: "Fluid shift" }, d: { ar: "انتقال السوائل نحو الجزء العلوي من الجسم (Cephalad Fluid Shift)", en: "Cephalad fluid shift toward the upper body" } },
+        { id: "sans", s: { ar: "العين والضغط", en: "SANS" }, d: { ar: "ارتفاع الضغط داخل الجمجمة ومتلازمة العين العصبية (SANS)", en: "Raised intracranial pressure and Spaceflight-Associated Neuro-ocular Syndrome" } },
+        { id: "cardio", s: { ar: "ضعف القلب", en: "Heart deconditioning" }, d: { ar: "انخفاض حجم البلازما وضعف الكتلة العضلية للقلب (Cardiovascular Deconditioning)", en: "Lower plasma volume and cardiac muscle loss" } },
+        { id: "arrhythmia", s: { ar: "اضطراب النظم", en: "Arrhythmias" }, d: { ar: "عدم انتظام ضربات القلب (Arrhythmias)", en: "Irregular heart rhythm" } },
+        { id: "ortho", s: { ar: "دوخة الوقوف", en: "Orthostatic" }, d: { ar: "عدم تحمل الجاذبية الانتصابية عند العودة (Orthostatic Intolerance)", en: "Orthostatic intolerance on return to gravity" } },
+        { id: "circadian", s: { ar: "الساعة البيولوجية", en: "Circadian" }, d: { ar: "اضطراب الساعة البيولوجية وجودة النوم (Circadian Rhythm Disruption)", en: "Circadian rhythm and sleep quality disruption" } },
+        { id: "stress", s: { ar: "الإجهاد النفسي", en: "Stress" }, d: { ar: "الإجهاد العصبي والنفسي الناتج عن العزلة (Psychological & Autonomic Stress)", en: "Psychological and autonomic stress from isolation" } },
+        { id: "heat", s: { ar: "حرارة وجفاف", en: "Heat & dehydration" }, d: { ar: "الإجهاد الحراري والجفاف أثناء المهام الخارجية (Thermal Stress & Dehydration during EVA)", en: "Thermal stress and dehydration during EVA" } },
+        { id: "hypoxia", s: { ar: "نقص الأكسجين", en: "Hypoxia" }, d: { ar: "نقص الأكسجة وتغيرات التنفس داخل البدلة الفضائية (Hypoxia & Respiratory Changes)", en: "Hypoxia and breathing changes in the suit" } },
+        { id: "immune", s: { ar: "المناعة", en: "Immunity" }, d: { ar: "ضعف الاستجابة المناعية وزيادة القابلية للالتهابات (Immune Dysregulation)", en: "Immune dysregulation and higher infection risk" } },
+        { id: "radiation", s: { ar: "الإشعاع", en: "Radiation" }, d: { ar: "تأثيرات التعرض للإشعاع الفضائي على العلامات الحيوية (Space Radiation Effects)", en: "Space radiation effects on vital signs" } }
+      ],
+      ind: [
+        { id: "hrsleep", st: "live", s: { ar: "النبض + النوم", en: "Resting HR + sleep" }, d: { ar: "مراقبة معدل النبض أثناء الراحة وجودة الاستشفاء (Resting HR & Sleep Recovery)", en: "Resting HR and sleep recovery" }, ch: ["cardio", "circadian", "stress"] },
+        { id: "co2", st: "live", s: { ar: "CO2 المقصورة", en: "Cabin CO2" }, d: { ar: "CO2 المقصورة من بيانات ناسا الحقيقية (OSDR)", en: "Cabin CO2 from real NASA data (OSDR)" }, ch: ["hypoxia", "stress"] },
+        { id: "rad", st: "live", s: { ar: "الجرعة التراكمية", en: "Cumulative dose" }, d: { ar: "تتبع الجرعة الإشعاعية التراكمية لكل رائد", en: "Cumulative radiation dose per astronaut" }, ch: ["radiation"] },
+        { id: "bp", st: "plan", s: { ar: "ضغط الدم", en: "Blood pressure" }, d: { ar: "تتبع منحنيات ضغط الدم ومقارنتها بالمعدل القاعدي (Blood Pressure Trends vs. Baseline). مؤشر غير مباشر لـ SANS، وتشخيصه بفحص العين.", en: "Blood pressure trends vs baseline. Indirect for SANS, which is diagnosed by eye exam." }, ch: ["fluid", "sans", "cardio", "ortho"] },
+        { id: "ecg", st: "plan", s: { ar: "تخطيط القلب", en: "ECG" }, d: { ar: "الرصد المستمر لمخطط كهربية القلب (Continuous ECG Monitoring)", en: "Continuous ECG monitoring" }, ch: ["arrhythmia"] },
+        { id: "hrv", st: "plan", s: { ar: "تقلب النبض", en: "HRV" }, d: { ar: "تحليل تقلبات معدل ضربات القلب لقياس الإجهاد (Heart Rate Variability)", en: "Heart rate variability for stress" }, ch: ["stress", "circadian"] },
+        { id: "temp", st: "plan", s: { ar: "حرارة الجسم", en: "Core temp" }, d: { ar: "المراقبة اللحظية لدرجة حرارة الجسم الأساسية (Core Body Temperature)", en: "Real-time core body temperature" }, ch: ["heat", "immune"] },
+        { id: "spo2", st: "plan", s: { ar: "SpO2 + التنفس", en: "SpO2 + breathing" }, d: { ar: "رصد تشبع الأكسجين ومعدل التنفس (SpO2 & Respiratory Rate)", en: "Oxygen saturation and respiratory rate" }, ch: ["hypoxia"] },
+        { id: "eva", st: "plan", s: { ar: "وضع EVA", en: "EVA mode" }, d: { ar: "وضع حماية المهام الخارجية (EVA Safety Mode): حرارة، أكسجين، نبض أثناء السير الفضائي", en: "EVA Safety Mode: heat, oxygen and heart rate during spacewalks" }, ch: ["heat", "hypoxia"] },
+        { id: "inflam", st: "sim", s: { ar: "مؤشرات الالتهاب", en: "Inflammation" }, d: { ar: "نظام الإنذار المبكر للاستجابات الالتهابية (Early Inflammatory Biomarkers Alerts). في العرض: المؤشر الكيميائي المحاكى.", en: "Early inflammatory biomarker alerts. In the demo: the simulated chemical marker." }, ch: ["immune"] }
+      ]
+    },
+
     // 2) الحل: الساعة واللوحي
     solution: {
       steps: [
