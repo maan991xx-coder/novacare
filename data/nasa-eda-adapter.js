@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /*
   VITALX ← NASA OSDR Environmental Data App (EDA)
-  يقرأ ملف CSV مُنزَّل من https://visualization.osdr.nasa.gov/eda/ (جدول Telemetry أو Radiation)
+  يقرأ ملف CSV أو JSON (من واجهة EDA API) مُنزَّل من https://visualization.osdr.nasa.gov/eda/ (جدول Telemetry أو Radiation)
   ويشغّل عليه محرك VITALX نفسه (robust_z + CUSUM) بدون أي تعديل على المحرك.
 
   الاستخدام:
@@ -34,7 +34,18 @@ function parseCSV(txt) {
   return rows.filter(r => r.some(v => v.trim() !== ""));
 }
 
-const rows = parseCSV(fs.readFileSync(args[0], "utf8"));
+function loadRows(file) {
+  const txt = fs.readFileSync(file, "utf8");
+  if (!/\.json$/i.test(file) && !/^\s*[\[{]/.test(txt)) return parseCSV(txt);
+  // EDA API JSON: /eda/api/missions/<M>/telemetry_data/ أو radiation_data/
+  let j = JSON.parse(txt);
+  const findArr = o => Array.isArray(o) ? o : (o && typeof o === "object" ? Object.values(o).map(findArr).find(Boolean) : null);
+  const arr = findArr(j) || [];
+  if (!arr.length) return [[]];
+  const keys = Object.keys(arr[0]).filter(k => typeof arr[0][k] !== "object" || arr[0][k] === null);
+  return [keys, ...arr.map(o => keys.map(k => o[k] == null ? "" : String(o[k])))];
+}
+const rows = loadRows(args[0]);
 const head = rows[0].map(h => h.trim());
 const lc = head.map(h => h.toLowerCase());
 const tCol = lc.findIndex(h => /time|date|day/.test(h));
