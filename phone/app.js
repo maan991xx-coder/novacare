@@ -60,7 +60,60 @@
     }
     renderMenu();
   }
-  window.vxBack = function () { if (st.mode !== "menu") { setMode("menu"); return true; } return false; };
+  window.vxBack = function () {
+    if (pin.open) { closePin(); return true; }
+    if (st.mode !== "menu") { setMode("menu"); return true; }
+    return false; // في القائمة: لا خروج
+  };
+
+  // ---------- لوحة رمز الخروج (تظهر بضغطة رجوع مطوّلة) ----------
+  var PX = {
+    title: { ar: "أدخل رمز الخروج", en: "Enter exit code" }, bad: { ar: "رمز خاطئ", en: "Wrong code" },
+    exit: { ar: "خروج من التطبيق", en: "Exit app" }, exitAll: { ar: "خروج وإلغاء القفل الكامل", en: "Exit and remove full lock" },
+    cancel: { ar: "إلغاء", en: "Cancel" }
+  };
+  var pin = { open: false, code: "" };
+  var bridge = function () { return window.Android || null; };
+  function pinDraw() {
+    var dots = ""; for (var i = 0; i < 5; i++) dots += '<i class="' + (i < pin.code.length ? "on" : "") + '"></i>';
+    $("pinDots").innerHTML = dots;
+  }
+  window.vxPin = function () {
+    pin.open = true; pin.code = "";
+    $("pinT").textContent = t(PX.title); $("pinMsg").textContent = ""; $("pinExit").innerHTML = "";
+    var k = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "x", "0", "<"], html = "";
+    k.forEach(function (d) { html += '<button data-k="' + d + '">' + (d === "x" ? t(PX.cancel) : d === "<" ? "⌫" : d) + "</button>"; });
+    $("pinKeys").innerHTML = html; $("pinKeys").style.display = "";
+    pinDraw(); $("pin").className = "pin on";
+  };
+  function closePin() {
+    pin.open = false; pin.code = ""; $("pin").className = "pin";
+    var b = bridge(); try { if (b && b.pinClosed) b.pinClosed(); } catch (e) { /* */ }
+  }
+  function pinKey(d) {
+    if (d === "x") { closePin(); return; }
+    if (d === "<") { pin.code = pin.code.slice(0, -1); pinDraw(); return; }
+    if (pin.code.length >= 5) return;
+    pin.code += d; pinDraw();
+    if (pin.code.length < 5) return;
+    var b = bridge(), ok = false;
+    try { ok = b && b.tryPin ? b.tryPin(pin.code) : pin.code === "12345"; } catch (e) { ok = false; }
+    if (!ok) {
+      $("pinMsg").textContent = t(PX.bad); $("pin").className = "pin on shake";
+      setTimeout(function () { pin.code = ""; pinDraw(); $("pin").className = "pin on"; }, 500);
+      return;
+    }
+    var owner = false; try { owner = b && b.isOwner ? b.isOwner() : false; } catch (e) { /* */ }
+    $("pinKeys").style.display = "none"; $("pinMsg").textContent = "";
+    $("pinExit").innerHTML = '<button class="go" data-x="0">' + t(PX.exit) + "</button>" +
+      (owner ? '<button data-x="1">' + t(PX.exitAll) + "</button>" : "") + '<button data-x="c">' + t(PX.cancel) + "</button>";
+  }
+  $("pinKeys").onclick = function (e) { var k = e.target.getAttribute && e.target.getAttribute("data-k"); if (k) pinKey(k); };
+  $("pinExit").onclick = function (e) {
+    var x = e.target.getAttribute && e.target.getAttribute("data-x"); if (!x) return;
+    if (x === "c") { closePin(); return; }
+    var b = bridge(); if (b && b.exit) b.exit(x === "1"); else closePin();
+  };
   window.vxMode = function () { return st.mode; };
   window.addEventListener("resize", function () { if (st.mode !== "menu") draw(); });
   function draw() { if (st.mode === "watch") drawWatch(); else if (st.mode === "ground") drawGround(); }
@@ -190,7 +243,9 @@
   $("gCrew").onclick = function (e) { var b = e.target; while (b && !b.getAttribute("data-m")) b = b.parentNode; if (b && b.getAttribute) { st.gMember = b.getAttribute("data-m"); drawGround(); } };
   $("gMain").onclick = function () { st.playing = !st.playing; $("ground").className = "view on" + (st.playing ? "" : " paused"); };
   // بدون جسر أندرويد (في المتصفح): زر Esc يرجع
-  document.addEventListener("keydown", function (e) { if (e.keyCode === 27) window.vxBack(); });
+  var escT = 0, escLong = false;
+  document.addEventListener("keydown", function (e) { if (e.keyCode === 27 && !escT) { escLong = false; escT = setTimeout(function () { escLong = true; window.vxPin(); }, 700); } });
+  document.addEventListener("keyup", function (e) { if (e.keyCode === 27) { clearTimeout(escT); escT = 0; if (!escLong) window.vxBack(); } });
   var q = (location.hash || "").slice(1);
   setMode(q === "watch" || q === "ground" ? q : "menu");
 })();

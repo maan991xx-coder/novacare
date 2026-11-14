@@ -85,3 +85,72 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#e7ecf7;
 .legend{font-size:1.4vw;color:#95a3c0;margin-top:.6vh}
 .legend i{display:inline-block;width:2vw;height:.5vh;border-radius:1px;vertical-align:middle;margin:0 .5vw}
 #ground .pause{font-size:8vw;top:40%}
+
+/* ================= نسق لوحة التحكم (خلفية المركبة + لوحات زجاجية بزوايا مضيئة) ================= */
+.view{background:#050b12 url(ship-bg.jpg) center/cover no-repeat}
+.view .shade{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(3,10,18,.55)}
+#watch .shade{background:rgba(3,10,18,.78)}
+#ground .shade{background:rgba(3,10,18,.72)}
+.holo{position:relative;background:-webkit-linear-gradient(top,rgba(14,42,56,.86),rgba(6,18,28,.9));background:linear-gradient(160deg,rgba(14,42,56,.86),rgba(6,18,28,.9));
+ border:1px solid rgba(120,230,255,.42);box-shadow:inset 0 0 0 1px rgba(95,212,255,.1),0 0 22px rgba(95,212,255,.22)}
+.holo:before,.holo:after{content:"";position:absolute;width:6vmin;height:6vmin;border:2px solid #6fe3ff;pointer-events:none;-webkit-filter:drop-shadow(0 0 4px #6fe3ff);filter:drop-shadow(0 0 4px #6fe3ff)}
+.holo:before{top:-1px;right:-1px;border-left:0;border-bottom:0;border-top-right-radius:inherit}
+.holo:after{bottom:-1px;left:-1px;border-right:0;border-top:0;border-bottom-left-radius:inherit}
+
+/* القائمة */
+#menu .in{-webkit-box-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;padding:4vh 6vw 15vh}
+.m-head{border-radius:4vw;padding:2vh 4vw 1.6vh;text-align:center}
+#menu h1{font-size:11vw}
+#menu .team{margin:.4vh 0 0;font-size:4vw}
+.hero{position:relative;-webkit-box-flex:1;-webkit-flex:1;flex:1;min-height:0;margin:2vh 0;text-align:center}
+.hero img{position:absolute;left:0;right:0;top:0;bottom:3vh;margin:auto;height:100%;max-height:calc(100% - 3vh);max-width:100%;
+ -webkit-filter:drop-shadow(0 0 18px rgba(95,212,255,.3));filter:drop-shadow(0 0 18px rgba(95,212,255,.3))}
+.hero .pad{position:absolute;bottom:0;left:22%;right:22%;height:5vh;border-radius:50%;border:2px solid rgba(111,227,255,.75);
+ background:-webkit-radial-gradient(center,closest-side,rgba(95,212,255,.5),rgba(95,212,255,.06) 70%,transparent);background:radial-gradient(closest-side,rgba(95,212,255,.5),rgba(95,212,255,.06) 70%,transparent);
+ box-shadow:0 0 24px rgba(95,212,255,.55)}
+.choices{display:-webkit-box;display:-webkit-flex;display:flex}
+.choices .choice{-webkit-box-flex:1;-webkit-flex:1;flex:1;margin:0 1.5vw;padding:2.6vh 2vw;border-radius:4vw}
+.choice .ic{width:10vw;height:10vw;margin-bottom:1vh}
+.choice b{font-size:5vw}
+.choice small{font-size:3vw}
+.note{bottom:9vh}
+.lang{bottom:2.6vh}
+
+/* ساعة الرائد داخل لوحة زجاجية */
+#watch .w{top:2.5vh;left:4vw;right:4vw;bottom:2.5vh;border-radius:6vw;padding:3vh 5vw 2.5vh}
+.tile{background:rgba(255,255,255,.04);border-color:rgba(120,230,255,.25)}
+.w-top b{color:#6fe3ff}
+
+/* لوحة الأرض */
+.g-head{border-radius:1.4vw}
+.g-head .t{color:#fff;text-shadow:0 0 14px rgba(111,227,255,.35)}
+.panel{background:rgba(10,30,42,.82);border-color:rgba(120,230,255,.3)}
+.cr{background:rgba(10,30,42,.82);border-color:rgba(120,230,255,.25)}
+.cr.on{background:rgba(20,60,80,.9);border-color:#6fe3ff;box-shadow:0 0 16px rgba(95,212,255,.35)}
+#ground .g{z-index:1}
+#watch .w,#menu .in{z-index:1}
+
+/* لوحة رمز الخروج */
+.pin{position:absolute;top:0;left:0;right:0;bottom:0;z-index:50;display:none;background:rgba(2,8,14,.82)}
+.pin.on{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center}
+.pin-box{width:84vmin;border-radius:5vmin;padding:4vmin 5vmin;text-align:center}
+.pin-box b{display:block;font-size:5vmin;color:#fff}
+.pdots{margin:3vmin 0 1vmin}
+.pdots i{display:inline-block;width:3.6vmin;height:3.6vmin;margin:0 1.6vmin;border-radius:50%;border:2px solid #6fe3ff}
+.pdots i.on{background:#6fe3ff;box-shadow:0 0 10px #6fe3ff}
+.pin.shake .pdots{-webkit-animation:shk .4s;animation:shk .4s}
+.pin.shake .pdots i{border-color:#ff5d6c}
+@-webkit-keyframes shk{25%{-webkit-transform:translateX(-3vmin)}75%{-webkit-transform:translateX(3vmin)}}
+@keyframes shk{25%{transform:translateX(-3vmin)}75%{transform:translateX(3vmin)}}
+#pinMsg{min-height:4vmin;color:#ff5d6c;font-size:3.6vmin}
+.keys{direction:ltr;margin-top:1vmin}
+.keys button{display:inline-block;width:30%;margin:1.2vmin 1%;padding:3vmin 0;border-radius:3vmin;font:inherit;font-size:6vmin;color:#fff;
+ background:rgba(255,255,255,.06);border:1px solid rgba(120,230,255,.35)}
+.keys button:active{background:rgba(111,227,255,.3)}
+.keys button[data-k=x]{font-size:3.6vmin;color:#a9c6d3}
+.pexit button{display:block;width:100%;margin-top:2.4vmin;padding:3vmin;border-radius:3vmin;font:inherit;font-size:4.4vmin;color:#e7ecf7;
+ background:rgba(255,255,255,.06);border:1px solid rgba(120,230,255,.35)}
+.pexit button.go{background:#e9c46a;color:#1a1405;border-color:#e9c46a;font-weight:700}
+#ground .shade{background:rgba(3,10,18,.6)}
+#watch .shade{background:rgba(3,10,18,.68)}
+.g-head:before,.g-head:after{width:3vmin;height:3vmin}
