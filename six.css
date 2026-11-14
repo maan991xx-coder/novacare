@@ -108,3 +108,9 @@
 }
 .chartbox.mid canvas { height: 220px; }
 .stat-row .stat { padding: 12px; }
+/* وضع بيانات ناسا الحقيقية في العرض الحي — نفس الأزرار والألوان */
+.demo-mode { display: flex; justify-content: center; gap: 8px; margin: 0 0 10px; }
+.demo-mode .key { min-height: 36px; padding: 0 14px; font-size: .85rem; }
+.tag-real { display: inline-block; font-size: .7rem; font-weight: 600; padding: 1px 9px; border-radius: 999px; vertical-align: middle;
+  color: var(--built, #3ddc97); border: 1px solid currentColor; background: rgba(61,220,151,.08); }
+.cohort h3 .tag-synth, .demo-chart h3 .tag-real { font-size: .68rem; padding: 1px 8px; white-space: nowrap; }

@@ -26,7 +26,7 @@
   const lvColor = l => css("--lv" + l) || ["#3ddc97", "#6aa8ff", "#ffb547", "#ff5d6c"][l];
 
   const state = {
-    day: 0, playing: false, speed: 2, screen: "home", member: "A" };
+    day: 0, playing: false, speed: 2, screen: "home", member: "A", demoMode: "sim" };
   const SPEEDS = [0.5, 1, 2, 4, 8];
 
   // ---------- تشغيل المحرك لكل رائد ----------
@@ -137,7 +137,7 @@
     g.fillStyle = bg; g.fillRect(pad.l, pad.t, W - pad.l - pad.r, H - pad.t - pad.b);
     // التكيف
     g.fillStyle = "rgba(165,175,196,.07)";
-    g.fillRect(X(0), pad.t, X(sim.adaptation.days) - X(0), H - pad.t - pad.b);
+    if (!o.noAdapt) g.fillRect(X(0), pad.t, X(sim.adaptation.days) - X(0), H - pad.t - pad.b);
     // المستقبل (لم يحدث بعد)
     if (o.day < n - 1) {
       const x0 = X(o.day);
@@ -154,10 +154,10 @@
       g.fillText(Math.abs(hi) >= 100 ? v.toFixed(0) : Math.abs(hi) >= 10 ? v.toFixed(1) : v.toFixed(2), pad.l - 7, y + 4);
     }
     g.textAlign = "center";
-    for (let d = 0; d < n; d += 10) {
+    for (let d = 0; d < n; d += (o.gridEvery || 10)) {
       const x = Math.round(X(d)) + .5;
       g.strokeStyle = "rgba(255,255,255,.04)"; g.beginPath(); g.moveTo(x, pad.t); g.lineTo(x, H - pad.b); g.stroke();
-      if (d % 20 === 0) g.fillText(d, x, H - 8);
+      if (d % (o.labelEvery || 20) === 0) g.fillText(o.xLabel ? o.xLabel(d) : d, x, H - 8);
     }
     // نطاق خط الأساس
     if (o.band) {
@@ -237,7 +237,7 @@
       if (gm.o.band && gm.o.band.lo[d] != null) rows.push(`<div class="muted">${tx(A.labels.baselineBand)}: <span dir="ltr">${fmt(gm.o.band.lo[d])} – ${fmt(gm.o.band.hi[d])}</span></div>`);
       const mk = (gm.o.markers || []).filter(m => m.x === d);
       mk.forEach(m => rows.push(`<div style="color:${lvColor(m.level)}">● ${tx(C.alerts[m.level].name)}</div>`));
-      tip.innerHTML = `<div class="muted">${tx(A.player.day)} <b dir="ltr">${d}</b></div>` + rows.join("");
+      tip.innerHTML = `<div class="muted">${gm.o.xLabel ? `<b dir="ltr">${esc(gm.o.xLabel(d, true))}</b>` : `${tx(A.player.day)} <b dir="ltr">${d}</b>`}</div>` + rows.join("");
       tip.style.display = "block";
       const tw = tip.offsetWidth;
       tip.style.left = clamp(x + 12, 0, gm.W - tw) + "px";
@@ -612,8 +612,74 @@
   }
   function afterEdge() { drawHr($("cvProj"), crewById(state.member), state.day, { proj: true }); }
 
+  // ---------- 4ب) بيانات ناسا الحقيقية: RR-12 من OSDR EDA ----------
+  // نفس المحرك: خط أساس من أول 14 يومًا، CUSUM (k,h من content.js)، CO2 خطره في الارتفاع فقط.
+  const NASA = window.VITALX_NASA || null;
+  const REAL = { base: sim.personal.stableWindow || 14, drift: 0.05, from: 16, limit: 3 };
+  function runReal(series) {
+    const st = E.baselineStats(series.slice(0, REAL.base), { type: "relative", value: 0.05 });
+    const step = E.makeCusum(sim.personal.k, sim.personal.h);
+    let ours = null, fixed = null; const marks = [];
+    series.forEach((v, i) => {
+      if (fixed == null && v > REAL.limit) fixed = i;
+      if (i < REAL.base) return;
+      const r = step(E.robustZ(v, st));
+      if (r.fired && r.side > 0) { marks.push(i); if (ours == null) ours = i; }
+    });
+    return { st, ours, fixed, marks };
+  }
+  let realCache = null;
+  function realData() {
+    if (realCache || !NASA) return realCache;
+    const real = NASA.co2, test = real.map((v, i) => +(v + Math.max(0, i - REAL.from) * REAL.drift).toFixed(3));
+    realCache = { real, test, r: runReal(real), t: runReal(test) };
+    return realCache;
+  }
+  const realDate = (i, long) => { const s = NASA.dates[i] || ""; return long ? s : s.slice(5).replace("-", "/"); };
+  function modeSwitch() {
+    if (!NASA) return "";
+    const P = S6.demo, b = (m, lab) => `<button type="button" class="key ${state.demoMode === m ? "primary" : ""}" data-demomode="${m}">${tx(lab)}</button>`;
+    return `<div class="demo-mode">${b("sim", P.modeSim)}${b("real", P.modeReal)}</div>`;
+  }
+  function screenReal() {
+    const P = S6.demo, R = realData(), dt = i => i == null ? `<b class="wait">${tx(P.never)}</b>` : `<b>${tx(P.day)} <span dir="ltr">${realDate(i)}</span></b>`;
+    const gap = R.t.ours != null && R.t.fixed != null ? R.t.fixed - R.t.ours : null;
+    return `${modeSwitch()}<div class="demo">
+        <div class="card demo-chart"><h3>${tx(P.realTitle)} <span class="unit">mmHg</span> <span class="tag-real">${tx(P.realTag)}</span></h3>${chartBox("cvReal", "tall")}
+          ${legend([["#e7ecf7", P.observed], ["rgba(95,212,255,.45)", L.baselineBand], [css("--personal"), P.drift], [css("--fixed"), P.limit]])}
+          <p class="six-note">${tx(P.source)}</p></div>
+        <div class="demo-side">
+          <div class="card score o"><small>${tx(P.realOurs)}</small><b>${R.r.ours == null ? tx(P.noAlarm) : `${tx(P.day)} <span dir="ltr">${realDate(R.r.ours)}</span>`}</b></div>
+          <div class="card score f"><small>${tx(P.realFixed)}</small><b>${R.r.fixed == null ? tx(P.noBreach) : `${tx(P.day)} <span dir="ltr">${realDate(R.r.fixed)}</span>`}</b></div>
+          <div class="card cohort"><h3>${tx(P.driftHead)} <span class="tag-synth">${tx(P.testTag)}</span></h3>
+            <div class="cmp head"><span></span><b class="o">VITALX</b><b class="f">${tx(L.fixedThr)}</b></div>
+            <div class="cmp"><span>${tx(P.detected)}</span><b class="o" dir="ltr">${R.t.ours == null ? "—" : realDate(R.t.ours)}</b><b class="f" dir="ltr">${R.t.fixed == null ? "—" : realDate(R.t.fixed)}</b></div></div>
+          ${gap ? `<div class="gap">${tx(P.earlier)} <b dir="ltr">${gap}</b> ${tx(S6.edge.days)}</div>` : ""}
+        </div></div>`;
+  }
+  function afterReal() {
+    const R = realData(), n = R.real.length, band = { lo: [], hi: [] };
+    for (let i = 0; i < n; i++) { band.lo.push(i < REAL.base ? null : +(R.r.st.med - 2 * R.r.st.scale).toFixed(3)); band.hi.push(i < REAL.base ? null : +(R.r.st.med + 2 * R.r.st.scale).toFixed(3)); }
+    const P = S6.demo;
+    drawChart($("cvReal"), {
+      n, day: n - 1, noAdapt: true, gridEvery: 7, labelEvery: 7, xLabel: realDate, band,
+      series: [
+        { data: R.test, color: css("--personal"), width: 1.6, dash: [5, 4], alpha: .9, label: t(P.drift), unit: "mmHg", dec: 2 },
+        { data: R.real, color: "#e7ecf7", width: 2.2, glow: true, fill: true, head: true, label: t(P.observed), unit: "mmHg", dec: 2 }
+      ],
+      hlines: [{ y: REAL.limit, color: css("--fixed"), label: t(P.limit) }],
+      vlines: [R.t.ours != null ? { x: R.t.ours, color: css("--personal"), label: "VITALX" } : null, R.t.fixed != null ? { x: R.t.fixed, color: css("--fixed") } : null].filter(Boolean),
+      markers: R.t.marks.map(x => ({ x, level: 2 }))
+    });
+    attachHover($("cvReal").parentElement);
+  }
+  function bindDemoMode() {
+    document.querySelectorAll("[data-demomode]").forEach(b => b.addEventListener("click", () => { state.demoMode = b.dataset.demomode; route(); }));
+  }
+
   // ---------- 4) العرض الحي ----------
   function screenDemo() {
+    if (state.demoMode === "real" && NASA) return screenReal();
     const c = crewById(state.member), d = state.day, P = S6.demo;
     const ours = firstDet(c.pers.level, c.ast.onset), fx = firstDet(c.fx.level, c.ast.onset);
     const box = (cls, name, det) => `<div class="card score ${cls}"><small>${tx(name)}</small>${det != null && det <= d
@@ -621,7 +687,7 @@
     const gap = ours != null && ours <= d && (fx == null || fx > ours) ? (fx != null && fx <= d ? fx - ours : d - ours) : null;
     const cs = cohortStats, pct = v => Math.round(v * 100) + "%";
     const m = (lab, a, b) => `<div class="cmp"><span>${tx(lab)}</span><b class="o" dir="ltr">${a}</b><b class="f" dir="ltr">${b}</b></div>`;
-    return `<div class="demo">
+    return `${modeSwitch()}<div class="demo">
         <div class="card demo-chart"><h3>${tx(c.m.name)} · ${esc(chName("hr"))} <span class="unit">bpm</span></h3>${chartBox("cvDemo", "tall")}
           ${legend([["#e7ecf7", L.observed], ["rgba(95,212,255,.45)", L.baselineBand], [css("--fixed"), L.fixedThr]])}</div>
         <div class="demo-side">
@@ -635,6 +701,8 @@
         </div></div>`;
   }
   function afterDemo() {
+    bindDemoMode();
+    if (state.demoMode === "real" && NASA) return afterReal();
     const c = crewById(state.member);
     drawHr($("cvDemo"), c, state.day, { band: true, fixed: true, markers: true, ours: firstDet(c.pers.level, c.ast.onset), fixedDet: firstDet(c.fx.level, c.ast.onset) });
   }
