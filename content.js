@@ -176,7 +176,13 @@ window.VITALX_CONTENT = {
         noRise: { ar: "لا اتجاه صاعد الآن", en: "No rising trend now" },
         hour: { ar: "أعلى متوسط ساعة", en: "Max 1-hour average" },
         honest: { ar: "البيئة والإشعاع قياسات ناسا حقيقية للمقصورة، وليست قياسات طبية للرواد. العلامات الحيوية في العرض محاكاة.", en: "Environment and radiation are real NASA cabin measurements, not medical readings of astronauts. Vitals in the demo are simulated." },
-        alertTest: { ar: "CO2 · اختبار مصطنع", en: "CO2 · synthetic test" }
+        alertTest: { ar: "CO2 · اختبار مصطنع", en: "CO2 · synthetic test" },
+        expHead: { ar: "نفس الهواء، استجابة مختلفة لكل رائد", en: "Same air, a different response per astronaut" },
+        expTag: { ar: "نبض محاكى", en: "Simulated HR" },
+        expSens: { ar: "الحساسية", en: "Sensitivity" },
+        expReal: { ar: "RR-12", en: "RR-12" },
+        expTest: { ar: "+ اختبار", en: "+ test" },
+        expNote: { ar: "CO2 حقيقي من RR-12، ونبض الراحة محاكى لكل رائد بحساسية فردية مفترضة. كل رائد يُقارن بخط أساسه: نفس الهواء طبيعي لرائد ويستحق المراقبة لآخر، والحد الثابت 85 bpm لا يرى شيئًا.", en: "Real RR-12 CO2; resting HR simulated per astronaut with an assumed individual sensitivity. Each is compared to their own baseline: the same air is normal for one and worth watching for another, while the fixed 85 bpm limit sees nothing." }
       }
     },
 

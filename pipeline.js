@@ -158,7 +158,20 @@
         days: Dd.dates.length, droppedDays: Dd.dropped, channels: 4, realAlerts: alerts.filter(a => a.src === "real").length, testAlerts: alerts.filter(a => a.src === "test").length } };
   }
 
-  const api = { RULES, CO2_LIMIT, PPM_TO_MMHG, decode, validate, daily, maxHourCo2, risk, radiation, run };
+  // ---------- ربط العلامات الحيوية المحاكاة ببيئة RR-12 الحقيقية ----------
+  // لا توجد بيانات صحية حقيقية للرواد، فنحاكي نبض الراحة لكل رائد ونجعله يتأثر بـ CO2 الحقيقي للمقصورة
+  // بحساسية فردية مفترضة (bpm لكل 1 mmHg فوق متوسط المقصورة). نفس الهواء ← استجابة مختلفة ← خط أساس لكل رائد.
+  // الحساسيات أرقام توضيحية للعرض وليست مقيسة.
+  function crewExposure(co2, crew) {
+    const ok = co2.slice(0, BASE).filter(v => v != null), cabin = median(ok);
+    return crew.map((m, k) => {
+      const rng = E.mulberry32(m.seed * 104729 + 7), base = 58 + k * 3;
+      const hr = co2.map(v => v == null ? null : +(base + m.sens * (v - cabin) + E.gauss(rng) * 1.0).toFixed(1));
+      return { id: m.id, sens: m.sens, base, hr, r: risk(hr, 1, 85) };
+    });
+  }
+
+  const api = { crewExposure, RULES, CO2_LIMIT, PPM_TO_MMHG, decode, validate, daily, maxHourCo2, risk, radiation, run };
   root.VITALX_PIPELINE = api;
   if (typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);

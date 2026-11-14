@@ -327,3 +327,13 @@ button, .key, .mini-crew, .t-row, .bchip { transition: transform .22s cubic-bezi
   .ana-two { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) { .demo-mode { gap: 6px; } .demo-mode .key { flex: 1 1 0; min-width: 0; padding: 0 6px; font-size: .76rem; } }
+/* نفس الهواء، استجابة مختلفة */
+.cmp.ex { grid-template-columns: minmax(0, 1fr) 54px 54px 54px; }
+.cmp.ex b { color: var(--c, var(--muted)); font-size: .8rem; }
+.cmp.ex b.hit { color: var(--c); font-weight: 700; }
+.cmp.head.ex b { color: var(--muted); font-size: .68rem; }
+.sens { display: inline-flex; gap: 2px; justify-content: center; align-items: flex-end; height: 14px; }
+.sens i { width: 5px; border-radius: 2px; background: rgba(255,255,255,.12); }
+.sens i:nth-child(1) { height: 6px; } .sens i:nth-child(2) { height: 10px; } .sens i:nth-child(3) { height: 14px; }
+.sens i.on { background: var(--fixed); box-shadow: 0 0 6px rgba(255,181,71,.5); }
+.expo .advisor { margin-top: 8px; }

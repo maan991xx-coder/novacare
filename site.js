@@ -880,6 +880,7 @@
         <div class="card demo-chart"><h3>${tx(Q.trendHead)} <span class="unit">mmHg</span> <span class="tag-real">${tx(P.realTag)}</span></h3>${chartBox("cvTrend")}
           ${legend([["#e7ecf7", P.observed], [css("--personal"), Q.trend], [css("--fixed"), P.limit]])}
           <p class="six-note">${trendTxt} · ${tx(Q.hour)} <b dir="ltr">${X.hour.mmhg} mmHg</b></p></div>
+        ${exposureCard(R, cur)}
       </div>
       <div class="demo-side">
         <div class="card cohort"><h3>${svgI(PI.mon)} ${tx(Q.o.mon)}</h3>
@@ -891,6 +892,23 @@
           <div class="cmp all ok"><span>${tx(Q.valid)}</span><b dir="ltr">${nf(X.stats.valid)}</b></div></div>
         <p class="six-note honest-line"><span class="tag-real">${tx(P.realTag)}</span> ${tx(Q.honest)}</p>
       </div></div>`;
+  }
+  // نفس هواء RR-12 الحقيقي ← نبض محاكى لكل رائد بحساسية فردية مفترضة ← خط أساس لكل رائد
+  const SENS = { A: 1, B: 3, C: 6, D: 2 };
+  function exposure(R) {
+    if (!R.exp) { const crewM = A.crew.map(m => ({ id: m.id, seed: m.seed, sens: SENS[m.id] || 2, name: m.name }));
+      R.exp = { real: PL.crewExposure(R.real, crewM), test: PL.crewExposure(R.test, crewM), crewM }; }
+    return R.exp;
+  }
+  function exposureCard(R, cur) {
+    const Q = S6.demo.pipe, X = exposure(R), seenI = i => i != null && i <= cur;
+    const bars = v => { const n = v >= 5 ? 3 : v >= 3 ? 2 : 1; return `<span class="sens" title="${v} bpm / mmHg">${[1, 2, 3].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>`; };
+    const cell = (r, test) => { const hit = seenI(r.ours); return `<b class="${hit ? "hit" : ""}" style="--c:${LV(hit ? 2 : 0)}" dir="ltr">${hit ? realDate(r.ours) : "●"}</b>`; };
+    const any = X.test.some(c => seenI(c.r.ours));
+    return `<div class="card cohort expo"><h3>${tx(Q.expHead)} <span class="tag-synth">${tx(Q.expTag)}</span></h3>
+      <div class="cmp head ex"><span></span><b>${tx(Q.expSens)}</b><b>${tx(Q.expReal)}</b><b>${tx(Q.expTest)}</b></div>
+      ${X.crewM.map((m, i) => `<div class="cmp ex"><span>${tx(m.name)}</span>${bars(m.sens)}${cell(X.real[i].r)}${cell(X.test[i].r, true)}</div>`).join("")}
+      <p class="six-note">${tx(Q.expNote)}</p>${any ? advisor("co2", 2) : ""}</div>`;
   }
   function afterAnalytics() {
     const R = realData(); if (!R || !R.P) return;
