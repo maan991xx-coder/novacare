@@ -923,14 +923,67 @@
       if (e.day > from && e.day <= to && e.level >= 2 && !seen.has(k)) { seen.add(k); toast(c, e); }
     }));
   }
+  // تنبيه واحد في كل مرة (لا تكديس): الجديد يحل محل الحالي مع عدّاد "+N".
+  // "مراقبة" تختفي بعد 4 ث، "عاجل" تبقى حتى الضغط. الضغط يفتح الرائد. الجرس يحفظ آخر التنبيهات.
+  const TOAST = { gap: 3000, auto: 4000 }, alertLog = [];
+  let tEl = null, tShown = 0, tExtra = 0, tTimer = 0, tCur = null, unread = 0;
+  const ALERT_I = '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>';
+  function openMember(id) { state.member = id; closeBell(); go("demo"); }
   function toast(c, e) {
-    const el = document.createElement("div");
-    el.className = "toast"; el.style.setProperty("--c", lvColor(e.level));
-    el.innerHTML = `<span class="dot" style="--c:${lvColor(e.level)};margin-top:6px"></span><div><b>${tx(L.newAlert)} · ${tx(C.alerts[e.level].name)}</b>${tx(c.m.name)} · ${tx(A.player.day)} <span dir="ltr">${e.day}</span></div>`;
-    el.onclick = () => { state.member = c.m.id; go("demo"); el.remove(); };
-    $("toasts").appendChild(el);
-    while ($("toasts").children.length > 3) $("toasts").firstChild.remove();
-    setTimeout(() => el.remove(), 6000);
+    alertLog.unshift({ id: c.m.id, name: c.m.name, day: e.day, level: e.level }); alertLog.length = Math.min(alertLog.length, 20);
+    unread++; renderBell();
+    const now = performance.now(), live = tEl && tEl.isConnected;
+    // خلال فترة التهدئة: نزيد العدّاد فقط، إلا إذا كان الجديد أشد
+    if (live && now - tShown < TOAST.gap && !(e.level > tCur.e.level)) { tExtra++; paintToast(); return; }
+    if (live) tExtra++; else tExtra = 0;
+    tCur = { c, e }; tShown = now; paintToast(true);
+  }
+  function paintToast(fresh) {
+    const box = $("toasts"), { c, e } = tCur, urgent = e.level >= 3;
+    const hh = document.querySelector(".holo-head");   // أعلى المنتصف داخل اللوحة (الحاسوب)
+    if (hh && innerWidth > 760) { const r = hh.getBoundingClientRect(); box.style.setProperty("--toast-top", Math.round(r.bottom + 10) + "px"); box.style.setProperty("--toast-x", Math.round(r.left + r.width / 2) + "px"); }
+    if (!tEl || !tEl.isConnected) { tEl = document.createElement("div"); box.appendChild(tEl); bindSwipe(tEl); }
+    tEl.className = "toast" + (urgent ? " urgent" : "") + (fresh ? " fresh" : "");
+    tEl.style.setProperty("--c", lvColor(e.level));
+    tEl.setAttribute("role", urgent ? "alert" : "status");
+    box.setAttribute("aria-live", urgent ? "assertive" : "polite");
+    tEl.innerHTML = `<span class="t-ic">${svgI(ALERT_I)}</span>
+      <span class="t-txt"><b>${tx(C.alerts[e.level].name)}</b><span>${tx(c.m.name)} · ${tx(A.player.day)} <span dir="ltr">${e.day}</span></span></span>
+      ${tExtra ? `<span class="t-more" dir="ltr">+${tExtra}</span>` : ""}
+      <button type="button" class="t-x" aria-label="${esc(t(L.close))}">×</button>`;
+    tEl.onclick = ev => { if (ev.target.closest(".t-x")) return hideToast(); if (tEl.dataset.swiped) return; openMember(c.m.id); hideToast(); };
+    clearTimeout(tTimer);
+    if (!urgent) tTimer = setTimeout(hideToast, TOAST.auto);
+    if (fresh) requestAnimationFrame(() => tEl && tEl.classList.remove("fresh"));
+  }
+  function hideToast() { clearTimeout(tTimer); if (tEl) { const el = tEl; tEl = null; tExtra = 0; el.classList.add("out"); setTimeout(() => el.remove(), 200); } }
+  function bindSwipe(el) {   // سحب للإغلاق (الجوال واللمس)
+    let x0 = null, y0 = 0, dx = 0, dy = 0;
+    el.addEventListener("pointerdown", ev => { x0 = ev.clientX; y0 = ev.clientY; dx = dy = 0; delete el.dataset.swiped; });
+    el.addEventListener("pointermove", ev => { if (x0 == null) return; dx = ev.clientX - x0; dy = ev.clientY - y0;
+      if (Math.abs(dx) > 6 || dy < -6) el.style.transform = Math.abs(dx) > Math.abs(dy) ? `translateX(${dx}px)` : `translateY(${Math.min(0, dy)}px)`; });
+    const end = () => { if (x0 == null) return; x0 = null;
+      if (Math.abs(dx) > 70 || dy < -40) { el.dataset.swiped = "1"; hideToast(); } else el.style.transform = ""; };
+    el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+  }
+  function renderBell() {
+    const n = $("bellN"); if (!n) return;
+    n.hidden = !unread; n.textContent = unread > 9 ? "9+" : unread;
+    $("bell").setAttribute("aria-label", t(L.alertsLog) + (unread ? ` (${unread})` : ""));
+  }
+  function renderBellList() {
+    $("bellList").innerHTML = `<b class="bl-head">${tx(L.alertsLog)}</b>` + (alertLog.length ? alertLog.map(a =>
+      `<button type="button" class="bl-row" data-open="${esc(a.id)}" style="--c:${lvColor(a.level)}"><i class="dot" style="--c:${lvColor(a.level)}"></i><span>${tx(a.name)}</span><small>${tx(C.alerts[a.level].name)} · ${tx(A.player.day)} <span dir="ltr">${a.day}</span></small></button>`).join("")
+      : `<p class="bl-empty">${tx(L.noAlerts)}</p>`);
+  }
+  function closeBell() { const l = $("bellList"); if (l && !l.hidden) { l.hidden = true; $("bell").setAttribute("aria-expanded", "false"); } }
+  function bindBell() {
+    const b = $("bell"), l = $("bellList"); if (!b) return;
+    b.onclick = ev => { ev.stopPropagation(); if (!l.hidden) return closeBell(); renderBellList(); l.hidden = false; b.setAttribute("aria-expanded", "true"); unread = 0; renderBell(); };
+    l.onclick = ev => { const r = ev.target.closest("[data-open]"); if (r) openMember(r.dataset.open); ev.stopPropagation(); };
+    document.addEventListener("click", closeBell);
+    document.addEventListener("keydown", ev => { if (ev.key === "Escape") { closeBell(); hideToast(); } });
+    renderBell();
   }
 
   // ---------- التنقل بين الشاشات: سحب بالماوس أو الإصبع، عجلة أفقية، أسهم، وإمالة الجوال ----------
@@ -1078,6 +1131,7 @@
     if ($("nextBtn")) $("nextBtn").onclick = () => stepMember(1);
     window.addEventListener("hashchange", route);
     if ($("edgePrev")) bindGestures();
+    bindBell();
     let rz = 0; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(render, 120); });
     document.addEventListener("keydown", e => {
       if (/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || "")) return;

@@ -223,3 +223,50 @@ button, .key, .mini-crew, .t-row, .bchip { transition: transform .22s cubic-bezi
   .ind-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ind-key { margin-inline-start: 0; }
 }
+
+/* التنبيهات: واحد في كل مرة، أعلى المنتصف داخل اللوحة */
+.console .toasts, .toasts { position: fixed; z-index: 60; inset-inline: auto; bottom: auto; top: var(--toast-top, 150px); left: var(--toast-x, 50%);
+  transform: translateX(-50%); width: max-content; max-width: min(440px, calc(100vw - 32px)); display: block; pointer-events: none; }
+.toast { pointer-events: auto; display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 14px; border-radius: 999px; cursor: pointer; font-size: .86rem;
+  background: rgba(8,16,28,.94); border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); border-inline-start-width: 1px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.5), 0 0 22px color-mix(in srgb, var(--c) 22%, transparent); backdrop-filter: blur(8px);
+  transition: opacity .2s, transform .2s; animation: none; touch-action: pan-y; user-select: none; }
+.toast.fresh { opacity: 0; transform: translateY(-8px); }
+.toast.out { opacity: 0; transform: translateY(-8px); }
+.toast .t-ic { flex: 0 0 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent); }
+.toast .t-ic svg { width: 17px; height: 17px; }
+.toast.urgent .t-ic { animation: tpulse 1.6s ease-in-out infinite; }
+@keyframes tpulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--c) 18%, transparent); } }
+.toast .t-txt { display: flex; align-items: baseline; gap: 8px; min-width: 0; white-space: nowrap; }
+.toast .t-txt b { color: var(--c); font-weight: 700; }
+.toast .t-txt > span { overflow: hidden; text-overflow: ellipsis; color: #dbe9f2; }
+.toast .t-more { font: 600 .72rem var(--mono); padding: 2px 7px; border-radius: 999px; background: color-mix(in srgb, var(--c) 22%, transparent); color: var(--c); }
+.toast .t-x { flex: 0 0 26px; height: 26px; border-radius: 50%; border: 0; background: rgba(255,255,255,.06); color: var(--muted); font-size: 1rem; line-height: 1; cursor: pointer; }
+.toast .t-x:hover { color: #fff; background: rgba(255,255,255,.12); }
+
+/* الجرس وقائمة آخر التنبيهات */
+.bell-wrap { position: relative; }
+.bell { position: relative; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+  border: 1px solid var(--line); background: rgba(111,227,255,.06); color: #cfe9f5; }
+.bell svg { width: 18px; height: 18px; }
+.bell:hover, .bell[aria-expanded="true"] { border-color: var(--cyan); color: var(--cyan); }
+.bell-n { position: absolute; top: -5px; inset-inline-end: -5px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px;
+  background: #ff5d6c; color: #fff; font: 700 .64rem/17px var(--mono); text-align: center; box-shadow: 0 0 8px rgba(255,93,108,.6); }
+.bell-list { position: absolute; z-index: 50; top: calc(100% + 8px); inset-inline-end: 0; width: 280px; max-height: 320px; overflow: auto; padding: 8px;
+  border-radius: 14px; background: rgba(8,16,28,.97); border: 1px solid var(--line); box-shadow: 0 18px 40px rgba(0,0,0,.55); }
+.bl-head { display: block; font-size: .78rem; color: var(--muted); padding: 4px 6px 8px; }
+.bl-row { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; align-items: center; width: 100%; padding: 8px; border: 0; border-radius: 10px;
+  background: transparent; color: inherit; font: inherit; text-align: start; cursor: pointer; }
+.bl-row:hover { background: rgba(255,255,255,.05); }
+.bl-row span { font-size: .84rem; } .bl-row small { grid-column: 2; font-size: .72rem; color: var(--c); }
+.bl-empty { margin: 6px; font-size: .8rem; color: var(--muted); }
+
+/* الشاشات الصغيرة: شريط علوي بعرض الشاشة وسطر واحد */
+@media (max-width: 760px) {
+  .console .toasts, .toasts { top: calc(8px + env(safe-area-inset-top)); left: 8px; right: 8px; transform: none; width: auto; max-width: none; z-index: 70; }
+  .toast { border-radius: 14px; padding: 8px 8px 8px 10px; font-size: .8rem; }
+  .toast .t-txt { flex: 1; }
+  .bell-wrap { margin-inline-start: auto; }
+  .bell-list { width: min(300px, calc(100vw - 40px)); }
+}
+@media (prefers-reduced-motion: reduce) { .toast, .toast.fresh, .toast.out { transition: none; transform: none; } .toast.urgent .t-ic { animation: none; } }
