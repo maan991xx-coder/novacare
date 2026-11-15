@@ -246,8 +246,6 @@ window.VITALX_CONTENT = {
       play: { ar: "تشغيل", en: "Play" }, pause: { ar: "إيقاف", en: "Pause" },
       restart: { ar: "من البداية", en: "Restart" }, step: { ar: "يوم واحد", en: "One day" },
       next: { ar: "الرائد التالي", en: "Next crew" },
-      tilt: { ar: "التنقل بالإمالة", en: "Tilt to navigate" },
-      tiltOn: { ar: "الإمالة تعمل", en: "Tilt on" },
       speed: { ar: "السرعة", en: "Speed" }, day: { ar: "اليوم", en: "Day" },
       perSec: { ar: "يوم/ث", en: "days/s" }
     },
@@ -275,6 +273,16 @@ window.VITALX_CONTENT = {
       alertsLog: { ar: "آخر التنبيهات", en: "Recent alerts" },
       noAlerts: { ar: "لا تنبيهات بعد", en: "No alerts yet" },
       close: { ar: "إغلاق", en: "Close" }
+    },
+    /* مركز التحكم: كل الطاقم وحالة اتصال حساساتهم (محاكاة) */
+    cc: {
+      conn: { 0: { ar: "متصل", en: "Connected" }, 1: { ar: "إشارة ضعيفة", en: "Weak signal" }, 2: { ar: "غير متصل", en: "Offline" } },
+      synced: { ar: "آخر مزامنة", en: "Last sync" },
+      sec: { ar: "ث", en: "s" },
+      crewOnline: { ar: "متصل", en: "online" },
+      allCrew: { ar: "كل الطاقم", en: "All crew" },
+      menu: { ar: "القائمة", en: "Menu" },
+      vitals: { ar: "قراءات الرائد", en: "Astronaut readings" }
     },
 
     /* الطاقم: أعضاء فريق NovaCare (البيانات مولّدة وليست قياساتهم). driftMult: 0 = لا انحراف (رائد مستقر) */
