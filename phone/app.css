@@ -172,3 +172,59 @@ html,body,button{font-family:"Thmanyah","IBM Plex Sans Arabic","Noto Sans Arabic
 /* Black 900: الشعار والرقم الكبير والحالة */
 .brand,#menu h1,.state,.ring .hr,.cr .av{font-weight:900}
 .ring .hr{font-family:"Thmanyah",sans-serif;direction:ltr}
+
+/* ================= v3.5: بيانات ناسا RR-12 الحقيقية + المسار (تحقق، مخاطر، توقع، مستشار) ================= */
+.view.on{-webkit-animation:vin .35s ease-out;animation:vin .35s ease-out}
+@-webkit-keyframes vin{from{opacity:0}to{opacity:1}}@keyframes vin{from{opacity:0}to{opacity:1}}
+.si{display:inline-block;width:1.25em;height:1.25em;vertical-align:-.25em;margin:0 .25em}
+.tag-real,.tag-sim{display:inline-block;font-size:.72em;font-weight:500;line-height:1;padding:.25em .55em;border-radius:999px;vertical-align:.1em;white-space:nowrap}
+.tag-real{color:#6fe3ff;border:1px solid rgba(111,227,255,.55);background:rgba(111,227,255,.1)}
+.tag-sim{color:#e9c46a;border:1px solid rgba(233,196,106,.55);background:rgba(233,196,106,.08)}
+.dim{color:#6c7a93;margin:0 1vw;font-size:.85em}
+/* الساعة */
+.ring .lab{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center}
+.ring .lab .si{width:4.2vw;height:4.2vw}.ring .lab .tag-sim{margin:0 1vw;font-size:2.6vw}
+.tile i{color:#95a3c0}.tile i .si{width:6.4vw;height:6.4vw;margin:0}
+.why .adv{margin-top:.2vh}
+.wtag{margin-top:.8vh;font-size:2.9vw;color:#95a3c0;text-align:center;font-weight:300}
+.w-top .tag-real{font-size:2.6vw}
+/* المستشار الذكي: أيقونات ما تغيّر ← إن استمر ← نقترح */
+.adv{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center}
+.adv .an{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;min-width:16vw}
+.adv .orb{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center;
+ width:9vw;height:9vw;border-radius:50%;border:1px solid currentColor;background:rgba(255,255,255,.04);box-shadow:0 0 12px currentColor}
+.adv .orb .si{width:5vw;height:5vw;margin:0}
+.adv small{display:block;margin-top:.5vh;font-size:3vw;color:#dfe8f3;font-weight:500}
+.adv .aa{display:block;width:4vw;height:1px;background:currentColor;opacity:.6;margin:0 .6vw;-webkit-align-self:flex-start;align-self:flex-start;margin-top:4.5vw}
+.adv.calm{color:#3ddc97}.adv.calm small{margin:0 1.5vw;font-size:3.4vw}.adv.calm{-webkit-flex-direction:row;flex-direction:row}
+/* لوحة الأرض */
+.tbtn{width:4.4vw;height:4.4vw;margin:0 1vw;border-radius:50%;border:1px solid rgba(233,196,106,.45);background:rgba(0,0,0,.25);color:#a9b4c6;padding:.7vw;font:inherit}
+.tbtn .si{width:100%;height:100%;margin:0}
+.tbtn.on{color:#1a1405;background:#e9c46a;border-color:#e9c46a;box-shadow:0 0 14px rgba(233,196,106,.6)}
+.cr .cn{width:2.4vw;height:2.4vw;margin:0 .6vw}.cr .cn .si{width:100%;height:100%;margin:0}
+.chips{position:absolute;top:1vh;left:1.2vw;display:-webkit-box;display:-webkit-flex;display:flex;direction:ltr;z-index:2}
+[dir=ltr] .chips{left:auto;right:1.2vw}
+.chip{width:4.6vw;height:4.6vw;margin-right:.6vw;border-radius:1vw;border:1px solid rgba(120,230,255,.25);background:rgba(0,0,0,.25);color:#95a3c0;padding:.8vw;font:inherit}
+.chip .si{width:100%;height:100%;margin:0}
+.chip.on{border-color:#6fe3ff;background:rgba(20,60,80,.9);color:#fff;box-shadow:0 0 12px rgba(95,212,255,.4)}
+.chart h3{-webkit-box-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-box-align:center;-webkit-align-items:center;align-items:center;padding-top:.6vh}
+.chart h3 .ct{color:#e7ecf7;font-weight:500}.chart h3 .ct .tag-real,.chart h3 .ct .tag-sim{font-size:1.2vw;margin:0 .4vw}
+.chart h3 .cv{margin:0 1.4vw;font-size:2.4vw;font-weight:700}.chart h3 .cv em{font-style:normal;font-size:1.3vw;color:#95a3c0;margin:0 .3vw;font-weight:300}
+.legend .dsh{background:none!important;border-top:2px dashed #5fd4ff;height:0!important}
+.legend .gn{float:left;color:#7f8ca6}[dir=ltr] .legend .gn{float:right}
+.row2 .panel small .si{width:1.9vw;height:1.9vw;color:#6fe3ff}
+.row2 .vrow{display:block;margin-top:.4vh;font-size:1.5vw;color:#95a3c0}
+.row2 .vrow span{margin:0 .8vw;white-space:nowrap}.row2 .vrow .si{width:1.8vw;height:1.8vw;margin:0 .3vw}
+.row2 .vrow em{font-style:normal;color:#e7ecf7}
+.row2 .alert .adv{margin-top:.6vh}
+.row2 .adv .an{min-width:6vw}.row2 .adv .orb{width:3.6vw;height:3.6vw}.row2 .adv .orb .si{width:2vw;height:2vw}
+.row2 .adv small{font-size:1.35vw;margin-top:.3vh}.row2 .adv .aa{width:2vw;margin-top:1.8vw}
+.row2 .adv.calm small{font-size:1.7vw}
+.row2 .alert small .tag-sim{font-size:1.1vw}
+.crew{width:29vw}
+.cr{margin-bottom:1vh}
+.cr .av{width:4vw;height:4vw;font-size:1.8vw}
+.cr .nm{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:1.75vw;line-height:1.25}
+.cr .nm small{overflow:hidden;text-overflow:ellipsis;font-size:1.35vw}
+.row2 #gFixed b{font-size:1.9vw}
+.row2 .vrow{font-size:1.35vw;white-space:nowrap}.row2 .vrow span{margin:0 .5vw}.row2 .vrow .si{width:1.6vw;height:1.6vw;margin:0 .2vw}

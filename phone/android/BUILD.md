@@ -3,6 +3,16 @@
 Start screen with two choices: **Astronaut watch** (portrait, one full-screen view) and **Ground dashboard** (landscape).
 Design follows the site console: spacecraft background, glass panels with glowing corners, astronaut on a holo pad.
 
+**Real NASA data (v3.5).** The app plays the real NASA RR-12 mission (ISS, 2019-04-22 → 05-28, 37 days) from the
+OSDR Environmental Data App. `build-rr12.js` runs the site's `pipeline.js` on the raw 5-minute readings
+(`data/rr12-raw.js`) at build time: validation (stuck 3000 ppm fill values removed, spikes corrected, gaps counted),
+daily medians, risk engine (14-day baseline + CUSUM, NASA 3 mmHg CO2 limit), radiation dose. The result
+(`rr12-app.js`, ~12 KB) is bundled in the APK, so it works offline. CO2, temperature, humidity and radiation are real.
+Resting heart rate is **simulated** per astronaut and driven by the real cabin CO2 (NASA does not publish astronaut
+medical data); it is labelled "محاكاة / Simulated" on screen. The ground dashboard adds channel chips (CO2, temp,
+humidity, radiation, HR), a 14-day forecast, a validation panel, the Smart Advisor, crew connection status, and a
+flask button for the labelled drift test (+0.05 mmHg/day CO2 from day 16 on top of the NASA data).
+
 **Locked (kiosk) mode**
 - The app becomes the phone's Home screen (on first Home press choose VITALX → *Always*). Home, Recents and pulling the status bar bring you straight back to it.
 - Short **Back**: returns to the start screen. Back on the start screen does nothing.
@@ -14,7 +24,7 @@ Build (Ubuntu: `apt install aapt apksigner dalvik-exchange android-sdk-platform-
 
 ```
 cd phone
-node build-html.js <path>/node_modules/@babel/standalone android/assets/index.html
+node build-html.js <path>/node_modules/@babel/standalone android/assets/index.html   # Babel 7 (npm i @babel/standalone@7); also regenerates rr12-app.js
 cp ../media/ship-bg.jpg ../media/astronaut.png android/assets/
 mkdir -p android/assets/fonts && cp ../fonts/thmanyahsans-*.woff2 ../fonts/thmanyahsans-*.otf android/assets/fonts/   # Thmanyah, 5 weights (local only)
 cd android
