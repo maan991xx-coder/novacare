@@ -196,7 +196,6 @@ body.console::before { display: none; }
 .view.in-r { animation: inR .38s cubic-bezier(.2,.8,.2,1); }
 @keyframes inL { from { opacity: 0; transform: translateX(-90px) rotateY(18deg) scale(.96); } }
 @keyframes inR { from { opacity: 0; transform: translateX(90px) rotateY(-18deg) scale(.96); } }
-.key.tilt.on { border-color: var(--built); color: var(--built); box-shadow: 0 3px 0 #050a10, 0 0 16px rgba(61,220,151,.4); }
 @media (prefers-reduced-motion: reduce) { .holo { transform: none; } .view.in-l, .view.in-r { animation: none; } }
 .key[hidden],[hidden]{display:none!important}
 

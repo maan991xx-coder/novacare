@@ -31,7 +31,18 @@ if (location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.
 
 <div class="stage">
   <!-- شريط القياسات العلوي -->
-  <header class="telemetry glassbar" id="telemetry"></header>
+  <header class="telemetry glassbar" id="topbar">
+    <div class="tm-row" id="telemetry"></div>
+    <div class="tm-menu">
+      <button class="tm-menu-btn" id="menuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menuDrop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path class="l1" d="M4 7h16"/><path class="l2" d="M4 12h16"/><path class="l3" d="M4 17h16"/></svg>
+      </button>
+      <div class="tm-drop" id="menuDrop" hidden>
+        <div class="tm-list" id="menuNums"></div>
+        <button class="tm-lang" id="langBtn" type="button"></button>
+      </div>
+    </div>
+  </header>
 
   <div class="carousel">
   <aside class="ghost gl" id="ghostL" aria-hidden="true"></aside>
@@ -83,8 +94,6 @@ if (location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.
       <label class="key speed"><span id="speedLab"></span><select id="speedSel"></select></label>
       <button class="key" id="nextBtn" type="button"></button>
       <div class="key daybadge"><span id="dayLab"></span> <b id="dayNum" dir="ltr">0</b><small dir="ltr" id="dayOf"></small></div>
-      <button class="key tilt" id="tiltBtn" type="button" hidden></button>
-      <button class="key" id="langBtn" type="button"></button>
     </div>
     <p class="fine"><span class="tag-synth" id="synthTag"></span> <span id="disclaimer"></span></p>
   </footer>

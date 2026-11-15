@@ -23,10 +23,34 @@
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const fmt = (v, d = 1) => v == null || isNaN(v) ? "—" : Number(v).toFixed(d);
   const LV = l => `var(--lv${l})`;
+  // ---------- انتقال سلس للأرقام: كل عنصر [data-n] يعدّ من قيمته السابقة إلى الجديدة ----------
+  const REDUCE = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const NUM = {};
+  const num = (key, txt) => `<span class="n" data-n="${key}">${txt}</span>`;
+  function tweenNums(root) {
+    if (!root) return;
+    root.querySelectorAll("[data-n]").forEach(el => {
+      const key = el.dataset.n, txt = el.textContent.trim(), to = parseFloat(txt);
+      const dec = (txt.split(".")[1] || "").length;
+      const st = NUM[key] || (NUM[key] = { cur: to, raf: 0 });
+      if (isNaN(to) || isNaN(st.cur) || REDUCE) { st.cur = to; return; }
+      const from = st.cur; if (from === to) return;
+      cancelAnimationFrame(st.raf);
+      const t0 = performance.now(), dur = 520;
+      el.textContent = from.toFixed(dec);
+      const step = now => {
+        const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+        st.cur = from + (to - from) * e;
+        el.textContent = (k < 1 ? st.cur : to).toFixed(dec);
+        if (k < 1) st.raf = requestAnimationFrame(step); else st.cur = to;
+      };
+      st.raf = requestAnimationFrame(step);
+    });
+  }
   const lvColor = l => css("--lv" + l) || ["#3ddc97", "#6aa8ff", "#ffb547", "#ff5d6c"][l];
 
   const state = {
-    day: 0, playing: false, speed: 2, screen: "home", member: "A", demoMode: "sim", rp: null };
+    day: 0, playing: false, speed: 2, screen: "home", member: "A", detail: null, demoMode: "sim", rp: null };
   const SPEEDS = [0.5, 1, 2, 4, 8];
 
   // ---------- تشغيل المحرك لكل رائد ----------
@@ -441,7 +465,7 @@
   const vicon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${VICON[k]}</svg>`;
   function vitalsFor(c, d) {
     const calib = d < c.pers.active;
-    const row = (k, name, val, unit, col, go) => `<button type="button" class="vital" data-go="${go}" style="--c:${col}"><span class="vi">${vicon(k)}</span><span class="vn">${esc(name)}</span><b class="vv" dir="ltr">${val}<em>${esc(unit)}</em></b></button>`;
+    const row = (k, name, val, unit, col, go) => `<button type="button" class="vital" data-go="${go}" style="--c:${col}"><span class="vi">${vicon(k)}</span><span class="vn">${esc(name)}</span><b class="vv" dir="ltr">${num("v-" + k, val)}<em>${esc(unit)}</em></b></button>`;
     const lim = sim.radiation.limit, dose = c.ast.rad[d];
     const radCol = dose / lim < .7 ? "#3ddc97" : dose / lim < .9 ? "#ffb547" : "#ff5d6c";
     const comp = c.pers.composite[d];
@@ -453,10 +477,42 @@
       + row("comp", t(L.composite), calib ? "—" : fmt(comp, 1), "z", statusColor(s === "calib" ? 0 : s), "solution");
   }
   let hasAstroImg = true; // الصورة موجودة في media/؛ إن فشل تحميلها يعود الرسم المدمج (انظر probe)
+  // حالة اتصال حساسات الرائد (محاكاة ثابتة لكل يوم): 0 متصل، 1 إشارة ضعيفة، 2 غير متصل
+  function connOf(c, d) {
+    const h = ((c.m.seed * 2654435761) ^ (d * 40503 + 7)) >>> 0, r = h % 100;
+    return r < 4 ? 2 : r < 14 ? 1 : 0;
+  }
+  const CONN_COL = ["#3ddc97", "#ffb547", "#ff5d6c"];
+  const connIcon = k => `<svg class="sig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">${
+    k === 2 ? '<path d="M4 20h.01M3 3l18 18M9 20v-4M14 20v-6"/>' : `<path d="M4 20v-2"/><path d="M9 20v-6"/><path d="M14 20v-10" ${k ? 'opacity=".25"' : ""}/><path d="M19 20V5" ${k ? 'opacity=".25"' : ""}/>`}</svg>`;
+  // مركز التحكم: كل الطاقم كبطاقات + حالة الاتصال. الضغط على بطاقة يفتح تفاصيل صحة الرائد
   function screenHome() {
-    const d = state.day, c = crewById(state.member), s = statusOf(c, d);
-    const open = crew.filter(x => { const sx = statusOf(x, d); return sx !== "calib" && sx >= 2; }).length;
-    const crewCol = crew.map(x => { const sx = statusOf(x, d); return `<button type="button" class="mini-crew ${x.m.id === c.m.id ? "on" : ""}" data-member="${x.m.id}" style="--c:${statusCss(sx)}" title="${esc(t(x.m.name))}"><span class="avatar">${esc(x.m.id)}</span><small>${tx(A.status[sx])}</small></button>`; }).join("");
+    const d = state.day;
+    if (!state.detail) {
+      const open = crew.filter(x => { const sx = statusOf(x, d); return sx !== "calib" && sx >= 2; }).length;
+      const online = crew.filter(x => connOf(x, d) === 0).length;
+      const cards = crew.map(x => {
+        const sx = statusOf(x, d), k = connOf(x, d), sync = k === 2 ? "—" : String(2 + ((x.m.seed + d * 7) % (k ? 40 : 9)));
+        return `<button type="button" class="cc-card ${x.m.id === state.member ? "last" : ""}" data-open="${x.m.id}" style="--c:${statusCss(sx)};--k:${CONN_COL[k]}" title="${esc(t(x.m.name))}">
+          <span class="cc-conn" title="${esc(t(A.cc.conn[k]))}">${connIcon(k)}<small>${tx(A.cc.conn[k])}</small></span>
+          <span class="avatar">${esc(x.m.id)}</span>
+          <b class="cc-name">${tx(x.m.name)}</b>
+          <small class="cc-role">${tx(x.m.role)}</small>
+          <span class="cc-st">${tx(A.status[sx])}</span>
+          <span class="cc-hr" dir="ltr">${vicon("hr")}${num("cc-hr-" + x.m.id, fmt(x.ast.obs.hr[d], 0))}<em>bpm</em></span>
+          <span class="cc-sync" title="${esc(t(A.cc.synced))}">⟳ <bdi>${sync}</bdi>${k === 2 ? "" : " " + esc(t(A.cc.sec))}</span>
+        </button>`;
+      }).join("");
+      return `<div class="cc">
+        <div class="cc-sum">
+          <span class="cc-pill">${icon("crew")}<b dir="ltr">${num("cc-n", String(crew.length))}</b></span>
+          <span class="cc-pill ok">${connIcon(0)}<b dir="ltr">${num("cc-on", String(online))}/${crew.length}</b><small>${tx(A.cc.crewOnline)}</small></span>
+          <button type="button" class="cc-pill alert ${open ? "hot" : ""}" data-go="demo">${icon("alerts")}<b dir="ltr">${num("cc-al", String(open))}</b><small>${tx(A.status[2])}</small></button>
+        </div>
+        <div class="cc-grid">${cards}</div>
+      </div>`;
+    }
+    const c = crewById(state.detail), s = statusOf(c, d), k = connOf(c, d);
     return `<div class="home">
       <div class="vitals">${vitalsFor(c, d)}</div>
       <div class="figure">
@@ -468,8 +524,9 @@
         </div>
       </div>
       <div class="side-col">
-        ${crewCol}
-        <button type="button" class="alert-btn ${open ? "hot" : ""}" data-go="demo">${icon("alerts")}<b dir="ltr">${open}</b><small>${tx(A.status[2])}</small></button>
+        <button type="button" class="back-btn" data-back="1" title="${esc(t(A.cc.allCrew))}" aria-label="${esc(t(A.cc.allCrew))}">${icon("crew")}<small>${tx(A.cc.allCrew)}</small></button>
+        <span class="conn-chip" style="--k:${CONN_COL[k]}">${connIcon(k)}<small>${tx(A.cc.conn[k])}</small></span>
+        <span class="role-chip">${tx(c.m.role)}</span>
       </div>
     </div>`;
   }
@@ -487,6 +544,7 @@
     g.save(); g.shadowColor = color; g.shadowBlur = 5; g.strokeStyle = color; g.lineWidth = 1.4; g.lineJoin = "round";
     g.beginPath(); vals.forEach((v, i) => i ? g.lineTo(X(v[0]), Y(v[1])) : g.moveTo(X(v[0]), Y(v[1]))); g.stroke(); g.restore();
   }
+  const SMALL = () => window.matchMedia("(max-width: 860px)").matches;
   function renderTelemetry() {
     const c = crewById(state.member), d = state.day;
     const items = [
@@ -496,9 +554,17 @@
       { k: "rad", name: t(L.dose), v: fmt(c.ast.rad[d], 1), u: "mSv", data: c.ast.rad, col: "#ffd166" },
       { k: "comp", name: t(L.composite), v: d < c.pers.active ? "—" : fmt(c.pers.composite[d], 1), u: "z", data: c.pers.composite, col: "#3ddc97" }
     ];
+    const small = SMALL();
+    // الشاشات الصغيرة: أرقام فقط (بلا رسوم)، والتفاصيل في القائمة المنسدلة
     $("telemetry").innerHTML = `<div class="tm-who"><span class="avatar" style="--c:${statusCss(statusOf(c, d))}">${esc(c.m.id)}</span><b>${tx(c.m.name)}</b></div>` +
-      items.map(it => `<div class="tm"><div class="tm-top"><span class="tm-i" style="color:${it.col}">${vicon(it.k)}</span><small>${esc(it.name)}</small><b dir="ltr">${it.v}<em>${it.u}</em></b></div><canvas data-tm="${it.k}"></canvas></div>`).join("");
-    items.forEach(it => tinySpark($("telemetry").querySelector(`[data-tm="${it.k}"]`), it.data, d, it.col));
+      items.map(it => `<div class="tm" title="${esc(it.name)}"><div class="tm-top"><span class="tm-i" style="color:${it.col}">${vicon(it.k)}</span><small>${esc(it.name)}</small><b dir="ltr">${num("tm-" + it.k, it.v)}<em>${it.u}</em></b></div>${small ? "" : `<canvas data-tm="${it.k}"></canvas>`}</div>`).join("");
+    if (!small) items.forEach(it => tinySpark($("telemetry").querySelector(`[data-tm="${it.k}"]`), it.data, d, it.col));
+    tweenNums($("telemetry"));
+    if ($("menuNums")) {
+      $("menuNums").innerHTML = `<div class="tl-who"><span class="avatar" style="--c:${statusCss(statusOf(c, d))}">${esc(c.m.id)}</span><b>${tx(c.m.name)}</b></div>` +
+        items.map(it => `<div class="tl-row"><span class="tm-i" style="color:${it.col}">${vicon(it.k)}</span><small>${esc(it.name)}</small><b dir="ltr">${num("mn-" + it.k, it.v)}<em>${it.u}</em></b></div>`).join("");
+      tweenNums($("menuNums"));
+    }
   }
 
   // =====================================================================
@@ -997,7 +1063,6 @@
     pause: '<path d="M8 5v14M16 5v14" stroke-width="3"/>',
     step: '<path d="M5 6l8 6-8 6zM17 6v12"/>',
     next: '<circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M17 9l3 3-3 3"/>',
-    tilt: '<rect x="7" y="3" width="10" height="18" rx="2" transform="rotate(-15 12 12)"/><path d="M2 9a8 8 0 0 0 0 6M22 9a8 8 0 0 1 0 6"/>',
     lang: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/>'
   };
   const kicon = k => `<svg class="ki" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${KI[k]}</svg>`;
@@ -1006,7 +1071,8 @@
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
     document.title = t(A.title);
-    setKey("langBtn", "lang", t(C.ui.langToggle), `<b class="kt">${lang === "ar" ? "EN" : "ع"}</b>`);
+    setKey("langBtn", "lang", t(C.ui.langToggle), `<span>${esc(t(C.ui.langToggle))}</span><b class="kt">${lang === "ar" ? "EN" : "ع"}</b>`);
+    $("menuBtn").title = t(A.cc.menu); $("menuBtn").setAttribute("aria-label", t(A.cc.menu));
     if ($("nextBtn")) setKey("nextBtn", "next", t(A.player.next));
     setKey("restartBtn", "restart", t(A.player.restart));
     setKey("stepBtn", "step", t(A.player.step) + " +1");
@@ -1038,13 +1104,19 @@
     cancelAnimationFrame(ecgRaf);
     const [html, after] = SCREENS[state.screen] || SCREENS.home;
     if ($("subtitle")) $("subtitle").textContent = state.screen === "home" ? t(A.subtitle) : "";
-    $("screenTitle").textContent = state.screen === "home" ? t(A.title) : t(A.screens[state.screen]);
+    const ttl = state.screen === "home" ? t(A.title) : t(A.screens[state.screen]);
+    if ($("screenTitle").textContent !== ttl) { const h = $("screenTitle"); h.textContent = ttl; h.classList.remove("swap"); void h.offsetWidth; h.classList.add("swap"); }
     $("view").innerHTML = html();
+    const v = $("view");
     if (slideDir) {
-      const v = $("view"), fromLeft = (slideDir > 0) === isRtl();
-      v.classList.remove("in-l", "in-r"); void v.offsetWidth; v.classList.add(fromLeft ? "in-l" : "in-r");
+      const fromLeft = (slideDir > 0) === isRtl();
+      v.classList.remove("in-l", "in-r", "zoom-in", "zoom-out"); void v.offsetWidth; v.classList.add(fromLeft ? "in-l" : "in-r");
       slideDir = 0;
+    } else if (zoomDir) {
+      v.classList.remove("in-l", "in-r", "zoom-in", "zoom-out"); void v.offsetWidth; v.classList.add(zoomDir > 0 ? "zoom-in" : "zoom-out");
+      zoomDir = 0;
     }
+    tweenNums(v);
     if (after) after();
     renderDots(); renderGhosts();
     renderTabs(); renderTimeline(); renderPlayer();
@@ -1053,6 +1125,7 @@
   function stepMember(k) {
     const i = crew.findIndex(c => c.m.id === state.member);
     state.member = crew[(i + k + crew.length) % crew.length].m.id;
+    if (state.screen === "home" && state.detail) { slideDir = k; go("home/" + state.member); return; }
     render();
   }
   // أثناء التشغيل: لا نعيد بناء الشاشة إذا كان المستخدم يكتب
@@ -1162,7 +1235,7 @@
   }
 
   // ---------- التنقل بين الشاشات: سحب بالماوس أو الإصبع، عجلة أفقية، أسهم، وإمالة الجوال ----------
-  let slideDir = 0;
+  let slideDir = 0, zoomDir = 0;
   function navStep(k) {
     let i = TABS.indexOf(state.screen); if (i < 0) i = 0;
     slideDir = k;
@@ -1229,33 +1302,6 @@
       });
       holo.addEventListener("mouseleave", () => { holo.style.setProperty("--ry", "0deg"); holo.style.setProperty("--rx", "0deg"); });
     }
-    // إمالة الجوال يمين/يسار
-    const tb = $("tiltBtn");
-    const hasTilt = "DeviceOrientationEvent" in window && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
-    if (tb && hasTilt) {
-      tb.hidden = false;
-      let on = false, armed = true, cool = 0;
-      const onTilt = ev => {
-        const gm = ev.gamma; if (gm == null) return;
-        const now = Date.now();
-        if (Math.abs(gm) < 10) { armed = true; return; }
-        if (!armed || now < cool || Math.abs(gm) < 25) return;
-        armed = false; cool = now + 900;
-        const next = isRtl() ? gm < 0 : gm > 0;   // الإمالة نحو جهة الشاشة التالية
-        navStep(next ? 1 : -1);
-      };
-      const label = () => { setKey("tiltBtn", "tilt", t(on ? A.player.tiltOn : A.player.tilt)); tb.classList.toggle("on", on); };
-      tb.onclick = async () => {
-        if (!on && typeof DeviceOrientationEvent.requestPermission === "function") {
-          try { await DeviceOrientationEvent.requestPermission(); } catch (e) { /* نكمل؛ إن لم يُسمح فلن تصل أحداث */ }
-        }
-        on = !on;
-        if (on) window.addEventListener("deviceorientation", onTilt); else window.removeEventListener("deviceorientation", onTilt);
-        label();
-      };
-      label();
-      tb._label = label;
-    }
   }
   // الصفحتان السابقة والتالية على جانبي اللوحة (عرض منحنٍ بمنظور الشخص الأول)
   let ghostKey = "";
@@ -1264,7 +1310,7 @@
     const i = Math.max(0, TABS.indexOf(state.screen)), n = TABS.length;
     const prev = TABS[(i - 1 + n) % n], next = TABS[(i + 1) % n];
     const left = isRtl() ? next : prev, right = isRtl() ? prev : next;
-    const key = [left, right, lang, state.member, Math.floor(state.day / 5)].join("|");
+    const key = [left, right, lang, state.member, state.detail, Math.floor(state.day / 5)].join("|");
     if (key === ghostKey) return; ghostKey = key;
     const fill = (el, scr, k) => {
       let body = "";
@@ -1281,7 +1327,6 @@
     $("dots").innerHTML = TABS.map(k => `<i class="${k === state.screen ? "on" : ""}"></i>`).join("");
     const L1 = isRtl() ? "›" : "‹", R1 = isRtl() ? "‹" : "›";
     $("edgePrev").textContent = L1; $("edgeNext").textContent = R1;
-    if ($("tiltBtn") && $("tiltBtn")._label) $("tiltBtn")._label();
   }
 
   // ---------- التوجيه عبر الرابط ----------
@@ -1289,6 +1334,10 @@
   function route() {
     const [scr, arg] = location.hash.slice(1).split("/");
     state.screen = SCREENS[scr] ? scr : "home";
+    const det = state.screen === "home" && arg && crew.some(c => c.m.id === arg) ? arg : null;
+    if (state.screen === "home" && !slideDir && det !== state.detail) zoomDir = det ? 1 : -1;
+    state.detail = det;
+    if (det) state.member = det;
     render();
     $("view").focus({ preventScroll: true });
     window.scrollTo({ top: 0 });
@@ -1302,7 +1351,17 @@
     $("speedSel").onchange = e => { state.speed = +e.target.value; };
     $("scrub").oninput = e => setDay(+e.target.value);
     const toggleLang = () => { lang = lang === "ar" ? "en" : "ar"; try { localStorage.setItem("vitalx-lang", lang); } catch (e) { /* */ } renderFrame(); render(); };
-    $("langBtn").onclick = toggleLang;
+    $("langBtn").onclick = () => { toggleLang(); };
+    // القائمة المنسدلة في الشريط العلوي (الأرقام + اللغة)
+    const menuBtn = $("menuBtn"), drop = $("menuDrop");
+    const setMenu = on => {
+      menuBtn.setAttribute("aria-expanded", String(on));
+      if (on) { drop.hidden = false; requestAnimationFrame(() => drop.classList.add("open")); }
+      else { drop.classList.remove("open"); setTimeout(() => { if (!drop.classList.contains("open")) drop.hidden = true; }, 220); }
+    };
+    menuBtn.onclick = e => { e.stopPropagation(); setMenu(drop.hidden || !drop.classList.contains("open")); };
+    document.addEventListener("click", e => { if (!drop.hidden && !e.target.closest(".tm-menu")) setMenu(false); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && !drop.hidden) setMenu(false); });
     if ($("nextBtn")) $("nextBtn").onclick = () => stepMember(1);
     window.addEventListener("hashchange", route);
     if ($("edgePrev")) bindGestures();
@@ -1317,8 +1376,10 @@
       if (e.key === "PageDown" || e.key === "[") setDay(state.day - 1);
     });
     $("view").addEventListener("click", e => {
-      const el = e.target.closest("[data-go],[data-member],[data-step]");
+      const el = e.target.closest("[data-go],[data-member],[data-step],[data-open],[data-back]");
       if (!el) return;
+      if (el.dataset.open) return go("home/" + el.dataset.open);
+      if (el.dataset.back) return go("home");
       if (el.dataset.go) return go(el.dataset.go);
       if (el.dataset.member) { state.member = el.dataset.member; return render(); }
       if (el.dataset.step) return stepMember(+el.dataset.step);

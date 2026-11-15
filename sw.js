@@ -1,6 +1,6 @@
 /* VITALX service worker: offline + install as an app.
    Bump VERSION on each deploy so visitors get the new files. */
-const VERSION = "vitalx-v3";
+const VERSION = "vitalx-v5";
 const CORE = [
   "./", "index.html", "manifest.webmanifest",
   "styles.css", "fonts.css", "appmode.css", "console.css", "six.css",
